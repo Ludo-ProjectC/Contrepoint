@@ -1,0 +1,20 @@
+<div class="pc-panel" id="panModulation"><div class="card">
+    <div class="card-title" data-i18n="t_keys">Tonalités</div>
+    <div class="key-grid">
+      <div class="key-box"><div class="key-label from" data-i18n="lbl_from">Départ</div><div class="key-sel-row"><select class="ksel" id="mod_fK"></select><div class="pills" id="mod_fM"><button class="pill on" onclick="setMode('f','major')">Maj</button><button class="pill" onclick="setMode('f','minor')">min</button></div></div></div>
+      <div class="key-arrow"><button class="swap-btn" onclick="swapKeys()">⇄</button></div>
+      <div class="key-box"><div class="key-label to" data-i18n="lbl_to">Arrivée</div><div class="key-sel-row"><select class="ksel" id="mod_tK"></select><div class="pills" id="mod_tM"><button class="pill on" onclick="setMode('t','major')">Maj</button><button class="pill" onclick="setMode('t','minor')">min</button></div></div></div>
+    </div>
+    <div class="dist-row" id="mod_dR"></div>
+  </div>
+  <div class="card"><div class="card-title" data-i18n="t_dia">Accords diatoniques <span style="font-weight:400;color:var(--pv);margin-left:6px">● pivot</span></div><div class="clr" id="mod_cL"></div></div>
+  <div class="card">
+    <div class="sh"><h3 data-i18n="t_piv">Accords pivots</h3><span class="cb" id="mod_pC"></span></div>
+    <div class="fr"><button class="fg on" data-f="triad" onclick="tgF(this)" data-i18n="m_tri">Triades</button><button class="fg on" data-f="seventh" onclick="tgF(this)" data-i18n="m_sev">Septièmes</button><button class="fg on" data-f="mixture" onclick="tgF(this)" data-i18n="m_mix">Mixture</button></div>
+    <div class="lg"><div class="li"><div class="ld df"></div><span data-i18n="m_dep">Départ</span></div><div class="li"><div class="ld dt"></div><span data-i18n="m_arr">Arrivée</span></div><div class="li"><div class="ld dp"></div>Pivot</div></div>
+    <div id="mod_pA"></div>
+  </div>
+  <div class="card"><div class="card-title" data-i18n="t_tech">Techniques de modulation</div><div class="mtg" id="mod_mTA"></div></div>
+  <div class="card" id="mod_chainCard"><div class="card-title" data-i18n="t_chain">Chaîne de modulations</div><div id="mod_chainUI"></div></div>
+  <div class="card" id="mod_libCard"><div class="card-title" data-i18n="t_lib">Bibliothèque du répertoire</div><div id="mod_libUI"></div></div>
+  <div class="card"><div class="card-title" data-i18n="t_prog">Progression modulatoire</div><div id="mod_sA"></div></div></div>

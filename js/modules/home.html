@@ -1,0 +1,317 @@
+  <div class="pc-panel" id="panHome">
+<!-- ═══ HOME / ACCUEIL PAGE ═══ -->
+<div class="home-hero">
+  <div class="home-hero-inner">
+    <div class="home-badge" data-i18n="home.badge">Outils de théorie musicale interactifs</div>
+    <h1 class="home-title" data-i18n-html="home.title">De votre première idée jusqu'à la dernière <em>mesure</em>.</h1>
+    <p class="home-sub" data-i18n="home.sub">Esquissez vos motifs, explorez les harmonies, structurez vos formes — la théorie au service de votre imagination.</p>
+    <div class="home-cta-row">
+      <button class="home-cta" onclick="switchTab(1)" data-i18n="home.cta_free">Commencer gratuitement</button>
+      <button class="home-cta home-cta-premium" onclick="openLicModal()" data-i18n="home.cta_premium">Débloquer le mode compositeur</button>
+      <a href="https://ko-fi.com/contrepoint" target="_blank" class="home-cta home-cta-donate" data-i18n="home.cta_donate">☕ Faire un don</a>
+      <button class="home-cta home-cta-share" onclick="openShareModal()" aria-label="Partager"><svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg> <span data-i18n="home.cta_share">Partager</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- Public beta notice -->
+<div class="home-beta-band">
+  <span class="hbb-icon">✨</span>
+  <span class="hbb-tag" data-i18n="home.beta_tag">Bêta publique</span>
+  <span data-i18n="home.beta_msg">— l'appli s'améliore chaque semaine. Trouvé un bug ou une suggestion&nbsp;?</span>
+  <button class="hbb-link" onclick="openContactForm('bug')" data-i18n="home.beta_link">Nous écrire</button>
+</div>
+
+<!-- Video presentation -->
+<div class="home-section-video">
+  <div class="home-section-video-head">
+    <div class="home-section-video-head-left">
+      <div class="home-section-label" data-i18n="home.video_label">Découvrir</div>
+      <h2 class="home-section-title" data-i18n="home.video_title">Voir Contrepoint en action</h2>
+      <p class="home-section-sub" data-i18n="home.video_sub">Une présentation rapide des outils et de l'expérience musicale interactive.</p>
+    </div>
+    <div class="home-video-stats" aria-label="Chiffres clés de Contrepoint">
+      <div class="home-video-stat">
+        <span class="home-video-stat-num">12</span>
+        <span class="home-video-stat-lbl" data-i18n="home.stat_tools">Outils</span>
+      </div>
+      <div class="home-video-stat-sep" aria-hidden="true"></div>
+      <div class="home-video-stat">
+        <span class="home-video-stat-num">22</span>
+        <span class="home-video-stat-lbl" data-i18n="home.stat_cad">Cadences</span>
+      </div>
+      <div class="home-video-stat-sep" aria-hidden="true"></div>
+      <div class="home-video-stat">
+        <span class="home-video-stat-num">80+</span>
+        <span class="home-video-stat-lbl" data-i18n="home.stat_scales">Gammes</span>
+      </div>
+      <div class="home-video-stat-sep" aria-hidden="true"></div>
+      <div class="home-video-stat">
+        <span class="home-video-stat-num">51</span>
+        <span class="home-video-stat-lbl" data-i18n="home.stat_seq">Séquences</span>
+      </div>
+    </div>
+  </div>
+  <div class="home-video-frame">
+    <iframe src="https://www.youtube-nocookie.com/embed/sU5qxEIBPTo?rel=0" title="Contrepoint — Présentation" loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+  </div>
+</div>
+
+<!-- Free tools section -->
+<div class="home-section">
+  <div class="home-section-label" data-i18n="home.free_label">ACCÈS LIBRE</div>
+  <h2 class="home-section-title" data-i18n="home.free_title">8 outils essentiels pour la théorie musicale — 100% gratuits</h2>
+  <div class="home-grid">
+    <div class="home-card" onclick="switchTab(1)">
+      <div class="home-card-icon">🎵</div>
+      <div class="home-card-title" data-i18n="home.c_transpo">Transposeur d'instruments</div>
+      <div class="home-card-desc" data-i18n="home.c_transpo_d">Transposez instantanément entre note écrite et note réelle pour plus de 40 instruments (clarinette, cor, saxophone, trompette…). Visualisez la tessiture de chaque instrument sur une portée interactive avec code couleur.</div>
+    </div>
+    <div class="home-card" onclick="switchTab(2)">
+      <div class="home-card-icon">📏</div>
+      <div class="home-card-title" data-i18n="home.c_inter">Calculateur d'intervalles</div>
+      <div class="home-card-desc" data-i18n="home.c_inter_d">Identifiez et calculez tous les intervalles musicaux — ascendants, descendants, simples et composés. Clavier interactif de deux octaves avec grille complète des intervalles et écoute audio.</div>
+    </div>
+    <div class="home-card" onclick="switchTab(3)">
+      <div class="home-card-icon">🎹</div>
+      <div class="home-card-title" data-i18n="home.c_harm">Analyse harmonique</div>
+      <div class="home-card-desc" data-i18n="home.c_harm_d">Explorez l'harmonie tonale dans toutes les tonalités : triades diatoniques, accords de septième, mixture modale, dominantes secondaires, sixtes augmentées (It6, Fr6, Ger6) et accord napolitain. Écoute et visualisation sur clavier.</div>
+    </div>
+    <div class="home-card" onclick="switchTab(4)">
+      <div class="home-card-icon">🎶</div>
+      <div class="home-card-title" data-i18n="home.c_chords">Dictionnaire d'accords</div>
+      <div class="home-card-desc" data-i18n="home.c_chords_d">Encyclopédie complète des accords : majeurs, mineurs, diminués, augmentés, 7èmes, 9èmes, sus, add, et bien plus. Chaque accord avec écoute, arpège, visualisation clavier et formule d'intervalles.</div>
+    </div>
+    <div class="home-card" onclick="switchTab(5)">
+      <div class="home-card-icon">🎼</div>
+      <div class="home-card-title" data-i18n="home.c_modes">Gammes &amp; Modes</div>
+      <div class="home-card-desc" data-i18n="home.c_modes_d">Toutes les gammes et modes avec formules, écoute et clavier interactif.</div>
+    </div>
+    <div class="home-card" onclick="switchTab(6)">
+      <div class="home-card-icon">🎯</div>
+      <div class="home-card-title" data-i18n="home.c_cad">Cadences</div>
+      <div class="home-card-desc" data-i18n="home.c_cad_d">Référence complète de toutes les cadences tonales : parfaite (CAP), imparfaite (CAI), demi-cadence (DC), plagale, rompue (CR), phrygienne et cadence italienne. Progressions d'accords avec chiffrage, écoute audio et résolutions types dans les modes majeur et mineur.</div>
+    </div>
+    <div class="home-card" onclick="switchTab(7)">
+      <div class="home-card-icon">⏱️</div>
+      <div class="home-card-title" data-i18n="home.c_metro">Métronome</div>
+      <div class="home-card-desc" data-i18n="home.c_metro_d">Métronome précis avec tap tempo, accents et subdivisions.</div>
+    </div>
+    <div class="home-card" onclick="switchTab(8)">
+      <div class="home-card-icon">🥁</div>
+      <div class="home-card-title" data-i18n="home.c_rhythm">Rythme</div>
+      <div class="home-card-desc" data-i18n="home.c_rhythm_d">Visualisez et écoutez les figures rythmiques et les mesures composées.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Composer Mode tools section -->
+<div class="home-section home-section-premium" id="composer-mode">
+  <div class="home-section-label home-premium-label" data-i18n="home.prem_label">MODE COMPOSITEUR</div>
+  <h2 class="home-section-title" data-i18n="home.prem_title">Outils avancés pour la composition, la modulation et l'analyse harmonique</h2>
+  <p class="home-section-sub" data-i18n="home.prem_sub">Quatre modules professionnels pour composer, moduler, analyser et structurer vos œuvres — du conservatoire à la salle de concert.</p>
+
+  <div class="cm-stats">
+    <div class="cm-stat"><span class="cm-stat-icon">✓</span><span data-i18n="cm.stat_1">21 formes musicales référencées</span></div>
+    <div class="cm-stat"><span class="cm-stat-icon">✓</span><span data-i18n="cm.stat_2">51 séquences harmoniques</span></div>
+    <div class="cm-stat"><span class="cm-stat-icon">✓</span><span data-i18n="cm.stat_3">11 techniques de modulation</span></div>
+    <div class="cm-stat"><span class="cm-stat-icon">✓</span><span data-i18n="cm.stat_4">Vérification SATB automatique</span></div>
+  </div>
+
+  <div class="cm-grid">
+    <div class="cm-card" onclick="switchTab(9)">
+      <div class="cm-card-head">
+        <div class="cm-card-icon">🏗️</div>
+        <div class="cm-card-titles">
+          <div class="cm-card-title" data-i18n="home.c_forme">Créateur de formes musicales</div>
+          <div class="cm-card-tag" data-i18n="cm.tag_forme">Architecture &amp; structure</div>
+        </div>
+      </div>
+      <div class="cm-card-desc" data-i18n="home.c_forme_d">Construisez l'architecture complète de vos compositions : forme sonate, rondo, ABA, thème et variations, symphonie multi-mouvements. Définissez sections, tonalités, tempos et cadences sur une timeline visuelle.</div>
+      <ul class="cm-card-bullets">
+        <li data-i18n="cm.b_forme_1">21 formes de référence (sonate, rondo, fugue, suite…)</li>
+        <li data-i18n="cm.b_forme_2">40+ types de sections, drag &amp; drop intuitif</li>
+        <li data-i18n="cm.b_forme_3">Export PDF prêt pour le conservatoire</li>
+      </ul>
+    </div>
+
+    <div class="cm-card" onclick="switchTab(10)">
+      <div class="cm-card-head">
+        <div class="cm-card-icon">🔀</div>
+        <div class="cm-card-titles">
+          <div class="cm-card-title" data-i18n="home.c_mod">Outil de modulation</div>
+          <div class="cm-card-tag" data-i18n="cm.tag_mod">Tonalités &amp; pivots</div>
+        </div>
+      </div>
+      <div class="cm-card-desc" data-i18n="home.c_mod_d">Trouvez instantanément le chemin de modulation idéal entre n'importe quelles tonalités. Accords pivots avec double analyse, modulations chromatiques, enharmoniques, par dominante secondaire — toutes audibles en SATB.</div>
+      <ul class="cm-card-bullets">
+        <li data-i18n="cm.b_mod_1">11 techniques (pivot, Ger⁺⁶, napolitain, double mod…)</li>
+        <li data-i18n="cm.b_mod_2">Visualisation sur le cercle des quintes</li>
+        <li data-i18n="cm.b_mod_3">Audio piano réaliste à 4 voix</li>
+      </ul>
+    </div>
+
+    <div class="cm-card" onclick="switchTab(11)">
+      <div class="cm-card-head">
+        <div class="cm-card-icon">🔁</div>
+        <div class="cm-card-titles">
+          <div class="cm-card-title" data-i18n="home.c_seq">Générateur de séquences</div>
+          <div class="cm-card-tag" data-i18n="cm.tag_seq">Marches &amp; modèles</div>
+        </div>
+      </div>
+      <div class="cm-card-desc" data-i18n="home.c_seq_d">Générez et écoutez 51 séquences harmoniques classiques et chromatiques. Marches de quintes, Pachelbel, Romanesca, Monte, Fonte, Omnibus — éditez chaque voix sur la portée interactive.</div>
+      <ul class="cm-card-bullets">
+        <li data-i18n="cm.b_seq_1">8 catégories : quintes, tierces, secondes, sixtes…</li>
+        <li data-i18n="cm.b_seq_2">Édition SATB drag &amp; drop sur portée</li>
+        <li data-i18n="cm.b_seq_3">Modèles répertorier (Pachelbel, Omnibus, Ponte…)</li>
+      </ul>
+    </div>
+
+    <div class="cm-card" onclick="switchTab(12)">
+      <div class="cm-card-head">
+        <div class="cm-card-icon">🔍</div>
+        <div class="cm-card-titles">
+          <div class="cm-card-title" data-i18n="home.c_anal">Analyseur harmonique</div>
+          <div class="cm-card-tag" data-i18n="cm.tag_anal">Voix SATB &amp; règles</div>
+        </div>
+      </div>
+      <div class="cm-card-desc" data-i18n="home.c_anal_d">Composez à 4 voix sur portée interactive et laissez l'analyseur vérifier votre conduite des voix en temps réel. Détection automatique des fautes classiques d'écriture harmonique.</div>
+      <ul class="cm-card-bullets">
+        <li data-i18n="cm.b_anal_1">Quintes/octaves parallèles &amp; directes détectées</li>
+        <li data-i18n="cm.b_anal_2">Croisement, doublures, résolution de la sensible</li>
+        <li data-i18n="cm.b_anal_3">Saisie par chiffrage romain ou drag &amp; drop</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="cm-cta-box">
+    <div class="cm-cta-tagline" data-i18n-html="cm.cta_tagline"><strong>Achat unique</strong> · Accès à vie · Mises à jour incluses</div>
+    <button class="cm-cta-btn" onclick="openLicModal()" data-i18n="home.cta_unlock">Débloquer le mode compositeur</button>
+    <div class="cm-cta-note" data-i18n="cm.cta_note">Pas d'abonnement · Annulation impossible (rien à annuler) · 30 jours satisfait ou remboursé</div>
+  </div>
+</div>
+
+<!-- ═══ FAQ Section (synchronisée avec FAQPage JSON-LD pour Google rich results) ═══ -->
+<section class="home-section-faq" id="faq" aria-labelledby="faqTitle">
+  <div class="home-faq-label" data-i18n="faq.label">FAQ</div>
+  <h2 class="home-faq-title" id="faqTitle" data-i18n="faq.title">Questions fréquentes</h2>
+  <p class="home-faq-sub" data-i18n="faq.sub">Tout ce que vous devez savoir avant de commencer.</p>
+
+  <div class="faq-list" role="list">
+    <div class="faq-item" role="listitem">
+      <button class="faq-q" aria-expanded="false" aria-controls="faq-a-1" id="faq-q-1" onclick="toggleFaq(this)">
+        <span class="faq-q-text" data-i18n="faq.q1">Qu'est-ce que Contrepoint ?</span>
+        <span class="faq-q-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></span>
+      </button>
+      <div class="faq-a" id="faq-a-1" role="region" aria-labelledby="faq-q-1"><p data-i18n="faq.a1">Contrepoint est une application web professionnelle d'outils interactifs de théorie musicale, destinée aux étudiants au conservatoire, aux compositeurs, aux chefs d'orchestre et aux musiciens autodidactes. Elle propose 12 outils couvrant la transposition, l'analyse harmonique, les cadences, les accords, les gammes, le métronome, la modulation et l'analyse SATB. L'interface est trilingue : français, anglais et espagnol.</p></div>
+    </div>
+
+    <div class="faq-item" role="listitem">
+      <button class="faq-q" aria-expanded="false" aria-controls="faq-a-2" id="faq-q-2" onclick="toggleFaq(this)">
+        <span class="faq-q-text" data-i18n="faq.q2">Contrepoint est-il gratuit ?</span>
+        <span class="faq-q-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></span>
+      </button>
+      <div class="faq-a" id="faq-a-2" role="region" aria-labelledby="faq-q-2"><p data-i18n="faq.a2">Oui, 8 outils sont entièrement gratuits et sans inscription : Transposeur, Intervalles, Harmonie, Accords, Gammes & Modes, Cadences, Métronome et Rythme. Pour 4 outils avancés (Formes musicales, Modulation, Séquences harmoniques, Analyseur SATB), un achat unique du Mode compositeur donne un accès à vie sans abonnement.</p></div>
+    </div>
+
+    <div class="faq-item" role="listitem">
+      <button class="faq-q" aria-expanded="false" aria-controls="faq-a-3" id="faq-q-3" onclick="toggleFaq(this)">
+        <span class="faq-q-text" data-i18n="faq.q3">Qu'inclut le Mode compositeur ?</span>
+        <span class="faq-q-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></span>
+      </button>
+      <div class="faq-a" id="faq-a-3" role="region" aria-labelledby="faq-q-3"><p data-i18n="faq.a3">Le Mode compositeur débloque 4 outils professionnels : (1) le constructeur de Formes musicales avec 21 formes de référence (sonate, rondo, fugue, suite, thème et variations…) ; (2) l'outil de Modulation avec 11 techniques (accord pivot, dominante secondaire, chromatique, Ger⁺⁶ enharmonique, napolitain…) ; (3) le générateur de 51 Séquences harmoniques (Pachelbel, Romanesca, Monte, Fonte, Omnibus…) ; (4) l'Analyseur SATB qui détecte automatiquement les quintes parallèles, octaves directes, croisements de voix et erreurs de résolution.</p></div>
+    </div>
+
+    <div class="faq-item" role="listitem">
+      <button class="faq-q" aria-expanded="false" aria-controls="faq-a-4" id="faq-q-4" onclick="toggleFaq(this)">
+        <span class="faq-q-text" data-i18n="faq.q4">L'achat est-il unique ou un abonnement ?</span>
+        <span class="faq-q-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></span>
+      </button>
+      <div class="faq-a" id="faq-a-4" role="region" aria-labelledby="faq-q-4"><p data-i18n="faq.a4">C'est un achat unique avec accès à vie, sans abonnement. Toutes les mises à jour futures sont incluses. Une garantie satisfait ou remboursé de 30 jours est offerte conformément à la Loi sur la protection du consommateur du Québec.</p></div>
+    </div>
+
+    <div class="faq-item" role="listitem">
+      <button class="faq-q" aria-expanded="false" aria-controls="faq-a-5" id="faq-q-5" onclick="toggleFaq(this)">
+        <span class="faq-q-text" data-i18n="faq.q5">Sur quels appareils Contrepoint fonctionne-t-il ?</span>
+        <span class="faq-q-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></span>
+      </button>
+      <div class="faq-a" id="faq-a-5" role="region" aria-labelledby="faq-q-5"><p data-i18n="faq.a5">Contrepoint est une application web qui fonctionne directement dans le navigateur, sans installation, sur ordinateur (Chrome, Firefox, Safari, Edge), tablette et mobile. La synthèse audio nécessite la prise en charge de l'API Web Audio (disponible sur tous les navigateurs modernes).</p></div>
+    </div>
+
+    <div class="faq-item" role="listitem">
+      <button class="faq-q" aria-expanded="false" aria-controls="faq-a-6" id="faq-q-6" onclick="toggleFaq(this)">
+        <span class="faq-q-text" data-i18n="faq.q6">Quels instruments transpositeurs sont supportés ?</span>
+        <span class="faq-q-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></span>
+      </button>
+      <div class="faq-a" id="faq-a-6" role="region" aria-labelledby="faq-q-6"><p data-i18n="faq.a6">Le Transposeur prend en charge plus de 40 instruments transpositeurs : Piccolo (Ré♭), Flûte alto (Sol), Cor anglais (Fa), petites clarinettes (Ré et Mi♭), Clarinettes (Si♭ et La), Clarinette basse, Saxophones (soprano/alto/ténor/baryton), Cors d'harmonie (Ré, Mi♭, Mi, Fa, La, Si♭), Trompettes (Ré, Mi♭, Fa, Si♭), Cornet à pistons, Saxhorns, Euphonium, Tuba, et plus encore.</p></div>
+    </div>
+
+    <div class="faq-item" role="listitem">
+      <button class="faq-q" aria-expanded="false" aria-controls="faq-a-7" id="faq-q-7" onclick="toggleFaq(this)">
+        <span class="faq-q-text" data-i18n="faq.q7">Quelle terminologie d'analyse harmonique est utilisée ?</span>
+        <span class="faq-q-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></span>
+      </button>
+      <div class="faq-a" id="faq-a-7" role="region" aria-labelledby="faq-q-7"><p data-i18n="faq.a7">Contrepoint utilise le chiffrage romain standard (I, ii, iii, IV, V, vi, vii°) avec inversions (⁶, ⁶₄, ⁶₅, ⁴₃, ⁴₂), conforme aux conventions des conservatoires francophones et anglo-saxons. Les noms de cadences sont disponibles en français (CAP, CAI, DC, CP, CR, CPh, CÉ), en anglais (PAC, IAC, HC, PC, DC, Phr., EC) et en espagnol (CAP, CAI, SC, CP, CR, CFr, CE).</p></div>
+    </div>
+
+    <div class="faq-item" role="listitem">
+      <button class="faq-q" aria-expanded="false" aria-controls="faq-a-8" id="faq-q-8" onclick="toggleFaq(this)">
+        <span class="faq-q-text" data-i18n="faq.q8">L'Analyseur SATB détecte-t-il toutes les fautes d'écriture harmonique ?</span>
+        <span class="faq-q-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></span>
+      </button>
+      <div class="faq-a" id="faq-a-8" role="region" aria-labelledby="faq-q-8"><p data-i18n="faq.a8">L'Analyseur détecte automatiquement les fautes principales d'écriture à 4 voix : quintes parallèles, octaves parallèles, octaves directes, quintes directes (S–B), croisement de voix, espacement supérieur à l'octave, doublure de la sensible, résolution incorrecte de la sensible, et mouvements interdits. Les notes peuvent être saisies par drag & drop sur la portée ou par chiffrage romain dans 24 tonalités prédéfinies.</p></div>
+    </div>
+
+    <div class="faq-item" role="listitem">
+      <button class="faq-q" aria-expanded="false" aria-controls="faq-a-9" id="faq-q-9" onclick="toggleFaq(this)">
+        <span class="faq-q-text" data-i18n="faq.q9">Les outils sont-ils utilisables sans connexion Internet ?</span>
+        <span class="faq-q-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></span>
+      </button>
+      <div class="faq-a" id="faq-a-9" role="region" aria-labelledby="faq-q-9"><p data-i18n="faq.a9">Une fois la page chargée, l'application fonctionne entièrement côté client : tous les calculs (transposition, analyse harmonique, génération SATB, synthèse audio piano) se font dans le navigateur sans serveur. Une connexion est requise uniquement pour le premier chargement et pour l'activation du Mode compositeur.</p></div>
+    </div>
+
+    <div class="faq-item" role="listitem">
+      <button class="faq-q" aria-expanded="false" aria-controls="faq-a-10" id="faq-q-10" onclick="toggleFaq(this)">
+        <span class="faq-q-text" data-i18n="faq.q10">Mes données et compositions sont-elles privées ?</span>
+        <span class="faq-q-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></span>
+      </button>
+      <div class="faq-a" id="faq-a-10" role="region" aria-labelledby="faq-q-10"><p data-i18n="faq.a10">Oui. Toutes les données (compositions dans le module Formes, préférences, état des outils) sont stockées localement dans votre navigateur via localStorage. Aucune donnée n'est envoyée à un serveur. Aucun traceur publicitaire n'est utilisé. Conforme RGPD et Loi 25 du Québec.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- Donation section -->
+<div class="home-section home-section-donate">
+  <div class="home-donate-inner">
+    <div class="home-donate-icon">☕</div>
+    <h2 class="home-donate-title" data-i18n="home.don_title">Vous trouvez Contrepoint utile ?</h2>
+    <p class="home-donate-desc" data-i18n="home.don_desc">Si ces outils vous sont utiles, vous pouvez soutenir le développement du projet avec un don. Chaque contribution aide à créer de nouvelles fonctionnalités et à garder les outils gratuits accessibles à tous.</p>
+    <a href="https://ko-fi.com/contrepoint" target="_blank" class="home-donate-btn" data-i18n="home.don_btn">☕ Offrir un café</a>
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="home-footer">
+  <div class="home-footer-copy">© 2026 Contrepoint. <span data-i18n="home.rights">Tous droits réservés.</span></div>
+  <div class="home-footer-links">
+    <a href="https://ko-fi.com/contrepoint" target="_blank" class="home-footer-link" data-i18n="home.don_footer">☕ Soutenir le projet</a>
+    <span class="home-footer-sep">·</span>
+    <a href="#" class="home-footer-link" onclick="event.preventDefault();document.getElementById('cgvModal').classList.add('show')" data-i18n="home.cgv_link">Mentions légales et conditions de vente</a>
+    <span class="home-footer-sep">·</span>
+    <a href="#" class="home-footer-link" onclick="event.preventDefault();openContactForm()" data-i18n="home.contact_link">Nous contacter</a>
+    <span class="home-footer-sep">·</span>
+    <span class="home-footer-share">
+      <span class="home-footer-share-label" data-i18n="home.share_short">Partager :</span>
+      <button class="home-footer-share-btn" onclick="shareNet('x')" aria-label="X (Twitter)" title="X (Twitter)"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></button>
+      <button class="home-footer-share-btn" onclick="shareNet('facebook')" aria-label="Facebook" title="Facebook"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></button>
+      <button class="home-footer-share-btn" onclick="shareNet('reddit')" aria-label="Reddit" title="Reddit"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg></button>
+      <button class="home-footer-share-btn" onclick="shareNet('linkedin')" aria-label="LinkedIn" title="LinkedIn"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.063 2.063 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></button>
+      <button class="home-footer-share-btn" onclick="shareNet('whatsapp')" aria-label="WhatsApp" title="WhatsApp"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 0 0 1.683 5.51l-.999 3.648 3.805-.857zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg></button>
+      <button class="home-footer-share-btn" onclick="shareNet('pinterest')" aria-label="Pinterest" title="Pinterest"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg></button>
+      <button class="home-footer-share-btn" onclick="shareNet('email')" aria-label="Email" title="Email"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M12 12.713l-11.985-9.713h23.97l-11.985 9.713zm-5.425-1.822l-6.575-5.329v12.501l6.575-7.172zm10.85 0l6.575 7.172v-12.501l-6.575 5.329zm-1.557 1.261l-3.868 3.135-3.868-3.135-8.11 8.848h23.956l-8.11-8.848z"/></svg></button>
+      <button class="home-footer-share-btn" onclick="copyAppLink()" aria-label="Copier le lien" title="Copier le lien"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></button>
+    </span>
+  </div>
+</div>
+</div><!-- /panHome -->
+

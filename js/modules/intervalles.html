@@ -1,0 +1,29 @@
+  <div class="pc-panel" id="panIntervalles">
+<div class="t2-app">
+      <div class="result-bar" id="result2"><div style="color:#9ca3af;font-size:13px" data-i18n="h_note">Sélectionnez une note sur le clavier</div></div>
+
+      <div class="card piano-card2">
+        <div class="card-title" data-i18n="t_start">Note de départ</div>
+        <div class="piano-wrap2"><div class="piano2" id="piano2"></div></div>
+        <div class="piano-bottom2">
+          <button class="pref-btn2 on" id="prefS2" onclick="T2.setAcc('s')" data-i18n="btn_sharps2">♯ Dièses</button>
+          <button class="pref-btn2" id="prefF2" onclick="T2.setAcc('f')" data-i18n="btn_flats2">♭ Bémols</button>
+        </div>
+      </div>
+
+      <div class="bottom-row2">
+        <div class="card dir-card2">
+          <div class="card-title" data-i18n="t_dir">Direction</div>
+          <div class="dir-inner2">
+            <button class="dir-btn2 on" id="dirUp2" onclick="T2.setDir('up')">↑<span class="dir-sub2" data-i18n="btn_asc">Ascendant</span></button>
+            <button class="dir-btn2" id="dirDn2" onclick="T2.setDir('down')">↓<span class="dir-sub2" data-i18n="btn_desc">Descendant</span></button>
+          </div>
+        </div>
+        <div class="card iv-card2">
+          <div class="card-title" data-i18n="t_iv">Intervalle</div>
+          <div class="iv-scroll2"><div class="iv-grid2" id="ivGrid2"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+

@@ -1,0 +1,23 @@
+  <div class="pc-panel" id="panModes">
+<div class="tm-wrap">
+      <div class="tm-top-row">
+        <div class="tm-card tm-key-card">
+          <div class="tm-title" data-i18n="t_key">Tonalité</div>
+          <select class="tm-ksel" id="tmkeySel"></select>
+        </div>
+        <div class="tm-card tm-scale-pick-card">
+          <div class="tm-title" data-i18n="t_sm">Gamme / Mode</div>
+          <div class="tm-search-wrap">
+            <svg class="tm-search-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/></svg>
+            <input type="text" class="tm-search-input" id="tmsearch" placeholder="Rechercher une gamme..." data-ph="ph_scale" autocomplete="off" onclick="TM.openDD()">
+            <div class="tm-dropdown" id="tmdropdown"></div>
+          </div>
+          <div id="tmbadge"></div>
+        </div>
+      </div>
+      <div class="tm-detail" id="tmdetail">
+        <div class="tm-empty" data-i18n="h_scale">Sélectionnez une gamme pour voir le détail</div>
+      </div>
+    </div>
+  </div>
+

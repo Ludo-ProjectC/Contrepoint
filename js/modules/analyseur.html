@@ -1,0 +1,655 @@
+  <div class="pc-panel" id="panAnalyseur"><div class="shell">
+    <!-- Score + Input -->
+    <div class="card score-area">
+        <div class="card-title"><span data-i18n="t_score">Partition</span> <span class="limit-badge" id="ah_chordCount">0 / 20 <span data-i18n="ah_ch">accords</span></span></div>
+        <canvas id="ah_scoreCanvas" class="score-canvas"></canvas>
+        <div class="chord-labels" id="ah_chordLabels"></div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#0077BB"></div><span data-i18n="ah_s">Soprano</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#EE7733"></div><span data-i18n="ah_a">Alto</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#009988"></div><span data-i18n="ah_t">Ténor</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#CC3311"></div><span data-i18n="ah_b">Basse</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#ef4444;outline:2px solid #ef4444;outline-offset:2px"></div><span data-i18n="ah_e">Erreur</span></div>
+        </div>
+        <div class="drag-hint" data-i18n="h_drag">↕ Glissez les notes verticalement sur la portée pour changer la tessiture</div>
+        <!-- Audio + Export controls -->
+        <div class="audio-row">
+          <button class="play-btn" id="ah_btnPlayAll" onclick="AH_playAll()" data-i18n="btn_play_all">▶ Écouter tout</button>
+          <button class="play-btn" id="ah_btnPlaySel" onclick="AH_playSelected()" data-i18n="btn_play_sel">▶ Accord</button>
+          <label style="font-size:11px;color:var(--t2)" data-i18n="ah_tp">Tempo:</label>
+          <input type="number" class="tempo-input" id="ah_tempoInput" value="72" min="30" max="200">
+          <span style="font-size:10px;color:var(--t3)">bpm</span>
+          <button class="btn" onclick="AH_exportPDF()" style="margin-left:auto">📄 PDF</button>
+          <button class="btn" onclick="AH_exportMIDI()">🎹 MIDI</button>
+        </div>
+      </div>
+
+      <!-- Chord input -->
+      <div class="input-grid">
+        <div class="card">
+          <div class="card-title"><span data-i18n="t_input">Saisie — Accord</span> <span id="ah_chordNum">1</span></div>
+          <div class="key-row">
+            <span class="key-label" data-i18n="ah_kl">Tonalité :</span>
+            <select class="note-sel" id="ah_keySel" onchange="AH_updateKey()"></select>
+          </div>
+          <div class="chord-sel-row">
+            <label data-i18n="ah_ml">Mesure :</label>
+            <select class="note-sel" id="ah_timeSigSel" onchange="AH_render()">
+              <option value="4/4">4/4</option>
+              <option value="3/4">3/4</option>
+              <option value="2/4">2/4</option>
+              <option value="2/2">2/2 (alla breve)</option>
+              <option value="5/4">5/4</option>
+              <option value="6/4">6/4</option>
+              <option value="3/8">3/8</option>
+              <option value="6/8">6/8</option>
+              <option value="9/8">9/8</option>
+              <option value="12/8">12/8</option>
+            </select>
+          </div>
+          <div class="chord-sel-row">
+            <label data-i18n="ah_cl">Accord :</label>
+            <select class="note-sel" id="ah_chordTypeSel" onchange="AH_onChordTypeChange()">
+              <option value="" data-i18n="ah_mn">— Manuel —</option>
+            </select>
+          </div>
+          <div class="chord-sel-row">
+            <label data-i18n="ah_il">Chiffrage :</label>
+            <select class="note-sel" id="ah_inversionSel" onchange="AH_onInversionChange()">
+              <option value="0" data-i18n="ah_rp">État fondamental</option>
+            </select>
+          </div>
+          <div class="btn-row">
+            <button class="btn primary" onclick="AH_addChord()" data-i18n="btn_add">Ajouter</button>
+            <button class="btn" onclick="AH_updateChord()" data-i18n="btn_edit">Modifier</button>
+            <button class="btn danger" onclick="AH_removeSelected()" data-i18n="btn_del">Effacer</button>
+            <button class="btn danger" onclick="AH_clearAll()" data-i18n="btn_clear">Tout effacer</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" data-i18n="t_voices">Voix (saisie manuelle)</div>
+          <div id="ah_voiceInputs2"></div>
+        </div>
+      </div>
+
+    <!-- Analysis + Theory -->
+    <div class="card">
+        <div class="card-title"><span data-i18n="t_analysis">Analyse</span> — <span id="ah_errCount">0</span> <span data-i18n="ah_p">problème(s)</span></div>
+        <div class="err-list" id="ah_errList">
+          <div class="no-errors" data-i18n="h_2chords">Ajoutez au moins 2 accords pour lancer l'analyse</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:10px">
+        <div class="section-toggle" onclick="AH_toggleSection(this)" data-i18n="t_rules">Règles vérifiées</div>
+        <div class="section-body" style="max-height:300px">
+          <div style="font-size:10px;color:var(--t2);line-height:1.7">
+            <div>✓ <span data-i18n="r_p5">Quintes parallèles</span></div>
+            <div>✓ <span data-i18n="r_p8">Octaves parallèles</span></div>
+            <div>✓ <span data-i18n="r_p1">Unissons parallèles</span></div>
+            <div>✓ <span data-i18n="r_d5">Quintes directes (S-B)</span></div>
+            <div>✓ <span data-i18n="r_d8">Octaves directes</span></div>
+            <div>✓ <span data-i18n="r_cx">Croisement de voix</span></div>
+            <div>✓ <span data-i18n="r_sp">Espacement excessif (> 8ve)</span></div>
+            <div>✓ <span data-i18n="r_lr">Résolution de la sensible</span></div>
+            <div>✓ <span data-i18n="r_ld">Doublure de la sensible</span></div>
+            <div>✓ <span data-i18n="r_cm">Mouvement contraire</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- THEORY SECTION — Comprehensive -->
+      <div class="card" style="margin-top:10px">
+        <div class="card-title" data-i18n="t_theory">Théorie — Conduite des voix</div>
+        <div style="max-height:600px;overflow-y:auto">
+          <div class="theory-card theory-fr">
+
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">1. Intervalles et renversements</div>
+              <div class="th-content">
+                <p>L'intervalle est la distance qui sépare une note d'une autre. En harmonie, les intervalles se comptent du grave à l'aigu ; c'est d'après la basse que l'on compte les intervalles qui forment les accords.</p>
+                <p>La gamme renferme : Seconde, Tierce, Quarte, Quinte, Sixte, Septième et Octave. En doublant, on obtient Neuvième à Quinzième (répétition à l'octave).</p>
+                <p>Chaque intervalle se présente sous trois faces : <em>diminué, mineur/majeur, augmenté</em>. L'unisson et l'octave ne s'altèrent pas.</p>
+
+                <p style="margin-top:8px"><strong>Renversement des intervalles</strong></p>
+                <p>Renverser un intervalle = transporter la note grave à l'aigu (ou inversement). La somme d'un intervalle et de son renversement donne toujours 9 :</p>
+                <table style="width:100%;border-collapse:collapse;font-size:10px;margin:6px 0">
+                  <tr style="background:#f5f3ff"><th style="padding:3px 6px;text-align:left;border:1px solid #e5e7eb">Intervalle</th><th style="padding:3px 6px;text-align:left;border:1px solid #e5e7eb">Renversement</th></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Unisson</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Octave</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Seconde</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Septième</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Tierce</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Sixte</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Quarte</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Quinte</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Quinte</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Quarte</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Sixte</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Tierce</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Septième</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Seconde</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Octave</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Unisson</td></tr>
+                </table>
+
+                <p style="margin-top:6px"><strong>Qualité et renversement</strong></p>
+                <p>En se renversant, la qualité s'inverse :</p>
+                <table style="width:100%;border-collapse:collapse;font-size:10px;margin:6px 0">
+                  <tr style="background:#f5f3ff"><th style="padding:3px 6px;text-align:left;border:1px solid #e5e7eb">Qualité</th><th style="padding:3px 6px;text-align:left;border:1px solid #e5e7eb">Renversement</th></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Diminué</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Augmenté</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Mineur</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Majeur</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Majeur</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Mineur</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Augmenté</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Diminué</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Juste</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Juste</td></tr>
+                </table>
+
+                <p style="margin-top:6px"><strong>Tableau détaillé</strong></p>
+                <p style="font-size:10px">Chaque intervalle sous ses trois faces et son renversement :</p>
+                <table style="width:100%;border-collapse:collapse;font-size:9.5px;margin:6px 0">
+                  <tr style="background:#f5f3ff"><th style="padding:2px 4px;border:1px solid #e5e7eb">Intervalle</th><th style="padding:2px 4px;border:1px solid #e5e7eb">3 faces</th><th style="padding:2px 4px;border:1px solid #e5e7eb">→ Renversement</th></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4" rowspan="3">Seconde</td><td style="padding:2px 4px;border:1px solid #f0f0f4">mineure (1 dt)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Septième majeure</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">majeure (1 ton)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Septième mineure</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">augmentée (1½ ton)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Septième diminuée</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4" rowspan="3">Tierce</td><td style="padding:2px 4px;border:1px solid #f0f0f4">diminuée (1 ton)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Sixte augmentée</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">mineure (1½ ton)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Sixte majeure</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">majeure (2 tons)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Sixte mineure</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4" rowspan="3">Quarte</td><td style="padding:2px 4px;border:1px solid #f0f0f4">diminuée (2 tons)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Quinte augmentée</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">juste (2½ tons)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Quinte juste</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">augmentée (3 tons)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Quinte diminuée</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4" rowspan="3">Quinte</td><td style="padding:2px 4px;border:1px solid #f0f0f4">diminuée (3 tons)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Quarte augmentée</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">juste (3½ tons)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Quarte juste</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">augmentée (4 tons)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Quarte diminuée</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4" rowspan="3">Sixte</td><td style="padding:2px 4px;border:1px solid #f0f0f4">mineure (4 tons)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Tierce majeure</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">majeure (4½ tons)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Tierce mineure</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">augmentée (5 tons)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Tierce diminuée</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4" rowspan="3">Septième</td><td style="padding:2px 4px;border:1px solid #f0f0f4">diminuée (4½ tons)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Seconde augmentée</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">mineure (5 tons)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Seconde majeure</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">majeure (5½ tons)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Seconde mineure</td></tr>
+                </table>
+              </div>
+            </div>
+
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">2. Consonances et dissonances</div>
+              <div class="th-content">
+                <p><strong>Consonants :</strong> Tierce, Quinte, Sixte, Octave.</p>
+                <p><strong>Dissonants :</strong> Seconde, Septième.</p>
+                <p>La quarte est dissonance contre la basse, mais consonance entre parties intermédiaires/supérieures.</p>
+                <div class="rule">Consonances parfaites : Quinte et Octave — ne peuvent être altérées sans cesser d'être consonantes.</div>
+                <div class="rule">Consonances imparfaites : Tierce et Sixte — peuvent être majeures ou mineures tout en restant consonantes.</div>
+                <p>La quinte diminuée et augmentée, la tierce diminuée et la sixte augmentée sont des intervalles dissonants.</p>
+              </div>
+            </div>
+
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">3. Les trois mouvements</div>
+              <div class="th-content">
+                <p><strong>Mouvement direct :</strong> deux parties montent ou descendent en même temps. Le plus naturel mais le plus dangereux — il peut engendrer des quintes et octaves parallèles.</p>
+                <p><strong>Mouvement oblique :</strong> l'une reste au même degré pendant que l'autre bouge. Très utile pour la liaison entre accords (note commune tenue).</p>
+                <p><strong>Mouvement contraire :</strong> l'une monte pendant que l'autre descend. Le plus riche harmoniquement.</p>
+                <div class="rule">Le mouvement oblique et surtout le mouvement contraire offrent le plus de ressources dans l'harmonie.</div>
+                <p>En pratique, une bonne conduite mélange les trois. Le mouvement contraire entre soprano et basse est particulièrement recommandé pour l'indépendance des voix extrêmes.</p>
+              </div>
+            </div>
+
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">4. Tessiture des voix SATB</div>
+              <div class="th-content">
+                <table style="width:100%;border-collapse:collapse;font-size:10px;margin:6px 0">
+                  <tr style="background:#f5f3ff"><th style="padding:3px 6px;text-align:left;border:1px solid #e5e7eb">Voix</th><th style="padding:3px 6px;border:1px solid #e5e7eb">Grave</th><th style="padding:3px 6px;border:1px solid #e5e7eb">Aigu</th><th style="padding:3px 6px;border:1px solid #e5e7eb">Portée</th></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4"><strong>Soprano</strong></td><td style="padding:3px 6px;border:1px solid #f0f0f4">Do4 (C4)</td><td style="padding:3px 6px;border:1px solid #f0f0f4">La5 (A5)</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Clé de sol</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4"><strong>Alto</strong></td><td style="padding:3px 6px;border:1px solid #f0f0f4">Fa3 (F3)</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Ré5 (D5)</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Clé de sol</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4"><strong>Ténor</strong></td><td style="padding:3px 6px;border:1px solid #f0f0f4">Do3 (C3)</td><td style="padding:3px 6px;border:1px solid #f0f0f4">La4 (A4)</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Clé de fa</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4"><strong>Basse</strong></td><td style="padding:3px 6px;border:1px solid #f0f0f4">Mi2 (E2)</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Mi4 (E4)</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Clé de fa</td></tr>
+                </table>
+                <p>Éviter les extrêmes du registre de façon prolongée. Le médium de chaque voix est le plus confortable et le plus sonore.</p>
+              </div>
+            </div>
+
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">5. Espacement et croisement</div>
+              <div class="th-content">
+                <div class="rule">L'espacement entre Soprano-Alto et Alto-Ténor ne doit pas dépasser une octave.</div>
+                <p>L'espacement Ténor-Basse est libre (jusqu'à deux octaves). La basse a un rôle harmonique distinct.</p>
+                <div class="rule">Le croisement de voix est interdit : chaque voix doit rester dans sa position relative (S &gt; A &gt; T &gt; B).</div>
+                <p>Le croisement momentané est toléré dans certains contrepoints avancés, mais en harmonie classique à 4 voix, il doit être évité.</p>
+              </div>
+            </div>
+
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">6. Marche des consonances</div>
+              <div class="th-content">
+                <div class="rule">Les consonances parfaites (5te juste, 8ve) ne s'enchaînent que par mouvement oblique ou contraire.</div>
+                <p>Le mouvement direct appliqué aux consonances parfaites produit des quintes et octaves de suite (directes ou cachées) — à éviter avec soin.</p>
+                <div class="rule">À 3 et 4 parties : les quintes et octaves cachées sont tolérées dans les parties intermédiaires, entre consonances seulement.</div>
+                <p>Les consonances imparfaites (tierces, sixtes) s'emploient librement par les trois mouvements. Les suites de tierces ou de sixtes parallèles sont un procédé courant et sonore (faux-bourdon).</p>
+              </div>
+            </div>
+
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">7. Quintes et octaves interdites</div>
+              <div class="th-content">
+                <p><strong>Quintes parallèles :</strong> deux voix forment une 5te juste, puis se déplacent par mouvement direct vers une autre 5te juste. L'effet détruit l'indépendance des voix.</p>
+                <p><strong>Octaves parallèles :</strong> deux voix à l'octave se déplaçant ensemble fusionnent en une seule ligne — on perd une voix.</p>
+                <p><strong>Unissons parallèles :</strong> cas extrême de l'octave parallèle.</p>
+                <div class="rule">Quintes, octaves et unissons parallèles par mouvement direct : interdits entre toutes les paires de voix.</div>
+                <p><strong>Quintes/octaves directes (cachées) :</strong> deux voix arrivent sur une 5te ou 8ve par mouvement direct sans y être avant.</p>
+                <div class="rule">Strictement interdites entre Soprano et Basse. Tolérées entre parties intermédiaires.</div>
+                <p><strong>Exception :</strong> la quinte directe S-B est tolérée si le soprano procède par mouvement conjoint (pas de saut).</p>
+              </div>
+            </div>
+
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">8. Doublures</div>
+              <div class="th-content">
+                <p>Dans un accord à 4 voix construit sur une triade (3 notes), il faut doubler une note :</p>
+                <div class="rule">Doubler de préférence la fondamentale de l'accord. C'est le choix le plus solide harmoniquement.</div>
+                <p>On peut aussi doubler la quinte. Doubler la tierce est plus délicat — cela colore mais peut affaiblir la tonalité.</p>
+                <div class="rule">Ne jamais doubler la sensible (7ᵉ degré). Sa résolution obligée vers la tonique créerait des octaves parallèles.</div>
+                <p>Dans un accord de sixte (1ᵉʳ renversement), on double souvent la basse (= tierce de l'accord fondamental) ou la quinte.</p>
+              </div>
+            </div>
+
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">9. Accord parfait et renversements</div>
+              <div class="th-content">
+                <p><strong>Accord parfait majeur :</strong> tierce majeure + quinte. Chiffré 5. <strong>Parfait mineur :</strong> tierce mineure + quinte.</p>
+                <p><strong>1ᵉʳ renversement (accord de sixte) :</strong> la tierce à la basse. Tierce + sixte. Chiffré 6. Le plus utilisé — il allège le discours harmonique.</p>
+                <p><strong>2ᵉ renversement (quarte et sixte) :</strong> la quinte à la basse. Quarte + sixte. Chiffré 6/4. Le moins stable.</p>
+                <div class="rule">Les accords parfaits doivent se succéder avec au moins une note commune. La meilleure liaison est de préparer la quinte.</div>
+                <div class="rule">Sans note commune : employer le mouvement contraire pour éviter les quintes de suite.</div>
+                <div class="rule">L'accord de quarte et sixte ne s'emploie guère que sur la tonique et la dominante. On ne peut pas en faire de succession — effet vague et tendance à la dureté.</div>
+                <p>La suite de sixtes (1ᵉʳ renversement) se fait par mouvement direct — procédé très usité et sonore.</p>
+              </div>
+            </div>
+
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">10. Accord de quinte diminuée</div>
+              <div class="th-content">
+                <p>Composé de tierce mineure et quinte diminuée. Se pose sur la note sensible (mode majeur) ou la 2ᵉ note (mode mineur).</p>
+                <p>Bien que la quinte diminuée soit dissonante, cet accord n'est pas classé parmi les dissonants : aucune de ses notes n'a de marche obligée — elles peuvent toutes monter, descendre ou rester en place. Il peut servir de repos momentané.</p>
+                <p><strong>1ᵉʳ dérivé :</strong> tierce mineure + sixte majeure (chiffré +6). <strong>2ᵉ dérivé :</strong> quarte augmentée + sixte majeure.</p>
+                <p>Le VIIᵉ degré portant cet accord est un pilier de la résolution vers la tonique.</p>
+              </div>
+            </div>
+
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">11. Septième dominante</div>
+              <div class="th-content">
+                <p>Composé de tierce majeure, quinte juste et septième mineure. Se pose sur la dominante (Vᵉ degré). Chiffré 7.</p>
+                <div class="rule">La septième est dissonante et doit descendre d'un degré. La note sensible (tierce de l'accord) doit monter d'un degré vers la tonique.</div>
+                <p><strong>1ᵉʳ renversement — Sixte et quinte diminuée :</strong> sur la note sensible. 3ce mineure + 5te diminuée + 6te mineure.</p>
+                <p><strong>2ᵉ — Sixte sensible :</strong> sur la 2ᵉ note du ton. 3ce mineure + 4te + 6te majeure.</p>
+                <p><strong>3ᵉ — Triton :</strong> sur la 4ᵉ note. 2de majeure + 4te augmentée + 6te majeure.</p>
+                <p>La résolution sur la tonique produit la <strong>cadence parfaite</strong>. La fondamentale descend de quinte, la tierce (sensible) monte, la septième descend, la quinte est libre.</p>
+              </div>
+            </div>
+
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">12. Septièmes de sensible et diminuée</div>
+              <div class="th-content">
+                <p><strong>7ᵉ de sensible :</strong> tierce mineure, quinte diminuée, septième mineure. Se pose sur la sensible. Résolution sur la tonique. Trois renversements.</p>
+                <p>La 7ᵉ dominante et la 7ᵉ de sensible ont trois notes communes, ce qui prouve leur identité d'origine (même son générateur).</p>
+                <p><strong>7ᵉ diminuée :</strong> tierce mineure, quinte diminuée, septième diminuée. Amalgame de la 7ᵉ dominante et de la 7ᵉ de sensible. Même résolution.</p>
+                <p><strong>7ᵉ mixte :</strong> la 7ᵉ de sensible employée sur le IIᵉ degré du mode mineur relatif. Résolution sur la dominante.</p>
+                <p>La 7ᵉ diminuée, composée de trois tierces mineures, divise l'octave en 4 parties égales — elle est particulièrement utile pour les modulations enharmoniques.</p>
+              </div>
+            </div>
+
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">13. Neuvième de dominante</div>
+              <div class="th-content">
+                <p><strong>9ᵉ majeure :</strong> combinaison de la 7ᵉ dominante et de la 7ᵉ de sensible. Tierce majeure + quinte + septième mineure + neuvième majeure. Se pose sur la dominante.</p>
+                <p>La septième et la neuvième sont dissonantes et doivent descendre d'un degré. La note sensible doit monter. On retranche la quinte pour un effet moins dur.</p>
+                <p><strong>9ᵉ mineure :</strong> même accord avec neuvième mineure. Amalgame de la 7ᵉ dominante et de la 7ᵉ diminuée.</p>
+                <p>La neuvième n'est pas susceptible d'être renversée — le générateur doit toujours rester à distance de neuvième de la dissonance.</p>
+              </div>
+            </div>
+
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">14. Cadences</div>
+              <div class="th-content">
+                <p><strong>Cadence parfaite :</strong> V7 → I. Termine le sens musical complètement. La résolution de la 7ᵉ de sensible/diminuée sur I est aussi une cadence parfaite, mais rarement employée comme finale.</p>
+                <p><strong>Cadence à la dominante (demi-cadence) :</strong> repos sur V. Suspend le sens sans le terminer. En mineur : toujours accord parfait majeur sur V.</p>
+                <p><strong>Cadence plagale :</strong> IV → I. Finale dans la musique religieuse.</p>
+                <p><strong>Cadence évitée :</strong> l'accord de repos reçoit une 7ᵉ mineure → devient 7ᵉ dominante → suite de 7ᵉ par quintes descendantes.</p>
+                <p><strong>Cadence rompue :</strong> V7 se résout sur un accord autre que I. Le plus usité : V7 → VI. Différentes manières en mineur (accord de sixte sur VIᵉ, sur IVᵉ altéré, etc.).</p>
+                <p><strong>Cadence interrompue :</strong> une 7ᵉ dominante suivie d'une autre dont la fondamentale descend de tierce ou de quarte.</p>
+                <p>Les cadences intermédiaires permettent un repos momentané sur chaque degré avant la cadence principale.</p>
+              </div>
+            </div>
+
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">15. Notes de passage</div>
+              <div class="th-content">
+                <div class="rule">Les notes de passage s'emploient au temps faible de la mesure ou à la partie faible du temps.</div>
+                <p>Elles sont étrangères aux accords sur lesquels elles ne font que glisser. Elles servent à remplir le vide d'un intervalle de tierce, quarte, quinte, etc.</p>
+                <div class="rule">Marche diatonique obligatoire (degrés conjoints), soit en montant, soit en descendant.</div>
+                <div class="rule">L'interdiction des deux quintes ou octaves de suite s'applique aux notes de passage comme si elles faisaient partie de l'harmonie.</div>
+                <p>On peut faire des notes de passage dans toutes les parties simultanément, y compris par mouvement contraire. Saut de tierce = 1 note de passage, de quarte = 2, de quinte = 3.</p>
+              </div>
+            </div>
+
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">16. Prolongations et retards</div>
+              <div class="th-content">
+                <p>L'harmonie naturelle peut devenir monotone par le retour trop fréquent des mêmes accords. On y introduit des dissonances artificielles par <strong>prolongation</strong> d'une note d'un accord sur l'accord suivant.</p>
+                <p><strong>Retards courants :</strong> quarte retardant la tierce dans l'accord parfait, seconde retardant l'accord de sixte, septième retardant l'accord de quarte et sixte, neuvième retardant l'octave.</p>
+                <p><strong>Doubles retards :</strong> neuvième et quarte, seconde et sixte, tierce et quinte retardant la quarte dans le 6/4.</p>
+                <div class="rule">Le retard se résout toujours en descendant d'un degré sur la note retardée.</div>
+                <p>On peut prolonger en entier sur la tonique et la médiante les accords de 7ᵉ dominante, 7ᵉ de sensible et 7ᵉ diminuée.</p>
+              </div>
+            </div>
+
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">17. Pédale</div>
+              <div class="th-content">
+                <p>La pédale est un son prolongé à la basse sur lequel on fait passer des accords étrangers, qui doivent de temps en temps contenir la note prolongée, sans quoi l'effet serait désagréable.</p>
+                <div class="rule">La pédale se fait sur la tonique et sur la dominante.</div>
+                <p><strong>Pédale de tonique :</strong> reçoit les accords de 7ᵉ dominante, 7ᵉ de sensible et 7ᵉ diminuée (ces accords résolvant sur la tonique, la pédale s'y retrouve souvent).</p>
+                <p><strong>Pédale de dominante :</strong> reçoit toutes les marches consonantes et dissonantes. Doit commencer par le repos à la dominante et finir par la cadence parfaite.</p>
+                <p>La pédale se fait normalement à la basse, l'harmonie placée au-dessus devant s'en éloigner le plus possible. Elle peut être transportée au milieu (<strong>pédale intérieure</strong>) ou à l'aigu, pourvu que le son prolongé fasse partie de l'accord suivant.</p>
+                <p>On peut moduler sur la pédale en la considérant tantôt comme tonique et tantôt comme dominante.</p>
+              </div>
+            </div>
+
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">18. Modulations</div>
+              <div class="th-content">
+                <p>Un ton ne s'établit pas seulement par son accord parfait — il faut que la note sensible ait été entendue. Le meilleur moyen est la cadence parfaite.</p>
+                <p>On module par <strong>quintes ascendantes</strong> (chaque modulation amène un dièse de plus) et <strong>descendantes</strong> (un bémol de plus).</p>
+                <p>Les modulations par quintes descendantes sont les plus naturelles : ajouter la 7ᵉ mineure à l'accord parfait majeur → 7ᵉ dominante → cadence parfaite.</p>
+                <p>Pour moduler par quintes ascendantes, l'accord parfait du nouveau ton doit être précédé de sa 7ᵉ dominante.</p>
+                <p>La première modulation se fait à la dominante, puis à la sous-dominante. La modulation au relatif (majeur ↔ mineur) est très usitée.</p>
+                <div class="rule">La seule règle dont on ne doive jamais s'écarter est de satisfaire l'oreille.</div>
+              </div>
+            </div>
+
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">19. Enharmonie</div>
+              <div class="th-content">
+                <p>Le passage enharmonique s'obtient principalement par la <strong>septième diminuée</strong>. Cet accord, composé de trois tierces mineures empilées, divise l'octave en 4 parties égales.</p>
+                <p>En changeant le nom d'une seule note (enharmonie), on transforme la fonction de l'accord et on module dans un ton éloigné. C'est toujours la dissonance de la 7ᵉ diminuée qui produit le passage enharmonique.</p>
+                <p>La succession des sons générateurs forme une suite de cadences interrompues qui amène le passage.</p>
+              </div>
+            </div>
+
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">20. Altérations</div>
+              <div class="th-content">
+                <p>Tous les accords sont susceptibles de recevoir une ou plusieurs altérations (notes étrangères au ton, modifiées par dièse ou bémol).</p>
+                <p><strong>Accord parfait majeur altéré :</strong> la quinte altérée en montant → quinte augmentée (deux tierces majeures). La fondamentale altérée en montant → accord diminué. La tierce altérée en descendant → accord mineur.</p>
+                <p><strong>Septième de sensible altérée :</strong> la tierce altérée en montant → renverse la tierce diminuée en sixte augmentée.</p>
+                <p><strong>Septième diminuée altérée :</strong> la tierce altérée en descendant. L'accord parfait qui suit doit être majeur (repos à la dominante).</p>
+                <div class="rule">Si une note doit descendre, elle est altérée par un bémol. Si elle doit monter, par un dièse.</div>
+              </div>
+            </div>
+
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">21. Règle de l'octave</div>
+              <div class="th-content">
+                <p>Harmonisation standard de chaque degré de la gamme à la basse :</p>
+                <table style="width:100%;border-collapse:collapse;font-size:10px;margin:4px 0">
+                  <tr style="background:#f5f3ff"><th style="padding:2px 4px;border:1px solid #e5e7eb">Degré</th><th style="padding:2px 4px;border:1px solid #e5e7eb">I</th><th style="padding:2px 4px;border:1px solid #e5e7eb">II</th><th style="padding:2px 4px;border:1px solid #e5e7eb">III</th><th style="padding:2px 4px;border:1px solid #e5e7eb">IV</th><th style="padding:2px 4px;border:1px solid #e5e7eb">V</th><th style="padding:2px 4px;border:1px solid #e5e7eb">VI</th><th style="padding:2px 4px;border:1px solid #e5e7eb">VII</th><th style="padding:2px 4px;border:1px solid #e5e7eb">I</th></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">Chiffrage</td><td style="padding:2px 4px;border:1px solid #f0f0f4">5</td><td style="padding:2px 4px;border:1px solid #f0f0f4">6</td><td style="padding:2px 4px;border:1px solid #f0f0f4">6</td><td style="padding:2px 4px;border:1px solid #f0f0f4">5</td><td style="padding:2px 4px;border:1px solid #f0f0f4">7</td><td style="padding:2px 4px;border:1px solid #f0f0f4">6</td><td style="padding:2px 4px;border:1px solid #f0f0f4">6</td><td style="padding:2px 4px;border:1px solid #f0f0f4">5</td></tr>
+                </table>
+                <p>Variante avec dissonance de quinte sur le IVᵉ degré en montant. La même harmonisation existe en mode mineur avec les accords adaptés aux degrés altérés.</p>
+                <p>Les marches dissonantes les plus usitées : suites de septièmes descendant par degrés, suites de sixtes, et les enchaînements de quinte et sixte.</p>
+              </div>
+            </div>
+
+          </div>
+          <div class="theory-card theory-en" style="display:none">
+
+            <!-- ENGLISH THEORY -->
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">1. Intervals and Inversions</div>
+              <div class="th-content">
+                <p>An interval is the distance between two notes. In harmony, intervals are counted from low to high; it is from the bass that we count the intervals forming chords.</p>
+                <p>The scale contains: Second, Third, Fourth, Fifth, Sixth, Seventh, and Octave. Doubling yields Ninth through Fifteenth (octave repetition).</p>
+                <p>Each interval appears in three forms: <em>diminished, minor/major, augmented</em>. The unison and octave cannot be altered.</p>
+                <p style="margin-top:8px"><strong>Interval Inversion</strong></p>
+                <p>To invert an interval = transfer the lower note to the upper register (or vice versa). The sum of an interval and its inversion always equals 9:</p>
+                <table style="width:100%;border-collapse:collapse;font-size:10px;margin:6px 0">
+                  <tr style="background:#f5f3ff"><th style="padding:3px 6px;text-align:left;border:1px solid #e5e7eb">Interval</th><th style="padding:3px 6px;text-align:left;border:1px solid #e5e7eb">Inversion</th></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Unison</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Octave</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Second</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Seventh</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Third</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Sixth</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Fourth</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Fifth</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Fifth</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Fourth</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Sixth</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Third</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Seventh</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Second</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Octave</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Unison</td></tr>
+                </table>
+                <p style="margin-top:6px"><strong>Quality and Inversion</strong></p>
+                <p>When inverted, the quality reverses:</p>
+                <table style="width:100%;border-collapse:collapse;font-size:10px;margin:6px 0">
+                  <tr style="background:#f5f3ff"><th style="padding:3px 6px;text-align:left;border:1px solid #e5e7eb">Quality</th><th style="padding:3px 6px;text-align:left;border:1px solid #e5e7eb">Inversion</th></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Diminished</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Augmented</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Minor</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Major</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Major</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Minor</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Augmented</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Diminished</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Perfect</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Perfect</td></tr>
+                </table>
+                <p style="margin-top:6px"><strong>Detailed Table</strong></p>
+                <p style="font-size:10px">Each interval in its three forms and its inversion:</p>
+                <table style="width:100%;border-collapse:collapse;font-size:9.5px;margin:6px 0">
+                  <tr style="background:#f5f3ff"><th style="padding:2px 4px;border:1px solid #e5e7eb">Interval</th><th style="padding:2px 4px;border:1px solid #e5e7eb">3 forms</th><th style="padding:2px 4px;border:1px solid #e5e7eb">→ Inversion</th></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4" rowspan="3">Second</td><td style="padding:2px 4px;border:1px solid #f0f0f4">minor (1 st)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Major seventh</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">major (1 tone)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Minor seventh</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">augmented (1½ tones)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Diminished seventh</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4" rowspan="3">Third</td><td style="padding:2px 4px;border:1px solid #f0f0f4">diminished (1 tone)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Augmented sixth</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">minor (1½ tones)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Major sixth</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">major (2 tones)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Minor sixth</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4" rowspan="3">Fourth</td><td style="padding:2px 4px;border:1px solid #f0f0f4">diminished (2 tones)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Augmented fifth</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">perfect (2½ tones)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Perfect fifth</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">augmented (3 tones)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Diminished fifth</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4" rowspan="3">Fifth</td><td style="padding:2px 4px;border:1px solid #f0f0f4">diminished (3 tones)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Augmented fourth</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">perfect (3½ tones)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Perfect fourth</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">augmented (4 tones)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Diminished fourth</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4" rowspan="3">Sixth</td><td style="padding:2px 4px;border:1px solid #f0f0f4">minor (4 tones)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Major third</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">major (4½ tones)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Minor third</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">augmented (5 tones)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Diminished third</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4" rowspan="3">Seventh</td><td style="padding:2px 4px;border:1px solid #f0f0f4">diminished (4½ tones)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Augmented second</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">minor (5 tones)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Major second</td></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">major (5½ tones)</td><td style="padding:2px 4px;border:1px solid #f0f0f4">Minor second</td></tr>
+                </table>
+              </div>
+            </div>
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">2. Consonance and Dissonance</div>
+              <div class="th-content">
+                <p><strong>Consonant:</strong> Third, Fifth, Sixth, Octave.</p>
+                <p><strong>Dissonant:</strong> Second, Seventh.</p>
+                <p>The fourth is dissonant against the bass but consonant between upper/inner voices.</p>
+                <div class="rule">Perfect consonances: Fifth and Octave — cannot be altered without ceasing to be consonant.</div>
+                <div class="rule">Imperfect consonances: Third and Sixth — may be major or minor while remaining consonant.</div>
+                <p>The diminished and augmented fifth, diminished third, and augmented sixth are dissonant intervals.</p>
+              </div>
+            </div>
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">3. The Three Motions</div>
+              <div class="th-content">
+                <p><strong>Contrary motion:</strong> two parts move in opposite directions (one up, the other down). The safest and most resourceful motion in harmony.</p>
+                <p><strong>Oblique motion:</strong> one part holds while the other moves. Also very useful.</p>
+                <p><strong>Direct (similar) motion:</strong> two parts ascend or descend together. The most natural but most dangerous — it can produce parallel fifths and octaves.</p>
+                <div class="rule">Oblique motion and especially contrary motion offer the greatest resources in harmony.</div>
+              </div>
+            </div>
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">4. SATB Voice Ranges</div>
+              <div class="th-content">
+                <table style="width:100%;border-collapse:collapse;font-size:10px;margin:4px 0">
+                  <tr style="background:#f5f3ff"><th style="padding:3px 6px;text-align:left;border:1px solid #e5e7eb">Voice</th><th style="padding:3px 6px;border:1px solid #e5e7eb">Low</th><th style="padding:3px 6px;border:1px solid #e5e7eb">High</th><th style="padding:3px 6px;border:1px solid #e5e7eb">Staff</th></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Soprano</td><td style="padding:3px 6px;border:1px solid #f0f0f4">C4</td><td style="padding:3px 6px;border:1px solid #f0f0f4">A5</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Treble</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Alto</td><td style="padding:3px 6px;border:1px solid #f0f0f4">F3</td><td style="padding:3px 6px;border:1px solid #f0f0f4">D5</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Treble</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Tenor</td><td style="padding:3px 6px;border:1px solid #f0f0f4">C3</td><td style="padding:3px 6px;border:1px solid #f0f0f4">A4</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Bass (8va)</td></tr>
+                  <tr><td style="padding:3px 6px;border:1px solid #f0f0f4">Bass</td><td style="padding:3px 6px;border:1px solid #f0f0f4">E2</td><td style="padding:3px 6px;border:1px solid #f0f0f4">E4</td><td style="padding:3px 6px;border:1px solid #f0f0f4">Bass</td></tr>
+                </table>
+              </div>
+            </div>
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">5. Spacing and Crossing</div>
+              <div class="th-content">
+                <div class="rule">The spacing between Soprano–Alto and Alto–Tenor must not exceed one octave.</div>
+                <p>Tenor–Bass spacing is free (up to two octaves). The bass has a distinct harmonic role.</p>
+                <div class="rule">Voice crossing is forbidden: each voice must remain in its relative position (S > A > T > B).</div>
+                <p>Momentary crossing is tolerated in advanced counterpoint, but in classical four-part harmony, it should be avoided.</p>
+              </div>
+            </div>
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">6. Treatment of Consonances</div>
+              <div class="th-content">
+                <p>Direct motion applied to perfect consonances produces consecutive (direct or hidden) fifths and octaves — to be carefully avoided.</p>
+                <div class="rule">Perfect consonances (5th, 8ve) approached by direct motion: forbidden between outer voices (Soprano–Bass).</div>
+                <p>Imperfect consonances (thirds, sixths) may be used freely with all three motions. Parallel thirds or sixths are a common and sonorous device (fauxbourdon).</p>
+              </div>
+            </div>
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">7. Forbidden Fifths and Octaves</div>
+              <div class="th-content">
+                <p><strong>Parallel fifths:</strong> two voices form a perfect 5th, then move by direct motion to another perfect 5th. This destroys voice independence.</p>
+                <p><strong>Parallel octaves:</strong> two voices at the octave moving together fuse into one line — a voice is lost.</p>
+                <p><strong>Parallel unisons:</strong> an extreme case of parallel octaves.</p>
+                <div class="rule">Parallel fifths, octaves, and unisons by direct motion: forbidden between all voice pairs.</div>
+                <p><strong>Direct (hidden) fifths/octaves:</strong> two voices arrive at a 5th or 8ve by direct motion without having been there before.</p>
+                <div class="rule">Direct fifths and octaves between Soprano and Bass (outer voices): forbidden unless the soprano moves by step.</div>
+              </div>
+            </div>
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">8. Doubling</div>
+              <div class="th-content">
+                <div class="rule">Preferably double the root of the chord. This is the most harmonically solid choice.</div>
+                <p>In root-position triads, the root is doubled. In first inversion, double the soprano note (usually). In second inversion (6/4), double the bass (the fifth).</p>
+                <div class="rule">Never double the leading tone (7th degree). Its mandatory resolution to the tonic would create parallel octaves.</div>
+                <p>In diminished triads, double the third. In augmented triads, double the bass.</p>
+              </div>
+            </div>
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">9. Triads and Inversions</div>
+              <div class="th-content">
+                <p>The <strong>triad</strong> (perfect chord) consists of root + third + fifth. Three types: major (M3+m3), minor (m3+M3), diminished (m3+m3), augmented (M3+M3).</p>
+                <p><strong>Root position (5/3):</strong> root in the bass. The most stable sonority.</p>
+                <p><strong>First inversion (6/3):</strong> third in the bass. Lighter, more mobile. Common in passing motion.</p>
+                <p><strong>Second inversion (6/4):</strong> fifth in the bass. Unstable — used mainly as cadential 6/4, passing 6/4, or pedal 6/4.</p>
+                <div class="rule">The cadential 6/4 resolves to V. Double the bass (the fifth of the chord).</div>
+              </div>
+            </div>
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">10. Diminished Fifth Chord</div>
+              <div class="th-content">
+                <p>Composed of minor third and diminished fifth. Built on the leading tone (major mode) or the 2nd degree (minor mode).</p>
+                <div class="rule">The diminished fifth is a dissonance that must resolve inward (by step, converging).</div>
+                <p>The VIIth degree bearing this chord is a pillar of resolution toward the tonic.</p>
+              </div>
+            </div>
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">11. Dominant Seventh</div>
+              <div class="th-content">
+                <p>The dominant seventh chord: major third + perfect fifth + minor seventh, built on the dominant (V). The most important dissonant chord in tonal harmony.</p>
+                <div class="rule">The seventh is dissonant and must descend by step. The leading tone (third of the chord) must rise by step to the tonic.</div>
+                <p><strong>First inversion — Six-five chord:</strong> on the leading tone. Minor 3rd + dim. 5th + min. 6th.</p>
+                <p><strong>Second — Four-three chord:</strong> on the 2nd degree. Min. 3rd + P4th + Maj. 6th.</p>
+                <p>Resolution to the tonic produces the <strong>perfect (authentic) cadence</strong>. The root descends by fifth, the third (leading tone) rises, the seventh descends, the fifth is free.</p>
+              </div>
+            </div>
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">12. Leading Tone and Diminished Sevenths</div>
+              <div class="th-content">
+                <p><strong>Leading tone seventh:</strong> minor third, diminished fifth, minor seventh. Built on the leading tone. Resolves to the tonic. Three inversions.</p>
+                <p>The dominant seventh and the leading tone seventh share three common tones, proving their shared origin (same generating tone).</p>
+                <p><strong>Diminished seventh:</strong> minor third, diminished fifth, diminished seventh. Amalgam of the dominant 7th and the leading tone 7th. Same resolution.</p>
+                <p><strong>Mixed seventh:</strong> the leading tone seventh used on the IInd degree of the relative minor. Resolves to the dominant.</p>
+              </div>
+            </div>
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">13. Dominant Ninth</div>
+              <div class="th-content">
+                <p><strong>Major ninth:</strong> combination of the dominant 7th and the leading tone 7th. Major third + perfect fifth + minor seventh + major ninth. Built on the dominant.</p>
+                <p>The seventh and ninth are dissonant and must descend by step. The leading tone must rise. The fifth is often omitted for a less harsh effect.</p>
+                <p><strong>Minor ninth:</strong> same structure with a minor ninth. More tense. Common in minor keys.</p>
+              </div>
+            </div>
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">14. Cadences</div>
+              <div class="th-content">
+                <p><strong>Perfect (authentic) cadence:</strong> V7 → I. Completes the musical meaning fully. Resolution of the leading tone 7th/dim. 7th to I is also a perfect cadence, but rarely used as a final.</p>
+                <p><strong>Imperfect cadence:</strong> I → V (or any chord → V). Half-stop, like a comma. The phrase pauses but is incomplete.</p>
+                <p><strong>Plagal cadence:</strong> IV → I. The "Amen" cadence. Often follows a perfect cadence to confirm the tonic.</p>
+                <p><strong>Deceptive cadence:</strong> V7 → vi (or another unexpected chord). The resolution is thwarted, creating surprise. The consonant chord that replaces the expected tonic provides a soft landing.</p>
+                <div class="rule">The perfect cadence is the pillar of tonal harmony. Every piece or phrase must ultimately rest upon it.</div>
+              </div>
+            </div>
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">15. Passing Notes</div>
+              <div class="th-content">
+                <p>A <strong>passing note</strong> is a melodic note foreign to the chord, placed on a weak beat, connecting two chord tones by step. It produces a momentary dissonance that resolves immediately.</p>
+                <div class="rule">Passing notes must move by step (conjunct motion) and occur on weak beats. They must not produce parallel 5ths or 8ves with other voices.</div>
+                <p><strong>Chromatic passing notes:</strong> fill the gap of a whole tone with a chromatic semitone. They must not anticipate the harmony of the next chord.</p>
+                <p><strong>Neighbor (auxiliary) notes:</strong> leave a chord tone by step and immediately return. Upper or lower neighbor. Same weak-beat rule applies.</p>
+              </div>
+            </div>
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">16. Suspensions and Delays</div>
+              <div class="th-content">
+                <p>A <strong>suspension</strong> prolongs a note from one chord into the next, where it becomes dissonant, then resolves downward by step.</p>
+                <p>Three phases: <strong>preparation</strong> (consonance on a weak beat), <strong>suspension</strong> (held into strong beat, becomes dissonant), <strong>resolution</strong> (descends by step to a chord tone).</p>
+                <p>Most common suspensions: 4–3 (fourth resolves to third), 7–6, 9–8. The 2–3 (bass suspension) is also very common.</p>
+                <p><strong>Double suspensions:</strong> ninth and fourth, second and sixth, third and fifth suspending the fourth in 6/4.</p>
+                <div class="rule">The suspension always resolves by descending one step to the suspended note.</div>
+                <p>One may prolong entirely on the tonic and mediant the dominant 7th, leading tone 7th, and diminished 7th chords.</p>
+              </div>
+            </div>
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">17. Pedal</div>
+              <div class="th-content">
+                <p>A pedal is a sustained note in the bass over which foreign chords pass; these chords must from time to time contain the sustained note, otherwise the effect would be unpleasant.</p>
+                <div class="rule">The pedal is used on the tonic and on the dominant.</div>
+                <p><strong>Tonic pedal:</strong> receives dominant 7th, leading tone 7th, and diminished 7th chords (since these resolve to the tonic, the pedal often coincides).</p>
+                <p><strong>Dominant pedal:</strong> receives all consonant and dissonant progressions. Must begin at rest on the dominant and end with the perfect cadence.</p>
+                <p>The pedal is normally in the bass, with the harmony above moving as far from it as possible. It may be transferred to an inner voice (<strong>inner pedal</strong>) or to the top, provided the sustained note belongs to the following chord.</p>
+                <p>One may modulate over a pedal by treating it alternately as tonic and dominant.</p>
+              </div>
+            </div>
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">18. Modulations</div>
+              <div class="th-content">
+                <p>A key is not established solely by its triad — the leading tone must have been heard. The best means is the perfect cadence.</p>
+                <p>One modulates by <strong>ascending fifths</strong> (each modulation adds a sharp) and <strong>descending fifths</strong> (adds a flat).</p>
+                <p>Modulations by descending fifths are the most natural: add a minor 7th to a major triad → dominant 7th → perfect cadence.</p>
+                <p>To modulate by ascending fifths, the triad of the new key must be preceded by its dominant 7th.</p>
+                <p>The first modulation goes to the dominant, then to the subdominant. Modulation to the relative (major ↔ minor) is very common.</p>
+                <div class="rule">The only rule from which one must never depart is to satisfy the ear.</div>
+              </div>
+            </div>
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">19. Enharmonic</div>
+              <div class="th-content">
+                <p>The enharmonic passage is achieved mainly through the <strong>diminished seventh</strong>. This chord, composed of three stacked minor thirds, divides the octave into 4 equal parts.</p>
+                <p>By changing the name of a single note (enharmonic respelling), the function of the chord is transformed and one modulates to a distant key. It is always the dissonance of the diminished 7th that produces the enharmonic passage.</p>
+                <p>The succession of generating tones forms a chain of deceptive cadences that brings about the passage.</p>
+              </div>
+            </div>
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">20. Alterations</div>
+              <div class="th-content">
+                <p>All chords may receive one or more alterations (notes foreign to the key, modified by sharp or flat).</p>
+                <p><strong>Altered major triad:</strong> the fifth raised → augmented fifth (two major thirds). The root raised → diminished chord. The third lowered → minor chord.</p>
+                <p><strong>Altered leading tone seventh:</strong> the third raised → inverts the diminished third into an augmented sixth.</p>
+                <p><strong>Altered diminished seventh:</strong> the third lowered. The following triad must be major (rest on the dominant).</p>
+                <div class="rule">If a note must descend, it is altered by a flat. If it must rise, by a sharp.</div>
+              </div>
+            </div>
+            <div class="th-section" onclick="this.classList.toggle('open')">
+              <div class="th-head">21. Rule of the Octave</div>
+              <div class="th-content">
+                <p>Standard harmonization of each scale degree in the bass:</p>
+                <table style="width:100%;border-collapse:collapse;font-size:10px;margin:4px 0">
+                  <tr style="background:#f5f3ff"><th style="padding:2px 4px;border:1px solid #e5e7eb">Degree</th><th style="padding:2px 4px;border:1px solid #e5e7eb">I</th><th style="padding:2px 4px;border:1px solid #e5e7eb">II</th><th style="padding:2px 4px;border:1px solid #e5e7eb">III</th><th style="padding:2px 4px;border:1px solid #e5e7eb">IV</th><th style="padding:2px 4px;border:1px solid #e5e7eb">V</th><th style="padding:2px 4px;border:1px solid #e5e7eb">VI</th><th style="padding:2px 4px;border:1px solid #e5e7eb">VII</th><th style="padding:2px 4px;border:1px solid #e5e7eb">I</th></tr>
+                  <tr><td style="padding:2px 4px;border:1px solid #f0f0f4">Figuring</td><td style="padding:2px 4px;border:1px solid #f0f0f4">5</td><td style="padding:2px 4px;border:1px solid #f0f0f4">6</td><td style="padding:2px 4px;border:1px solid #f0f0f4">6</td><td style="padding:2px 4px;border:1px solid #f0f0f4">5</td><td style="padding:2px 4px;border:1px solid #f0f0f4">7</td><td style="padding:2px 4px;border:1px solid #f0f0f4">6</td><td style="padding:2px 4px;border:1px solid #f0f0f4">6</td><td style="padding:2px 4px;border:1px solid #f0f0f4">5</td></tr>
+                </table>
+                <p>Variant with fifth dissonance on the IVth degree ascending. The same harmonization exists in minor mode with chords adapted to the altered degrees.</p>
+                <p>The most commonly used dissonant progressions: chains of sevenths descending by step, chains of sixths, and fifth-and-sixth successions.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+  </div></div>
+
+</div>

@@ -1,0 +1,162 @@
+  <div class="pc-panel" id="panMetro">
+    <div class="metro-main">
+<div class="col-left">
+      <div class="ring-box">
+        <canvas class="ring-canvas" id="ringCanvas" width="560" height="560"></canvas>
+        <div class="bpm-center">
+          <div class="bpm-val" id="bpmVal">120</div>
+          <div class="bpm-lbl">BPM</div>
+        </div>
+      </div>
+
+      <div class="bpm-ctrl">
+        <button class="pm-btn" onclick="M.nudge(-5)">−5</button>
+        <button class="pm-btn" onclick="M.nudge(-1)">−</button>
+        <button class="tap-btn" onclick="M.tap()">Tap</button>
+        <button class="play-btn" id="playBtn" onclick="M.toggle()">
+          <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <button class="tap-btn" style="visibility:hidden">Tap</button>
+        <button class="pm-btn" onclick="M.nudge(1)">+</button>
+        <button class="pm-btn" onclick="M.nudge(5)">+5</button>
+      </div>
+
+      <div class="slider-wrap">
+        <input type="range" class="slider" id="bpmSlider" min="20" max="300" value="120" oninput="M.setBpm(+this.value)">
+      </div>
+
+      <div class="tempo-preset">
+        <div class="tempo-combo" id="tempoCombo">
+          <input type="text" class="tempo-input" id="tempoInput" placeholder="Rechercher un tempo..." data-ph="ph_tempo" onfocus="M.openTempoList()" oninput="M.filterTempos(this.value)">
+          <div class="tempo-dropdown" id="tempoDropdown"></div>
+        </div>
+        <div class="tempo-range-row hidden" id="tempoRangeRow">
+          <span class="tempo-range-name" id="tempoRangeName"></span>
+          <span class="tempo-range-lbl" id="tempoRangeMin"></span>
+          <input type="range" class="tempo-range-slider" id="tempoRangeSlider" oninput="M.slidePreset(+this.value)">
+          <span class="tempo-range-lbl" id="tempoRangeMax"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-right">
+
+      <!-- Métrique — always open, compact -->
+      <div class="card">
+        <div class="card-t" data-i18n="t_meter">Métrique & Accents</div>
+        <div class="ts-row">
+          <span class="ts-lbl" data-i18n="lbl_mes">Mesure</span>
+          <select class="ts-sel" id="tsNum" onchange="M.setTs()">
+            <option value="2">2</option><option value="3">3</option><option value="4" selected>4</option>
+            <option value="5">5</option><option value="6">6</option><option value="7">7</option>
+            <option value="8">8</option><option value="9">9</option><option value="10">10</option>
+            <option value="11">11</option><option value="12">12</option><option value="13">13</option>
+          </select>
+          <span class="ts-lbl">/</span>
+          <select class="ts-sel" id="tsDen" onchange="M.setTs()">
+            <option value="4" selected>4</option><option value="8">8</option><option value="16">16</option>
+          </select>
+        </div>
+        <div class="acc-row" id="accRow"></div>
+        <div id="grpZone"></div>
+      </div>
+
+      <!-- Valeur de note — always open -->
+      <div class="card">
+        <div class="card-t" data-i18n="t_nv">Valeur de note</div>
+        <div class="nv-grid" id="nvGrid"></div>
+      </div>
+
+      <!-- Subdivision — always open -->
+      <div class="card">
+        <div class="card-t" data-i18n="t_sub">Subdivision</div>
+        <div class="sub-grid" id="subGrid"></div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+          <span class="ts-lbl" data-i18n="lbl_swing">Swing</span>
+          <input type="range" class="mini-slider" style="width:120px" id="swingSlider" min="0" max="75" value="0" oninput="M.setSwing(+this.value)">
+          <span class="swing-pct" id="swingVal">0%</span>
+        </div>
+      </div>
+
+      <!-- Polyrythmie — collapsible -->
+      <div class="card card-collapse" id="cardPoly" onclick="M.toggleCard('cardPoly',event)">
+        <div class="card-header">
+          <div class="card-t" data-i18n="t_poly">Polyrythmie</div>
+          <span class="card-arrow">▼</span>
+        </div>
+        <div class="card-body" onclick="event.stopPropagation()">
+          <label class="poly-toggle">
+            <input type="checkbox" id="polyOn" onchange="M.togglePoly()">
+            <div class="poly-sw"></div>
+            <span class="poly-lbl" data-i18n="lbl_poly_en">Activer la 2e couche</span>
+          </label>
+          <div class="poly-ctrl" id="polyCtrl">
+            <span class="ts-lbl">Couche A</span>
+            <input type="number" class="poly-num" id="polyA" value="4" min="2" max="16" onchange="M.updatePoly()">
+            <span class="poly-vs">contre</span>
+            <input type="number" class="poly-num" id="polyB" value="3" min="2" max="16" onchange="M.updatePoly()">
+            <span class="ts-lbl">Couche B</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Son — collapsible -->
+      <div class="card card-collapse" id="cardSnd" onclick="M.toggleCard('cardSnd',event)">
+        <div class="card-header">
+          <div class="card-t" data-i18n="t_snd">Son</div>
+          <span class="card-arrow">▼</span>
+        </div>
+        <div class="card-body" onclick="event.stopPropagation()">
+          <div style="font-size:10px;font-weight:700;color:var(--pri);margin-bottom:6px" data-i18n="la">COUCHE PRINCIPALE</div>
+          <div class="snd-row">
+            <span class="snd-label" data-i18n="lbl_timbre">Timbre</span>
+            <select class="snd-sel" id="sndTimbre1" onchange="M.updateSnd()">
+              <option value="click">Click</option><option value="wood">Wood Block</option>
+              <option value="beep">Beep</option><option value="hihat">Hi-Hat</option><option value="rim">Rimshot</option>
+            </select>
+          </div>
+          <div class="snd-row">
+            <span class="snd-label" data-i18n="lbl_vol">Volume</span>
+            <input type="range" class="mini-slider" id="sndVol1" min="0" max="100" value="80" oninput="M.updateSnd()">
+            <span class="snd-val" id="sndVol1V">80</span>
+          </div>
+          <div class="snd-row">
+            <span class="snd-label" data-i18n="lbl_pan">Pan</span>
+            <input type="range" class="mini-slider" id="sndPan1" min="-100" max="100" value="0" oninput="M.updateSnd()">
+            <span class="snd-val" id="sndPan1V">C</span>
+          </div>
+          <div id="sndLayer2" style="display:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+            <div style="font-size:10px;font-weight:700;color:var(--orange);margin-bottom:6px" data-i18n="lb">COUCHE B (POLYRYTHMIE)</div>
+            <div class="snd-row">
+              <span class="snd-label" data-i18n="lbl_timbre">Timbre</span>
+              <select class="snd-sel" id="sndTimbre2" onchange="M.updateSnd()">
+                <option value="click">Click</option><option value="wood" selected>Wood Block</option>
+                <option value="beep">Beep</option><option value="hihat">Hi-Hat</option><option value="rim">Rimshot</option>
+              </select>
+            </div>
+            <div class="snd-row">
+              <span class="snd-label" data-i18n="lbl_vol">Volume</span>
+              <input type="range" class="mini-slider" id="sndVol2" min="0" max="100" value="65" oninput="M.updateSnd()">
+              <span class="snd-val" id="sndVol2V">65</span>
+            </div>
+            <div class="snd-row">
+              <span class="snd-label" data-i18n="lbl_pan">Pan</span>
+              <input type="range" class="mini-slider" id="sndPan2" min="-100" max="100" value="40" oninput="M.updateSnd()">
+              <span class="snd-val" id="sndPan2V">40R</span>
+            </div>
+          </div>
+          <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+            <div style="font-size:10px;font-weight:700;color:var(--green);margin-bottom:6px" data-i18n="lsub">SUBDIVISIONS</div>
+            <div class="snd-row">
+              <span class="snd-label" data-i18n="lbl_vol">Volume</span>
+              <input type="range" class="mini-slider" id="sndVolSub" min="0" max="100" value="35" oninput="M.updateSnd()">
+              <span class="snd-val" id="sndVolSubV">35</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    </div>
+  </div>
+

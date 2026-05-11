@@ -1,0 +1,53 @@
+<div class="pc-panel" id="panFormes">
+
+<div class="fm-toolbar">
+  <input class="proj-name" id="fm_projName" type="text" placeholder="Nom de l'œuvre…" data-ph="fm_wn" value="Mon œuvre">
+  <div class="key-sel-wrap"><label data-i18n="fm_key">Tonalité</label><select id="fm_globalKey"></select><select id="fm_globalMode"><option value="major" data-i18n="Major">Majeur</option><option value="minor" data-i18n="Minor">Mineur</option></select></div>
+  <div class="fm-actions">
+    <button class="tbtn" onclick="FM_undo()" title="Annuler (Ctrl+Z)">↶</button>
+    <button class="tbtn" onclick="FM_redo()" title="Refaire (Ctrl+Y)">↷</button>
+    <button class="tbtn" onclick="FM_togglePresentation()" title="Mode présentation">⛶</button>
+    <button class="tbtn" onclick="FM_toggleRef()" data-i18n="fm_ref">📐 Réf.</button>
+    <button class="tbtn" onclick="FM_showOrchModal()" data-i18n="fm_orch">🎻 Orch.</button>
+    <button class="tbtn" onclick="FM_showTemplates()">🗂 Templates</button>
+    <button class="tbtn" onclick="FM_showSaves()">📂</button>
+    <button class="tbtn" onclick="FM_saveProject()">💾</button>
+    <button class="tbtn" onclick="FM_saveAsTemplate()" title="Sauver comme template">💾+</button>
+    <button class="tbtn" onclick="FM_exportJSON()">⬇ JSON</button>
+    <button class="tbtn" onclick="FM_importJSON()">⬆ JSON</button>
+    <button class="tbtn primary" onclick="FM_exportPDF()" data-i18n="fm_pdf">📄 PDF</button>
+    <button class="tbtn" onclick="FM_showRepertoire()" data-i18n="fm_rep">🎼 Répertoire</button>
+  </div>
+</div>
+<div class="fm-main">
+  <div class="alerts-bar" id="fm_alertsBar"></div>
+  <div class="mvt-bar" id="fm_mvtBar"><div class="mvt-bar-label" data-i18n="fm_mvt">Mouvements</div><div class="mvt-row" id="fm_mvtRow"></div></div>
+  <div class="timeline-area"><div class="form-header" id="fm_formHeader"></div><div class="timeline-scroll"><div class="timeline" id="fm_timeline"></div><div class="fm-tonal-plan" id="fm_tonalPlan"></div></div></div>
+  <div class="bottom-area">
+    <div class="ref-panel" id="fm_refPanel"><div class="ref-title"><span data-i18n="fm_rf">Forme de référence</span><button class="ref-close" onclick="FM_toggleRef()">✕</button></div><div id="fm_refContent"></div></div>
+    <div class="detail-panel" id="fm_detailPanel"><div class="dp-empty" id="fm_dpEmpty" data-i18n="h_section">Sélectionner une section dans la timeline pour voir ses détails</div><div class="dp-card" id="fm_dpCard" style="display:none"></div></div>
+  </div>
+</div>
+<div class="modal-overlay" id="fm_addModal"><div class="modal"><button class="modal-close" onclick="FM_closeModal('fm_addModal')">✕</button><h3 data-i18n="fm_as">Ajouter une section</h3><div id="fm_addModalContent"></div></div></div>
+<div class="modal-overlay" id="fm_savesModal"><div class="modal"><button class="modal-close" onclick="FM_closeModal('fm_savesModal')">✕</button><h3 data-i18n="fm_sp">Projets sauvegardés</h3><div class="saves-list" id="fm_savesList"></div><div style="margin-top:10px;font-size:11px;color:var(--txt3)" data-i18n="fm_ls">Sauvegarde locale (navigateur).</div></div></div>
+<div class="modal-overlay" id="fm_templatesModal"><div class="modal"><button class="modal-close" onclick="FM_closeModal('fm_templatesModal')">✕</button><h3>🗂 Templates</h3><div class="saves-list" id="fm_templatesContent"></div><div style="margin-top:10px;font-size:11px;color:var(--txt3)">Templates réutilisables · Local storage</div></div></div>
+<div class="modal-overlay" id="fm_addMvtModal"><div class="modal"><button class="modal-close" onclick="FM_closeModal('fm_addMvtModal')">✕</button><h3 data-i18n="fm_am">Ajouter un mouvement</h3><div id="fm_addMvtContent"></div></div></div>
+<div class="modal-overlay" id="fm_orchModal"><div class="modal wide"><button class="modal-close" onclick="FM_closeModal('fm_orchModal')">✕</button><h3 data-i18n="fm_oi">🎻 Orchestration / Instrumentation</h3><div id="fm_orchContent"></div></div></div>
+<div class="modal-overlay" id="fm_repModal"><div class="modal wide"><button class="modal-close" onclick="FM_closeModal('fm_repModal')">✕</button><h3 data-i18n="fm_re">🎼 Exemples du répertoire</h3><div style="font-size:11px;color:var(--txt3);margin-bottom:8px">Charger un plan formel d'une œuvre connue comme modèle de référence.</div><div id="fm_repContent"></div></div></div>
+<div class="fm-dict-overlay" id="fm_dictOverlay" onclick="FM_closeDict()"></div>
+<aside class="fm-dict-panel" id="fm_dictPanel" aria-hidden="true" aria-labelledby="fm_dictTitle">
+  <header class="fm-dict-head">
+    <h3 id="fm_dictTitle" class="fm-dict-title" data-i18n="fm_dict_title">📖 Dictionnaire orchestral</h3>
+    <button class="fm-dict-close" onclick="FM_closeDict()" aria-label="Fermer">✕</button>
+  </header>
+  <div class="fm-dict-search">
+    <input type="search" id="fm_dictSearch" data-ph="fm_dict_ph" placeholder="Rechercher (abr., terme, instrument…)" oninput="FM_filterDict()" autocomplete="off">
+    <span class="fm-dict-count" id="fm_dictCount"></span>
+  </div>
+  <div class="fm-dict-sources" data-i18n="fm_dict_sources">D'après Catel · Laitz · Berlioz · Adler</div>
+  <div class="fm-dict-list" id="fm_dictList" role="list"></div>
+</aside>
+<input type="file" id="fm_jsonFileInput" accept=".json" style="display:none" onchange="FM_handleJSONImport(event)">
+
+</div>
+

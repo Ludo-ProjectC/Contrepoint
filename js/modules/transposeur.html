@@ -1,0 +1,47 @@
+  <div class="pc-panel" id="panTranspo">
+<div class="t1-grid">
+      <div>
+        <div class="pnl">
+          <div class="lbl" data-i18n="lbl_instr">Instrument</div>
+          <input id="srch" type="text" placeholder="Rechercher..." data-ph="ph_search" data-ph="ph_search">
+          <div class="iscroll" id="ilist"></div>
+        </div>
+        <div class="pnl" style="margin-top:10px">
+          <div class="lbl" data-i18n="lbl_clef">Clef</div>
+          <div class="iscroll" id="cleflist"></div>
+        </div>
+      </div>
+      <div>
+        <div class="pnl">
+          <div class="lbl" data-i18n="lbl_dir">Direction</div>
+          <div class="seg">
+            <button class="sbtn on" id="bW" onclick="T1.setDir('w')" data-i18n="btn_w2c">Note écrite → Réelle</button>
+            <button class="sbtn" id="bC" onclick="T1.setDir('c')" data-i18n="btn_c2w">Note réelle → Écrite</button>
+          </div>
+          <div class="lbl" id="nlbl" data-i18n="lbl_written_note">Note écrite sur la partition</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+            <span style="font-size:11px;color:#9ca3af" data-i18n="lbl_acc">Accidentels :</span>
+            <button class="apill on" id="pS" onclick="T1.setAcc('s')" data-i18n="btn_sharps">Dièses ♯</button>
+            <button class="apill" id="pF" onclick="T1.setAcc('f')" data-i18n="btn_flats">Bémols ♭</button>
+          </div>
+          <div class="piano-outer">
+            <div class="piano-wrap2"><div class="piano2" id="piano1"></div></div>
+            <div class="piano-hint" data-i18n="h_key">Cliquez sur une touche pour sélectionner la note</div>
+          </div>
+          <div class="octrow">
+            <span style="font-size:12px;color:#7c7a9a" data-i18n="lbl_oct">Octave :</span>
+            <button class="obtn" onclick="T1.chOct(-1)">−</button>
+            <span id="onum" style="font-size:14px;font-weight:600;min-width:18px;text-align:center;color:#111827">4</span>
+            <button class="obtn" onclick="T1.chOct(1)">+</button>
+            <span style="font-size:11px;color:#9ca3af">A4 = 440 Hz</span>
+          </div>
+        </div>
+        <div id="rzone">
+          <div style="text-align:center;padding:20px;font-size:13px;color:#9ca3af" data-i18n="h_instr">Sélectionnez un instrument pour voir la transposition</div>
+        </div>
+        <div id="xizone"></div>
+        <div id="clefzone"></div>
+      </div>
+    </div>
+  </div>
+

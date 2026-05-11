@@ -1,0 +1,61 @@
+  <div class="pc-panel" id="panRythme">
+<div class="sec-nav">
+    <button class="sec-btn on" onclick="switchSec(0)" data-i18n="btn_ts">Indication de mesure</button>
+    <button class="sec-btn" onclick="switchSec(1)" data-i18n="btn_bd">Division du temps</button>
+  </div>
+
+  <div class="rythme-content">
+    <!-- ═══════ SECTION 1 : Indication de mesure ═══════ -->
+    <div class="section active" id="sec0">
+      <div class="card">
+        <div class="card-t" data-i18n="t_ts">Indication de mesure</div>
+        <div class="meter-top">
+          <div class="pills" id="typeP">
+            <button class="pill on" onclick="TR.setType('simple')" data-i18n="btn_simple">Simple</button>
+            <button class="pill" onclick="TR.setType('compound')" data-i18n="btn_compound">Composée</button>
+          </div>
+          <select class="meter-sel" id="meterSel" onchange="TR.selMeter(parseInt(this.value))"></select>
+        </div>
+        <div class="info-badge" id="infoBadge" style="user-select:none"></div>
+      </div>
+
+      <div class="hier-box">
+        <div class="hier-title"><span data-i18n="t_hier">Hiérarchie rythmique</span> <span style="font-weight:400;color:#b0aec4;text-transform:none;letter-spacing:0" data-i18n="h_hier">— cliquez sur un niveau pour l'isoler</span></div>
+        <div id="hierContent"></div>
+        <div class="legend">
+          <div class="leg-i"><div class="leg-d st"></div><span data-i18n="str">Fort</span></div>
+          <div class="leg-i"><div class="leg-d sm"></div><span data-i18n="med">Semi-fort</span></div>
+          <div class="leg-i"><div class="leg-d wk"></div><span data-i18n="wk">Faible</span></div>
+        </div>
+        <div class="hint" data-i18n="h_hier2">Cliquez sur un niveau pour le mettre en évidence — recliquez pour tout afficher</div>
+      </div>
+
+      <div class="pulse-box">
+        <div class="pulse-t" data-i18n="t_mvis">Visualisation du mètre</div>
+        <div class="pulse-desc" id="pulseDesc"></div>
+        <div id="pulseContent"></div>
+      </div>
+    </div>
+
+    <!-- ═══════ SECTION 2 : Division du temps ═══════ -->
+    <div class="section" id="sec1">
+      <div class="card">
+        <div class="card-t" data-i18n="t_fig">Figure de note</div>
+        <div class="note-sel-row" id="noteSelRow"></div>
+      </div>
+
+      <div class="card" id="eqCard">
+        <div class="card-t" data-i18n="t_eq">Équivalences notes et silences</div>
+        <div id="eqContent"></div>
+      </div>
+
+      <div class="tup-card">
+        <div class="tup-title" data-i18n="t_tup">Divisions irrégulières (n-olets)</div>
+        <div class="tup-tabs" id="tupTabs"></div>
+        <div id="tupContent"></div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+
