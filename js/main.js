@@ -62,7 +62,8 @@ async function bootstrap() {
   const wantedTab = params.get('tab');
   let initialIdx = 0;
   if (wantedTab) { const idx = MODULES.indexOf(wantedTab); if (idx >= 0) initialIdx = idx; }
-  if (initialIdx !== 0) { await window.switchTab(initialIdx); } else { if (typeof window.applyI18n === 'function') window.applyI18n(); }
+  // CORRECTION BUG 1 : Toujours appeler switchTab pour afficher le panel (home ou autre)
+  await window.switchTab(initialIdx);
 }
 
 document.addEventListener('DOMContentLoaded', bootstrap);

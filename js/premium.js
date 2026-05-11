@@ -116,161 +116,90 @@
   // Open / close modal
   window.openLicModal = function(){
     updateModalLang();
-    var bg = document.getElementById('licModalBg');
-    if(!bg) return console.error('licModalBg element not found');
-    bg.style.display = 'flex';
-    bg.classList.add('show');
-    var inp = document.getElementById('lmInput');
-    if(inp){ inp.value = ''; inp.className = 'lm-input'; inp.focus(); }
-    var msg = document.getElementById('lmMsg');
-    if(msg) msg.textContent = '', msg.className = 'lm-msg';
+    document.getElementById('licModalBg').style.display = 'flex';
+    document.getElementById('lmInput').focus();
   };
+
   window.closeLicModal = function(){
-    var bg = document.getElementById('licModalBg');
-    if(bg){ bg.style.display = 'none'; bg.classList.remove('show'); }
+    document.getElementById('licModalBg').style.display = 'none';
+    document.getElementById('lmInput').value = '';
+    document.getElementById('lmMsg').textContent = '';
   };
 
-  // Activate license
-  window.activerLicence = async function(){
-    var inp = document.getElementById('lmInput');
-    var btn = document.getElementById('lmBtn');
-    var msg = document.getElementById('lmMsg');
-    var cle = inp.value.trim();
-
-    if(!cle){
-      msg.textContent = t('errEmpty');
-      msg.className = 'lm-msg err';
-      inp.className = 'lm-input error';
-      return;
-    }
-
-    btn.disabled = true;
-    document.getElementById('lmBtnText').textContent = t('btnLoading');
-    msg.textContent = '';
-    msg.className = 'lm-msg';
-
-    // Master key verification (obfuscated)
-    async function _vK(k){
-      var e=new TextEncoder().encode(k);
-      var h=await crypto.subtle.digest('SHA-256',e);
-      return Array.from(new Uint8Array(h)).map(function(b){return b.toString(16).padStart(2,'0')}).join('');
-    }
-    var _mH='ec8cf37444d57b38a19db3aa8c273e770b26135da109d138861af81b5d0b2a91';
-    var _kH=await _vK(cle);
-    if(_kH===_mH){
-      localStorage.setItem('pc_licence', cle);
-      localStorage.setItem('pc_instance', 'master');
-      localStorage.setItem('pc_premium', 'true');
-      inp.className = 'lm-input success';
-      msg.textContent = t('success');
-      msg.className = 'lm-msg ok';
-      updateTabs();
-      addOverlays();
-      btn.disabled = false;
-      document.getElementById('lmBtnText').textContent = t('btn');
-      setTimeout(function(){ closeLicModal(); }, 1200);
-      return;
-    }
-
-    try {
-      var response = await fetch('https://api.lemonsqueezy.com/v1/licenses/activate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          license_key: cle,
-          instance_name: 'projetc-web-' + Date.now()
-        })
-      });
-      var data = await response.json();
-
-      if(data.activated || data.valid){
-        // Success
-        localStorage.setItem('pc_licence', cle);
-        localStorage.setItem('pc_instance', (data.instance && data.instance.id) || '');
+  // Validate license
+  window.validateLicense = function(){
+    var key = document.getElementById('lmInput').value.trim();
+    var msgEl = document.getElementById('lmMsg');
+    var btnEl = document.querySelector('[onclick="window.validateLicense()"]');
+    
+    if(!key){ msgEl.textContent = t('errEmpty'); return; }
+    
+    msgEl.textContent = '';
+    btnEl.textContent = t('btnLoading');
+    btnEl.disabled = true;
+    
+    fetch('https://api.lemonsqueezy.com/v1/licenses/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ license_key: key })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if(data.valid || data.license_key){
         localStorage.setItem('pc_premium', 'true');
-        inp.className = 'lm-input success';
-        msg.textContent = t('success');
-        msg.className = 'lm-msg ok';
+        localStorage.setItem('pc_license_key', key);
+        msgEl.textContent = t('success');
+        msgEl.style.color = '#10b981';
         updateTabs();
         addOverlays();
-        setTimeout(function(){ closeLicModal(); }, 1200);
+        setTimeout(() => window.closeLicModal(), 1000);
       } else {
-        inp.className = 'lm-input error';
-        msg.textContent = t('errInvalid');
-        msg.className = 'lm-msg err';
+        msgEl.textContent = t('errInvalid');
+        msgEl.style.color = '#ef4444';
       }
-    } catch(err) {
-      // Network error — try offline validation as fallback
-      // For demo/testing: accept key starting with "PC-"
-      if(cle.length > 8){
-        localStorage.setItem('pc_licence', cle);
-        localStorage.setItem('pc_premium', 'true');
-        inp.className = 'lm-input success';
-        msg.textContent = t('success');
-        msg.className = 'lm-msg ok';
-        updateTabs();
-        addOverlays();
-        setTimeout(function(){ closeLicModal(); }, 1200);
-      } else {
-        msg.textContent = t('errNetwork');
-        msg.className = 'lm-msg err';
-      }
-    }
-
-    btn.disabled = false;
-    document.getElementById('lmBtnText').textContent = t('btn');
-  };
-
-  // Allow Enter key to activate
-  document.addEventListener('DOMContentLoaded', function(){
-    var inp = document.getElementById('lmInput');
-    if(inp) inp.addEventListener('keydown', function(e){
-      if(e.key === 'Enter') activerLicence();
+    })
+    .catch(e => {
+      msgEl.textContent = t('errNetwork');
+      msgEl.style.color = '#ef4444';
+    })
+    .finally(() => {
+      btnEl.textContent = t('btn');
+      btnEl.disabled = false;
     });
-  });
+  };
 
-  // Validate on each page load (background)
-  async function validateOnLoad(){
-    var cle = localStorage.getItem('pc_licence');
-    if(!cle) return;
-    // Skip validation for master key
-    if(localStorage.getItem('pc_instance') === 'master') return;
-    try {
-      var response = await fetch('https://api.lemonsqueezy.com/v1/licenses/validate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          license_key: cle,
-          instance_id: localStorage.getItem('pc_instance') || undefined
-        })
-      });
-      var data = await response.json();
-      if(!data.valid){
+  // Premium gate for switchTab
+  window._premiumGate = function(tabIdx){
+    if(PREMIUM_TABS.indexOf(tabIdx) === -1) return true;
+    if(isPremium()) return true;
+    openLicModal();
+    return false;
+  };
+
+  // Validate license on load (only if already licensed)
+  function validateOnLoad(){
+    var key = localStorage.getItem('pc_license_key');
+    if(!key) return;
+    fetch('https://api.lemonsqueezy.com/v1/licenses/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ license_key: key })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if(!(data.valid || data.license_key)){
         localStorage.removeItem('pc_premium');
-        localStorage.removeItem('pc_licence');
-        localStorage.removeItem('pc_instance');
+        localStorage.removeItem('pc_license_key');
         updateTabs();
         addOverlays();
       }
-    } catch(e){
-      // Offline — trust local cache
-    }
+    })
+    .catch(() => {});
   }
 
-  // Override switchTab to intercept Composer Mode tabs when locked
-  var _origSwitchTab = window.switchTab;
-  window.switchTab = function(i){
-    if(PREMIUM_TABS.indexOf(i) !== -1 && !isPremium()){
-      // Still switch to show the overlay
-      _origSwitchTab(i);
-      return;
-    }
-    _origSwitchTab(i);
-  };
-
-  // Hook into language changes to update overlays
-  var _origSetLang = window.setLang;
-  if(typeof _origSetLang === 'function'){
+  // Hook setLang to update premium UI on language change
+  if(typeof window.setLang === 'function'){
+    var _origSetLang = window.setLang;
     window.setLang = function(lang){
       _origSetLang(lang);
       setTimeout(function(){
@@ -280,16 +209,18 @@
     };
   }
 
-  // Init on load
+  // CORRECTION BUG 2 : Init on load — VALIDATION STRICTE
+  // Les onglets premium doivent TOUJOURS être verrouillés au startup si pas de licence valide
   document.addEventListener('DOMContentLoaded', function(){
-    updateTabs();
-    addOverlays();
+    updateTabs();    // Cela ajoute la classe 'premium-locked' si isPremium() === false
+    addOverlays();   // Cela ajoute les overlays si isPremium() === false
+    // Valider uniquement si une clé est présente (déjà sauvegardée)
     if(isPremium()) validateOnLoad();
   });
 
   // Also run after a short delay in case DOM isn't fully ready
   setTimeout(function(){
-    updateTabs();
+    updateTabs();    // Garantir que les onglets sont bien verrouillés
     addOverlays();
     if(isPremium()) validateOnLoad();
   }, 500);
