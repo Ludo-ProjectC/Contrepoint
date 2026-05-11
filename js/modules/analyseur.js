@@ -108,6 +108,22 @@ function AH_buildChordFromSymbol(keyRoot,minor,symbol){
 /* ── State ── */
 let AH_chords=[], AH_selChord=-1, AH_keyInfo={root:0,minor:false,sharps:0};
 const AH_MAX_CHORDS=20;
+/* T3 — Voice mode */
+let AH_voiceMode='SATB'; // SATB | SAB | SAT | TTB
+const AH_VOICE_SETS={SATB:['S','A','T','B'],SAB:['S','A','B'],SAT:['S','A','T'],TTB:['T','T','B']};
+const AH_VOICE_PAIRS_MAP={
+  SATB:[['S','A'],['S','T'],['S','B'],['A','T'],['A','B'],['T','B']],
+  SAB:[['S','A'],['S','B'],['A','B']],
+  SAT:[['S','A'],['S','T'],['A','T']],
+  TTB:[['S','A'],['S','B'],['A','B']] // SAT positions map to T1,T2,B
+};
+function AH_activeVoices(){return AH_VOICE_SETS[AH_voiceMode]||AH_VOICE_SETS.SATB;}
+function AH_activePairs(){return AH_VOICE_PAIRS_MAP[AH_voiceMode]||AH_VOICE_PAIRS_MAP.SATB;}
+function AH_onVoiceModeChange(){
+  const sel=document.getElementById('ah_voiceModeSel');
+  if(sel)AH_voiceMode=sel.value;
+  AH_buildInputs();AH_analyze();AH_render();
+}
 
 function AH_noteName(m){const pc=m%12,oct=Math.floor(m/12)-1;return(AH_keyInfo.sharps>=0?AH_NOTES_S:AH_NOTES_F)[pc]+oct;}
 
@@ -120,14 +136,32 @@ function AH_buildChordTypeSelector(){
 }
 function AH_buildInputs(){
   const el=document.getElementById('ah_voiceInputs2');let h='';
-  ['S','A','T','B'].forEach(v=>{const[lo,hi]=AH_RANGE[v];
-    h+=`<div class="voice-row"><div class="voice-color" style="background:${AH_VCOLORS[v]}"></div><div class="voice-label">${AH_VN(v)}</div><select class="note-sel" id="v${v}">`;
+  const activeV=AH_activeVoices();
+  // For 3-voice TTB mode, display as T1/T2/B using S/A/B DOM ids mapped to T colors
+  const displayV=AH_voiceMode==='TTB'?['S','A','B']:activeV;
+  const labelMap=AH_voiceMode==='TTB'
+    ?{S:currentLang==='en'?'Tenor 1':currentLang==='es'?'Tenor 1':'Ténor 1',A:currentLang==='en'?'Tenor 2':currentLang==='es'?'Tenor 2':'Ténor 2',B:AH_VN('B')}
+    :null;
+  displayV.forEach(v=>{const[lo,hi]=AH_RANGE[v];
+    const label=labelMap?labelMap[v]:AH_VN(v);
+    h+=`<div class="voice-row"><div class="voice-color" style="background:${AH_VCOLORS[v]}"></div><div class="voice-label">${label}</div><select class="note-sel" id="v${v}">`;
     for(let m=hi;m>=lo;m--){const s=(v==='S'&&m===72)||(v==='A'&&m===64)||(v==='T'&&m===60)||(v==='B'&&m===48);h+=`<option value="${m}"${s?' selected':''}>${AH_noteName(m)}</option>`;}
     h+=`</select></div>`;});
   el.innerHTML=h;
 }
-function AH_getInputChord(){return{S:+document.getElementById('vS').value,A:+document.getElementById('vA').value,T:+document.getElementById('vT').value,B:+document.getElementById('vB').value,symbol:document.getElementById('ah_chordTypeSel').value||''};}
-function AH_setInputChord(ch){['S','A','T','B'].forEach(v=>{document.getElementById('v'+v).value=ch[v];});if(ch.symbol)document.getElementById('ah_chordTypeSel').value=ch.symbol;}
+function AH_getInputChord(){
+  const vals={S:72,A:64,T:60,B:48};
+  const domIds=AH_voiceMode==='TTB'?['S','A','B']:AH_activeVoices();
+  domIds.forEach(v=>{const el=document.getElementById('v'+v);if(el)vals[v]=+el.value;});
+  if(AH_voiceMode==='SAB')vals.T=vals.A-2;
+  if(AH_voiceMode==='SAT')vals.B=vals.T-4;
+  return{...vals,symbol:document.getElementById('ah_chordTypeSel').value||''};
+}
+function AH_setInputChord(ch){
+  const domIds=AH_voiceMode==='TTB'?['S','A','B']:AH_activeVoices();
+  domIds.forEach(v=>{const el=document.getElementById('v'+v);if(el)el.value=ch[v];});
+  if(ch.symbol)document.getElementById('ah_chordTypeSel').value=ch.symbol;
+}
 
 function AH_updateInversionOptions(){
   const sym=document.getElementById('ah_chordTypeSel').value,sel=document.getElementById('ah_inversionSel');
@@ -371,28 +405,64 @@ function AH_analyze(){
     msg8d:EN?'Direct 8ve':ES?'8ª directa':'8ves dir.', msg5d:EN?'Direct 5th S–B':ES?'5ª dir. S–B':'5te dir. S–B',
     msgLt:EN?'leading tone':ES?'Sensible':'Sensible', msgUnres:EN?'unresolved':ES?'sin resolver':'non résolue',
     msgCross:EN?'Crossing':ES?'Cruzamiento':'Croisement', msgSpace:EN?'Spacing':ES?'Espaciado':'Espacement',
-    msgLtD:EN?'Doubled leading tone':ES?'Sensible':'Sensible', msgDoubled:EN?'doubled':ES?'duplicada':'doublée'};
-  const voices=['S','A','T','B'],pairs=[['S','A'],['S','T'],['S','B'],['A','T'],['A','B'],['T','B']];
+    msgLtD:EN?'Doubled leading tone':ES?'Sensible':'Sensible', msgDoubled:EN?'doubled':ES?'duplicada':'doublée',
+    /* T1 */
+    d7:EN?'Unresolved 7th':ES?'7ª sin resolver':'7e non résolue',
+    d9:EN?'Unresolved 9th':ES?'9ª sin resolver':'9e non résolue',
+    aug:EN?'Augmented chord — resolution':ES?'Acorde aumentado — resolución':'Accord augmenté — résolution',
+    tip_d7:EN?'V7: 7th should resolve down by step.':ES?'V7: la 7ª debe resolver hacia abajo por grado.':'V7 : la 7e doit descendre par degré conjoint.',
+    tip_d9:EN?'9th should resolve down by step to tonic.':ES?'La 9ª debe resolver descendiendo por grado.':'La 9e doit descendre par degré conjoint.',
+    tip_aug:EN?'Aug. 5th should resolve by semitone.':ES?'La 5ª aum. debe resolver cromáticamente.':'La 5te aug. doit résoudre par ½ ton.',
+    /* T2 */
+    h5:EN?'Hidden fifth':ES?'Quinta oculta':'Quinte cachée',
+    h8:EN?'Hidden octave':ES?'Octava oculta':'Octave cachée'};
+  // T3: use active voices and pairs
+  const voices=AH_activeVoices();
+  const pairs=AH_activePairs();
+  // Per-chord checks
   AH_chords.forEach((ch,ci)=>{
-    if(ch.S<ch.A)AH_errors.push({type:'error',chord:ci,msg:`${L.msgCross} S(${AH_noteName(ch.S)}) < A(${AH_noteName(ch.A)})`,rule:L.cross});
-    if(ch.A<ch.T)AH_errors.push({type:'error',chord:ci,msg:`${L.msgCross} A(${AH_noteName(ch.A)}) < T(${AH_noteName(ch.T)})`,rule:L.cross});
-    if(ch.T<ch.B)AH_errors.push({type:'error',chord:ci,msg:`${L.msgCross} T(${AH_noteName(ch.T)}) < B(${AH_noteName(ch.B)})`,rule:L.cross});
+    // Voice crossing (only for adjacent active voices)
+    if(AH_voiceMode==='SATB'||AH_voiceMode==='SAT'){
+      if(voices.includes('S')&&voices.includes('A')&&ch.S<ch.A)AH_errors.push({type:'error',chord:ci,msg:`${L.msgCross} S(${AH_noteName(ch.S)}) < A(${AH_noteName(ch.A)})`,rule:L.cross});
+      if(voices.includes('A')&&voices.includes('T')&&ch.A<ch.T)AH_errors.push({type:'error',chord:ci,msg:`${L.msgCross} A(${AH_noteName(ch.A)}) < T(${AH_noteName(ch.T)})`,rule:L.cross});
+    }
+    if((AH_voiceMode==='SATB'||AH_voiceMode==='SAB')&&voices.includes('T')&&voices.includes('B')&&ch.T<ch.B)
+      AH_errors.push({type:'error',chord:ci,msg:`${L.msgCross} T(${AH_noteName(ch.T)}) < B(${AH_noteName(ch.B)})`,rule:L.cross});
     if(ch.S-ch.A>12)AH_errors.push({type:'warn',chord:ci,msg:`${L.msgSpace} S-A: ${ch.S-ch.A}st`,rule:L.spacing});
-    if(ch.A-ch.T>12)AH_errors.push({type:'warn',chord:ci,msg:`${L.msgSpace} A-T: ${ch.A-ch.T}st`,rule:L.spacing});
+    if(AH_voiceMode==='SATB'&&ch.A-ch.T>12)AH_errors.push({type:'warn',chord:ci,msg:`${L.msgSpace} A-T: ${ch.A-ch.T}st`,rule:L.spacing});
     const lt=(AH_keyInfo.root+11)%12,ltC=voices.filter(v=>(ch[v]%12)===lt).length;
     if(ltC>=2)AH_errors.push({type:'error',chord:ci,msg:`${L.msgLtD} (${AH_NOTES_S[lt]}) ${L.msgDoubled}`,rule:L.ltDoubled});
+    /* T1 — Dissonance detection on individual chord */
+    // Detect augmented chord (qual contains aug or V+)
+    if(ch.symbol&&(ch.symbol.includes('+')||(()=>{const c=AH_buildChordFromSymbol(AH_keyInfo.root,AH_keyInfo.minor,ch.symbol);return c&&c.qual==='aug';})()))
+      AH_errors.push({type:'warn',chord:ci,msg:L.tip_aug,rule:L.aug,tooltip:L.tip_aug});
   });
+  // Between-chord checks
   for(let i=0;i<AH_chords.length-1;i++){
     const a=AH_chords[i],b=AH_chords[i+1];
     pairs.forEach(([v1,v2])=>{
-      const v1a=a[v1],v1b=b[v1],v2a=a[v2],v2b=b[v2];const intA=AH_interval(v1a,v2a),intB=AH_interval(v1b,v2b),motion=AH_motionType(v1a,v1b,v2a,v2b);
+      const v1a=a[v1],v1b=b[v1],v2a=a[v2],v2b=b[v2];
+      const intA=AH_interval(v1a,v2a),intB=AH_interval(v1b,v2b),motion=AH_motionType(v1a,v1b,v2a,v2b);
       if(intA===7&&intB===7&&motion==='direct')AH_errors.push({type:'error',chord:i,msg:`${L.msg5} ${AH_VN(v1)}–${AH_VN(v2)} (${i+1}→${i+2})`,rule:L.p5});
       if(intA===0&&intB===0&&motion==='direct'&&v1a!==v1b)AH_errors.push({type:'error',chord:i,msg:`${L.msg8} ${AH_VN(v1)}–${AH_VN(v2)} (${i+1}→${i+2})`,rule:L.p8});
       if(intA!==0&&intB===0&&motion==='direct')AH_errors.push({type:'error',chord:i,msg:`${L.msg8d} ${AH_VN(v1)}–${AH_VN(v2)} (${i+1}→${i+2})`,rule:L.d8});
       if(intA!==7&&intB===7&&motion==='direct'&&v1==='S'&&v2==='B')AH_errors.push({type:'warn',chord:i,msg:`${L.msg5d} (${i+1}→${i+2})`,rule:L.d5});
+      /* T2 — Hidden 5ths/8ths: similar motion into P5 or P8 (not already parallel) */
+      if(intA!==7&&intB===7&&motion==='direct')AH_errors.push({type:'warn',chord:i,msg:`${L.h5} ${AH_VN(v1)}–${AH_VN(v2)} (${i+1}→${i+2})`,rule:L.h5});
+      if(intA!==0&&intB===0&&motion==='direct'&&v1a!==v1b)AH_errors.push({type:'warn',chord:i,msg:`${L.h8} ${AH_VN(v1)}–${AH_VN(v2)} (${i+1}→${i+2})`,rule:L.h8});
     });
     const lt=(AH_keyInfo.root+11)%12;
     voices.forEach(v=>{if((a[v]%12)===lt&&(b[v]%12)!==AH_keyInfo.root%12&&b[v]!==a[v]&&b[v]<a[v])AH_errors.push({type:'warn',chord:i,msg:`${L.msgLt} ${AH_VN(v)} ${L.msgUnres} (${i+1}→${i+2})`,rule:L.ltRes});});
+    /* T1 — V7 unresolved 7th: detect dom7 chord followed by non-resolution */
+    if(a.symbol&&(a.symbol==='V7'||a.symbol.includes('V7'))){
+      const dom7note=(AH_keyInfo.root+10)%12; // 7th of V7
+      voices.forEach(v=>{
+        if((a[v]%12)===dom7note){
+          const expected=(a[v]-1+128)%128; // expect step down (minor 2nd)
+          if(b[v]!==expected&&b[v]!==a[v]-2)AH_errors.push({type:'warn',chord:i,msg:`${L.msgLt} (V7) ${AH_VN(v)} — ${L.tip_d7}`,rule:L.d7,tooltip:L.tip_d7});
+        }
+      });
+    }
   }
   AH_renderErrors();
 }
@@ -400,7 +470,7 @@ function AH_renderErrors(){
   const el=document.getElementById('ah_errList');document.getElementById('ah_errCount').textContent=AH_errors.length;
   if(AH_errors.length===0&&AH_chords.length>=2){el.innerHTML=`<div class="err-item ok"><span class="err-icon">✓</span><div class="err-text"><span class="err-rule">${currentLang==="en"?"No errors":currentLang==="es"?"Sin errores":"Aucune erreur"}</span>${currentLang==="en"?"Voice leading follows classical harmony rules.":currentLang==="es"?"La conducción de las voces respeta las reglas de armonía clásica.":"La conduite des voix respecte les règles d'harmonie classique."}</div></div>`;return;}
   if(AH_chords.length<2){el.innerHTML='<div class="no-errors">'+t('h_2chords')+'</div>';return;}
-  el.innerHTML=AH_errors.map(e=>`<div class="err-item ${e.type}" onclick="AH_selectChord(${e.chord})"><span class="err-icon">${e.type==='error'?'✕':'⚠'}</span><div class="err-text"><span class="err-rule">${e.rule}</span>${e.msg}</div></div>`).join('');
+  el.innerHTML=AH_errors.map(e=>`<div class="err-item ${e.type}" onclick="AH_selectChord(${e.chord})"${e.tooltip?` title="${e.tooltip}"`:''} style="${e.tooltip?'cursor:help':''}"><span class="err-icon">${e.type==='error'?'✕':'⚠'}</span><div class="err-text"><span class="err-rule">${e.rule}</span>${e.msg}</div></div>`).join('');
 }
 
 /* ═══════════════════════════
@@ -475,25 +545,16 @@ function AH_renderScore(){
   // Left barline
   ctx.strokeStyle='#333';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(AH_LM,AH_trebleTop);ctx.lineTo(AH_LM,AH_bassTop+4*AH_LS);ctx.stroke();
 
-  // Accolade — professional brace shape
-  const brT=AH_trebleTop, brB=AH_bassTop+4*AH_LS, brM=(brT+brB)/2;
-  const brX=AH_LM-3;
+  // Accolade — Unicode brace character scaled to span both staves
+  const brT=AH_trebleTop, brB=AH_bassTop+4*AH_LS;
+  const brH=brB-brT;
+  ctx.save();
   ctx.fillStyle='#333';
-  ctx.beginPath();
-  // Top half: from top, curves left to the center point
-  ctx.moveTo(brX, brT);
-  ctx.bezierCurveTo(brX-8, brT, brX-12, brT+8, brX-12, brT+20);
-  ctx.bezierCurveTo(brX-12, brM-15, brX-8, brM-8, brX-16, brM);
-  // Bottom half: from center point, curves back right then down
-  ctx.bezierCurveTo(brX-8, brM+8, brX-12, brM+15, brX-12, brB-20);
-  ctx.bezierCurveTo(brX-12, brB-8, brX-8, brB, brX, brB);
-  // Right side (thinner, return path)
-  ctx.bezierCurveTo(brX-6, brB, brX-9, brB-10, brX-9, brB-22);
-  ctx.bezierCurveTo(brX-9, brM+12, brX-5, brM+5, brX-13, brM);
-  ctx.bezierCurveTo(brX-5, brM-5, brX-9, brM-12, brX-9, brT+22);
-  ctx.bezierCurveTo(brX-9, brT+10, brX-6, brT, brX, brT);
-  ctx.closePath();
-  ctx.fill();
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+  ctx.font=`${brH}px "Times New Roman",Georgia,serif`;
+  ctx.fillText('{', AH_LM-10, brT+brH/2);
+  ctx.restore();
 
   // Clefs — Times New Roman, proportional to AH_LS, style séquentiel
   const trebleFS=AH_LS*5.4;
@@ -509,11 +570,14 @@ function AH_renderScore(){
   const bH=(bM.actualBoundingBoxAscent||bassFS*0.8)+(bM.actualBoundingBoxDescent||bassFS*0.1);
   ctx.fillText('\uD834\uDD22',AH_LM+4,(AH_bassTop+AH_LS)-bH*0.15+(bM.actualBoundingBoxAscent||bassFS*0.8));
 
-  // Time signature — after clef
+  // Time signature — after clef (use max of both clef widths to avoid overlap)
   const ts=document.getElementById('ah_timeSigSel').value.split('/');
   ctx.font=`${trebleFS}px "Times New Roman",Georgia,serif`;
-  const clefWidth=ctx.measureText('\uD834\uDD1E').width;
-  const tsX=AH_LM + clefWidth + 12;
+  const trebleClefWidth=ctx.measureText('\uD834\uDD1E').width;
+  ctx.font=`${bassFS}px "Times New Roman",Georgia,serif`;
+  const bassClefWidth=ctx.measureText('\uD834\uDD22').width;
+  const maxClefWidth=Math.max(trebleClefWidth, bassClefWidth);
+  const tsX=AH_LM + maxClefWidth + 10;
   ctx.fillStyle='#1e1e2e';ctx.textAlign='center';ctx.textBaseline='middle';
   ctx.font=`bold ${AH_LS*2.2}px "Times New Roman",Georgia,serif`;
   ctx.fillText(ts[0],tsX,AH_trebleTop+1*AH_LS);ctx.fillText(ts[1],tsX,AH_trebleTop+3*AH_LS);
@@ -809,7 +873,11 @@ window.addEventListener('resize',AH_render);
 
 /* ═══ INIT ═══ */
 
-try{ AH_buildKeySelector();AH_buildChordTypeSelector();AH_updateInversionOptions();AH_buildInputs();AH_calcLayout();AH_analyze();AH_render();AH_setupCanvasEvents();window.addEventListener('resize',AH_render); }catch(e){console.error('AH:',e)}
+try{
+  // T3: restore voice mode
+  const _vm=document.getElementById('ah_voiceModeSel');if(_vm)AH_voiceMode=_vm.value||'SATB';
+  AH_buildKeySelector();AH_buildChordTypeSelector();AH_updateInversionOptions();AH_buildInputs();AH_calcLayout();AH_analyze();AH_render();AH_setupCanvasEvents();window.addEventListener('resize',AH_render);
+}catch(e){console.error('AH:',e)}
 
 
 /* ═══ Apply detected language (always — ensures lang selector + html lang + storage are coherent) ═══ */

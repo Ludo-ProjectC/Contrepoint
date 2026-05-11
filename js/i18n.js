@@ -312,6 +312,22 @@ r_sp:{fr:'Espacement excessif (> 8ve)',en:'Excessive Spacing (> 8ve)',es:'Espaci
 r_lr:{fr:'Résolution de la sensible',en:'Leading Tone Resolution',es:'Resolución de la sensible'},
 r_ld:{fr:'Doublure de la sensible',en:'Leading Tone Doubling',es:'Duplicación de la sensible'},
 r_cm:{fr:'Mouvement contraire',en:'Contrary Motion',es:'Movimiento contrario'},
+/* T1 — Dissonance resolutions */
+r_d7:{fr:'7e non résolue',en:'Unresolved 7th',es:'7ª sin resolver'},
+r_d9:{fr:'9e non résolue',en:'Unresolved 9th',es:'9ª sin resolver'},
+r_aug:{fr:'Accord augmenté — résolution',en:'Augmented chord — resolution',es:'Acorde aumentado — resolución'},
+tip_d7:{fr:'La 7e de dominante (V7) doit descendre par degré conjoint vers la 3e de l\'accord suivant.',en:'The dominant 7th (V7) should resolve downward by step to the 3rd of the next chord.',es:'La 7ª de dominante (V7) debe resolver descendiendo por grado conjunto hacia la 3ª del acorde siguiente.'},
+tip_d9:{fr:'La 9e doit descendre par degré conjoint vers l\'octave ou la tonique.',en:'The 9th should resolve downward by step to the octave or tonic.',es:'La 9ª debe resolver descendiendo por grado conjunto hacia la octava o tónica.'},
+tip_aug:{fr:'La 5e augmentée doit résoudre chromatiquement (½ ton).',en:'The augmented 5th should resolve chromatically (semitone).',es:'La 5ª aumentada debe resolver cromáticamente (½ tono).'},
+/* T2 — Hidden 5ths/8ths */
+r_h5:{fr:'Quinte cachée',en:'Hidden Fifth',es:'Quinta oculta'},
+r_h8:{fr:'Octave cachée',en:'Hidden Octave',es:'Octava oculta'},
+/* T3 — Voice mode selector */
+ah_vmode:{fr:'Mode voix :',en:'Voice mode:',es:'Modo voces:'},
+ah_vm_satb:{fr:'SATB (4 voix)',en:'SATB (4 voices)',es:'SATB (4 voces)'},
+ah_vm_sab:{fr:'SAB (3 voix)',en:'SAB (3 voices)',es:'SAB (3 voces)'},
+ah_vm_sat:{fr:'SAT (3 voix)',en:'SAT (3 voices)',es:'SAT (3 voces)'},
+ah_vm_ttb:{fr:'TTB (3 voix)',en:'TTB (3 voices)',es:'TTB (3 voces)'},
 ph_scale:{fr:'Rechercher une gamme...',en:'Search a scale...',es:'Buscar una escala...'},
 ph_search:{fr:'Rechercher...',en:'Search...',es:'Buscar...'},
 ph_tempo:{fr:'Rechercher un tempo...',en:'Search a tempo...',es:'Buscar un tempo...'},

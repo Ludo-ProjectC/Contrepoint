@@ -130,13 +130,18 @@
   window.validateLicense = function(){
     var key = document.getElementById('lmInput').value.trim();
     var msgEl = document.getElementById('lmMsg');
-    var btnEl = document.querySelector('[onclick="window.validateLicense()"]');
+    var btnEl = document.querySelector('.lm-modal button:last-of-type');
     
-    if(!key){ msgEl.textContent = t('errEmpty'); return; }
+    if(!key){ 
+      if(msgEl) msgEl.textContent = t('errEmpty'); 
+      return; 
+    }
     
-    msgEl.textContent = '';
-    btnEl.textContent = t('btnLoading');
-    btnEl.disabled = true;
+    if(msgEl) msgEl.textContent = '';
+    if(btnEl) {
+      btnEl.textContent = t('btnLoading');
+      btnEl.disabled = true;
+    }
     
     fetch('https://api.lemonsqueezy.com/v1/licenses/validate', {
       method: 'POST',
@@ -163,8 +168,10 @@
       msgEl.style.color = '#ef4444';
     })
     .finally(() => {
-      btnEl.textContent = t('btn');
-      btnEl.disabled = false;
+      if(btnEl) {
+        btnEl.textContent = t('btn');
+        btnEl.disabled = false;
+      }
     });
   };
 

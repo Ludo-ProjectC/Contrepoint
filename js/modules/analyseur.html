@@ -33,6 +33,15 @@
             <select class="note-sel" id="ah_keySel" onchange="AH_updateKey()"></select>
           </div>
           <div class="chord-sel-row">
+            <label data-i18n="ah_vmode">Mode voix :</label>
+            <select class="note-sel" id="ah_voiceModeSel" onchange="AH_onVoiceModeChange()">
+              <option value="SATB" data-i18n="ah_vm_satb">SATB (4 voix)</option>
+              <option value="SAB" data-i18n="ah_vm_sab">SAB (3 voix)</option>
+              <option value="SAT" data-i18n="ah_vm_sat">SAT (3 voix)</option>
+              <option value="TTB" data-i18n="ah_vm_ttb">TTB (3 voix)</option>
+            </select>
+          </div>
+          <div class="chord-sel-row">
             <label data-i18n="ah_ml">Mesure :</label>
             <select class="note-sel" id="ah_timeSigSel" onchange="AH_render()">
               <option value="4/4">4/4</option>
@@ -95,6 +104,11 @@
             <div>✓ <span data-i18n="r_lr">Résolution de la sensible</span></div>
             <div>✓ <span data-i18n="r_ld">Doublure de la sensible</span></div>
             <div>✓ <span data-i18n="r_cm">Mouvement contraire</span></div>
+            <div>✓ <span data-i18n="r_h5">Quinte cachée</span></div>
+            <div>✓ <span data-i18n="r_h8">Octave cachée</span></div>
+            <div>✓ <span data-i18n="r_d7">7e non résolue</span></div>
+            <div>✓ <span data-i18n="r_d9">9e non résolue</span></div>
+            <div>✓ <span data-i18n="r_aug">Accord augmenté — résolution</span></div>
           </div>
         </div>
       </div>
