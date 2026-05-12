@@ -313,5 +313,66 @@
     </span>
   </div>
 </div>
+
+<!-- ═══ Contact Modal ═══ -->
+<div id="contactModal" class="ct-modal-bg" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="ct-modal" role="dialog" aria-modal="true" aria-labelledby="ctTitle">
+    <button class="ct-close" onclick="document.getElementById('contactModal').classList.remove('show')" aria-label="Fermer">✕</button>
+    <h2 id="ctTitle">Nous contacter</h2>
+    <p class="ct-sub" id="ctSub">Une question, un problème technique ou une suggestion ? Remplissez le formulaire ci-dessous.</p>
+    <div class="ct-field">
+      <label for="ctName" id="ctLblName">Votre nom</label>
+      <input type="text" id="ctName" autocomplete="name">
+    </div>
+    <div class="ct-field">
+      <label for="ctEmail" id="ctLblEmail">Votre courriel</label>
+      <input type="email" id="ctEmail" autocomplete="email">
+    </div>
+    <div class="ct-field">
+      <label for="ctSubject" id="ctLblSubject">Sujet</label>
+      <select id="ctSubject">
+        <option value="general" id="ctOptGen">Question générale</option>
+        <option value="bug" id="ctOptBug">Signaler un problème</option>
+        <option value="license" id="ctOptLic">Licence / Paiement</option>
+        <option value="refund" id="ctOptRef">Demande de remboursement</option>
+        <option value="suggestion" id="ctOptSug">Suggestion</option>
+        <option value="other" id="ctOptOth">Autre</option>
+      </select>
+    </div>
+    <div class="ct-field">
+      <label for="ctMessage" id="ctLblMsg">Message</label>
+      <textarea id="ctMessage" rows="4"></textarea>
+    </div>
+    <div id="ctConfirm" class="ct-msg"></div>
+    <button class="ct-submit" id="ctBtn" onclick="submitContact()">Envoyer le message</button>
+  </div>
+</div>
+
+<!-- ═══ CGV / Mentions légales Modal ═══ -->
+<div id="cgvModal" class="cgv-modal-bg" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="cgv-modal" role="dialog" aria-modal="true" aria-labelledby="cgvTitle">
+    <button class="cgv-close" onclick="document.getElementById('cgvModal').classList.remove('show')" aria-label="Fermer">✕</button>
+    <h2 id="cgvTitle" data-i18n="cgv.title">Mentions légales et conditions de vente</h2>
+    <h3 data-i18n="cgv.h_editor">Éditeur</h3>
+    <p data-i18n="cgv.editor">Contrepoint est un projet indépendant développé au Québec, Canada. Contact : via le formulaire de contact disponible sur ce site.</p>
+    <h3 data-i18n="cgv.h_host">Hébergement</h3>
+    <p data-i18n="cgv.host">Le site est hébergé sur Netlify (Netlify Inc., 44 Montgomery St, Suite 300, San Francisco, CA 94104, USA).</p>
+    <h3 data-i18n="cgv.h_ip">Propriété intellectuelle</h3>
+    <p data-i18n="cgv.ip">L'ensemble du contenu de ce site (textes, interface, code, design) est protégé par le droit d'auteur. Toute reproduction sans autorisation est interdite.</p>
+    <h3 data-i18n="cgv.h_sale">Conditions de vente — Mode compositeur</h3>
+    <p data-i18n="cgv.sale_1">Le Mode compositeur est vendu sous forme d'achat unique donnant un accès à vie, sans abonnement.</p>
+    <p data-i18n="cgv.sale_2">Conformément à la Loi sur la protection du consommateur du Québec (LPC), une garantie de remboursement de 30 jours est offerte si vous n'êtes pas satisfait. Pour toute demande, utilisez le formulaire de contact en précisant votre numéro de commande.</p>
+    <p data-i18n="cgv.sale_3">Les paiements sont traités par LemonSqueezy (A Stripe Company). Contrepoint ne stocke aucune donnée de carte bancaire.</p>
+    <h3 data-i18n="cgv.h_privacy">Données personnelles & confidentialité</h3>
+    <p data-i18n="cgv.privacy">Aucune donnée personnelle n'est collectée lors de l'utilisation des outils gratuits. Toutes les préférences et compositions sont stockées localement dans votre navigateur (localStorage). Conforme au RGPD et à la Loi 25 du Québec.</p>
+    <p data-i18n="cgv.privacy_2">En cas d'achat, votre adresse courriel est transmise à LemonSqueezy uniquement pour la livraison de la clé de licence et les communications liées à votre commande.</p>
+    <h3 data-i18n="cgv.h_cookies">Cookies & analytique</h3>
+    <p data-i18n="cgv.cookies">Ce site utilise Google Analytics (gtag.js) pour mesurer l'audience de façon anonyme. Aucun cookie publicitaire ou tracker tiers n'est utilisé.</p>
+    <h3 data-i18n="cgv.h_law">Droit applicable</h3>
+    <p data-i18n="cgv.law">Ces conditions sont régies par les lois en vigueur au Québec, Canada.</p>
+    <p class="cgv-update">Dernière mise à jour : mai 2026</p>
+  </div>
+</div>
+
 </div><!-- /panHome -->
 
