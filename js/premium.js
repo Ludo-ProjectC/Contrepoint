@@ -62,8 +62,47 @@
   function getLang(){ return (typeof currentLang !== 'undefined' ? currentLang : 'fr'); }
   function t(key){ var l = getLang(); return (LIC_I18N[l] && LIC_I18N[l][key]) || LIC_I18N.fr[key] || key; }
 
-  // Check Composer Mode status
-  function isPremium(){ return localStorage.getItem('pc_premium') === 'true'; }
+  // Master key (for developer) — unlocks everything everywhere
+  var MASTER_KEY = 'PC-MASTER-C5BF7B2EE4C56BB60029DB23';
+  
+  // Generate checksum for LemonSqueezy keys (simple validation)
+  function generateKeyChecksum(key){
+    var hash = 0;
+    for(var i = 0; i < key.length; i++){
+      var char = key.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return Math.abs(hash).toString(16);
+  }
+  
+  // Validate LemonSqueezy license key format
+  function isValidLemonSqueezyKey(key){
+    // Format: LSQ-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX (UUID-like)
+    // At minimum: starts with LSQ- and has reasonable length
+    if(!key || typeof key !== 'string') return false;
+    if(!key.toUpperCase().startsWith('LSQ-')) return false;
+    if(key.length < 20) return false; // Minimum length check
+    return true;
+  }
+  
+  // Check Composer Mode status (localStorage + sessionStorage + master/license keys)
+  function isPremium(){ 
+    var stored = localStorage.getItem('pc_premium');
+    var session = sessionStorage.getItem('pc_premium_session');
+    var key = localStorage.getItem('pc_license_key') || '';
+    
+    // Master key always unlocks (anywhere, any PC)
+    if(key === MASTER_KEY) return true;
+    
+    // Valid LemonSqueezy key (validated on activation)
+    if(isValidLemonSqueezyKey(key) && stored === 'true') return true;
+    
+    // Session activation (survives browser refresh, not page close)
+    if(session === 'true') return true;
+    
+    return false;
+  }
 
   // Add overlays to Composer Mode panels
   function addOverlays(){
@@ -126,9 +165,9 @@
     document.getElementById('lmMsg').textContent = '';
   };
 
-  // Validate license
+  // Validate license (Master key + API backend for LemonSqueezy)
   window.validateLicense = function(){
-    var key = document.getElementById('lmInput').value.trim();
+    var key = (document.getElementById('lmInput').value.trim() || '').toUpperCase();
     var msgEl = document.getElementById('lmMsg');
     var btnEl = document.querySelector('.lm-modal button:last-of-type');
     
@@ -137,41 +176,85 @@
       return; 
     }
     
-    if(msgEl) msgEl.textContent = '';
-    if(btnEl) {
-      btnEl.textContent = t('btnLoading');
-      btnEl.disabled = true;
-    }
-    
-    fetch('https://api.lemonsqueezy.com/v1/licenses/validate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ license_key: key })
-    })
-    .then(r => r.json())
-    .then(data => {
-      if(data.valid || data.license_key){
-        localStorage.setItem('pc_premium', 'true');
-        localStorage.setItem('pc_license_key', key);
+    // Master key override (developer)
+    if(key === MASTER_KEY){
+      localStorage.setItem('pc_license_key', key);
+      localStorage.setItem('pc_premium', 'true');
+      sessionStorage.setItem('pc_premium_session', 'true');
+      updateTabs();
+      addOverlays();
+      if(msgEl) {
         msgEl.textContent = t('success');
         msgEl.style.color = '#10b981';
+      }
+      setTimeout(function(){ window.closeLicModal(); }, 1000);
+      return;
+    }
+    
+    // LemonSqueezy key validation via backend API
+    if(msgEl) msgEl.textContent = t('btnLoading');
+    if(btnEl) btnEl.disabled = true;
+    
+    fetch('/api/validate-license', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: key })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if(data.valid){
+        // Save license data
+        localStorage.setItem('pc_license_key', key);
+        localStorage.setItem('pc_premium', 'true');
+        if(data.email) localStorage.setItem('pc_license_email', data.email);
+        localStorage.setItem('pc_license_date', new Date().toISOString());
+        sessionStorage.setItem('pc_premium_session', 'true');
+        
+        // Update UI
         updateTabs();
         addOverlays();
-        setTimeout(() => window.closeLicModal(), 1000);
+        
+        if(msgEl) {
+          msgEl.textContent = t('success');
+          msgEl.style.color = '#10b981';
+        }
+        
+        // Close modal
+        setTimeout(function(){ window.closeLicModal(); }, 1500);
       } else {
-        msgEl.textContent = t('errInvalid');
-        msgEl.style.color = '#ef4444';
+        if(msgEl) {
+          msgEl.textContent = t('errInvalid');
+          msgEl.style.color = '#ef4444';
+        }
       }
     })
-    .catch(e => {
-      msgEl.textContent = t('errNetwork');
-      msgEl.style.color = '#ef4444';
-    })
-    .finally(() => {
-      if(btnEl) {
-        btnEl.textContent = t('btn');
-        btnEl.disabled = false;
+    .catch(function(e){
+      // Network error or API down — fallback to format validation
+      if(isValidLemonSqueezyKey(key)){
+        // Warn user but allow activation (offline mode)
+        if(msgEl) {
+          msgEl.textContent = '⚠️ ' + t('errNetwork') + ' — Format OK';
+          msgEl.style.color = '#f59e0b';
+        }
+        
+        // Still activate (trust user entered valid key from email)
+        setTimeout(function(){
+          localStorage.setItem('pc_license_key', key);
+          localStorage.setItem('pc_premium', 'true');
+          sessionStorage.setItem('pc_premium_session', 'true');
+          updateTabs();
+          addOverlays();
+          setTimeout(function(){ window.closeLicModal(); }, 1500);
+        }, 1500);
+      } else {
+        if(msgEl) {
+          msgEl.textContent = t('errNetwork');
+          msgEl.style.color = '#ef4444';
+        }
       }
+    })
+    .finally(function(){
+      if(btnEl) btnEl.disabled = false;
     });
   };
 
