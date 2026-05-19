@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Politique de confidentialité — Contrepoint</title>
+<meta name="description" content="Politique de confidentialité de Contrepoint. Conformité Loi 25 Québec et RGPD.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://contrepoint.app/privacy">
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{font-family:'DM Sans',sans-serif;background:#f4f3f9;color:#111827;min-height:100%}
+  :root{--pri:#534AB7;--pri2:#7F77DD;--txt:#111827;--txt2:#6b7280;--bd:#e5e7eb;--card:#fff;--bg:#f4f3f9}
+
+  .page{max-width:780px;margin:0 auto;padding:32px 20px 64px}
+
+  /* Header */
+  .site-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:40px;padding-bottom:20px;border-bottom:1px solid var(--bd)}
+  .logo{font-family:'DM Serif Display',serif;font-size:26px;font-weight:400;color:var(--pri);text-decoration:none}
+  .back-link{font-size:13px;color:var(--pri);text-decoration:none;display:flex;align-items:center;gap:5px;font-weight:500}
+  .back-link:hover{text-decoration:underline}
+
+  /* Lang switcher */
+  .lang-bar{display:flex;gap:8px;margin-bottom:32px}
+  .lang-btn{padding:5px 14px;border:1px solid var(--bd);border-radius:20px;background:var(--card);font-size:12px;font-weight:600;color:var(--txt2);cursor:pointer;transition:.15s}
+  .lang-btn:hover,.lang-btn.active{background:var(--pri);color:#fff;border-color:var(--pri)}
+
+  /* Content */
+  .privacy-card{background:var(--card);border-radius:16px;padding:36px 40px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+  @media(max-width:600px){.privacy-card{padding:24px 18px}}
+
+  .privacy-title{font-family:'DM Serif Display',serif;font-size:28px;font-weight:400;color:var(--txt);margin-bottom:6px}
+  .privacy-updated{font-size:12px;color:var(--txt2);margin-bottom:32px}
+
+  h2{font-size:16px;font-weight:700;color:var(--pri);margin:28px 0 10px;padding-bottom:6px;border-bottom:1px solid #eae8f4}
+  h2:first-of-type{margin-top:0}
+  p{font-size:14px;line-height:1.7;color:var(--txt);margin-bottom:10px}
+  ul{padding-left:20px;margin-bottom:10px}
+  li{font-size:14px;line-height:1.7;color:var(--txt);margin-bottom:4px}
+  a{color:var(--pri);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  .highlight-box{background:#f5f3ff;border:1px solid #c4bfee;border-radius:10px;padding:14px 18px;margin:16px 0;font-size:13px;color:var(--txt)}
+
+  /* Footer */
+  .footer{text-align:center;margin-top:40px;font-size:12px;color:var(--txt2)}
+  .footer a{color:var(--pri)}
+
+  /* Lang sections */
+  .lang-section{display:none}
+  .lang-section.active{display:block}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <header class="site-header">
+    <a href="/" class="logo">Contrepoint</a>
+    <a href="/" class="back-link">← Retour à l'application</a>
+  </header>
+
+  <!-- Lang switcher -->
+  <div class="lang-bar">
+    <button class="lang-btn active" onclick="setPrivacyLang('fr')">FR</button>
+    <button class="lang-btn" onclick="setPrivacyLang('en')">EN</button>
+    <button class="lang-btn" onclick="setPrivacyLang('es')">ES</button>
+  </div>
+
+  <div class="privacy-card">
+
+    <!-- ═══ FRANÇAIS ═══ -->
+    <div class="lang-section active" id="lang-fr">
+      <h1 class="privacy-title">Politique de confidentialité</h1>
+      <p class="privacy-updated">Dernière mise à jour : mai 2026</p>
+
+      <div class="highlight-box">
+        Cette politique est conforme à la <strong>Loi 25 du Québec</strong> (Loi sur la protection des renseignements personnels dans le secteur privé) et au <strong>RGPD</strong> (Règlement général sur la protection des données, UE).
+      </div>
+
+      <h2>1. Responsable du traitement</h2>
+      <p>Contrepoint est développé et exploité par un développeur indépendant basé au Québec, Canada. Pour toute question relative à vos données personnelles, utilisez le <a href="/" onclick="history.back()">formulaire de contact</a> intégré à l'application.</p>
+
+      <h2>2. Données collectées et finalités</h2>
+      <p>Contrepoint collecte un minimum de données personnelles :</p>
+      <ul>
+        <li><strong>Formulaire de contact</strong> : nom, adresse courriel, message. Finalité : répondre à votre demande. Base légale : consentement explicite (soumission du formulaire).</li>
+        <li><strong>Achat du Mode compositeur</strong> : adresse courriel fournie lors de l'achat via LemonSqueezy. Finalité : livraison de la clé de licence et support. Base légale : exécution du contrat.</li>
+        <li><strong>Clé de licence</strong> : stockée localement dans votre navigateur (localStorage) uniquement. Aucune donnée de licence n'est transmise à nos serveurs sauf lors de la validation initiale.</li>
+      </ul>
+
+      <h2>3. Données NON collectées</h2>
+      <ul>
+        <li>Aucun traceur publicitaire ni cookie de suivi n'est utilisé.</li>
+        <li>Aucune donnée de composition, préférence ou état des outils n'est envoyée à un serveur — tout reste dans votre navigateur (localStorage).</li>
+        <li>Aucune donnée biométrique, financière (numéro de carte) ou sensible n'est collectée directement par Contrepoint.</li>
+      </ul>
+
+      <h2>4. Durée de conservation</h2>
+      <ul>
+        <li><strong>Messages de contact</strong> : conservés le temps nécessaire pour traiter votre demande, au maximum 2 ans.</li>
+        <li><strong>Données d'achat (email)</strong> : durée de la licence + 3 ans (obligations comptables et légales).</li>
+        <li><strong>Données locales (localStorage)</strong> : jusqu'à ce que vous les supprimiez via les paramètres de votre navigateur.</li>
+      </ul>
+
+      <h2>5. Partage avec des tiers</h2>
+      <p>Contrepoint partage des données avec les tiers suivants, uniquement dans le cadre des finalités décrites :</p>
+      <ul>
+        <li><strong>LemonSqueezy</strong> (paiement et gestion des licences) — <a href="https://www.lemonsqueezy.com/privacy" target="_blank" rel="noopener">politique de confidentialité</a></li>
+        <li><strong>Web3Forms</strong> (transmission du formulaire de contact) — <a href="https://web3forms.com/privacy" target="_blank" rel="noopener">politique de confidentialité</a></li>
+      </ul>
+      <p>Aucune donnée n'est vendue, louée ou partagée à des fins publicitaires.</p>
+
+      <h2>6. Vos droits</h2>
+      <p>Conformément à la Loi 25 (Québec) et au RGPD (UE), vous disposez des droits suivants :</p>
+      <ul>
+        <li><strong>Droit d'accès</strong> : obtenir une copie des données vous concernant.</li>
+        <li><strong>Droit de rectification</strong> : corriger des données inexactes.</li>
+        <li><strong>Droit à l'effacement</strong> : demander la suppression de vos données.</li>
+        <li><strong>Droit à la portabilité</strong> : recevoir vos données dans un format structuré.</li>
+        <li><strong>Droit d'opposition</strong> : vous opposer au traitement de vos données.</li>
+      </ul>
+      <p>Pour exercer ces droits, utilisez le <a href="/" onclick="history.back()">formulaire de contact</a>. Nous répondons dans un délai de 30 jours.</p>
+
+      <h2>7. Sécurité</h2>
+      <p>Les communications entre votre navigateur et nos serveurs sont chiffrées via HTTPS/TLS. Les clés API et secrets ne sont jamais exposés côté client. Les données de contact transitent via un proxy sécurisé côté serveur.</p>
+
+      <h2>8. Cookies</h2>
+      <p>Contrepoint n'utilise pas de cookies de suivi ou publicitaires. L'application utilise uniquement le <strong>localStorage</strong> du navigateur pour stocker vos préférences et votre licence localement.</p>
+
+      <h2>9. Modifications</h2>
+      <p>Cette politique peut être mise à jour. La date de dernière modification est indiquée en haut de page. Les changements substantiels seront signalés dans l'application.</p>
+    </div>
+
+    <!-- ═══ ENGLISH ═══ -->
+    <div class="lang-section" id="lang-en">
+      <h1 class="privacy-title">Privacy Policy</h1>
+      <p class="privacy-updated">Last updated: May 2026</p>
+
+      <div class="highlight-box">
+        This policy complies with <strong>Quebec Law 25</strong> (Act respecting the protection of personal information in the private sector) and the <strong>GDPR</strong> (EU General Data Protection Regulation).
+      </div>
+
+      <h2>1. Data Controller</h2>
+      <p>Contrepoint is developed and operated by an independent developer based in Quebec, Canada. For any questions regarding your personal data, please use the <a href="/" onclick="history.back()">contact form</a> in the application.</p>
+
+      <h2>2. Data Collected and Purposes</h2>
+      <p>Contrepoint collects minimal personal data:</p>
+      <ul>
+        <li><strong>Contact form</strong>: name, email address, message. Purpose: responding to your inquiry. Legal basis: explicit consent (form submission).</li>
+        <li><strong>Composer Mode purchase</strong>: email address provided at checkout via LemonSqueezy. Purpose: license key delivery and support. Legal basis: contract performance.</li>
+        <li><strong>License key</strong>: stored locally in your browser (localStorage) only. No license data is sent to our servers except during initial validation.</li>
+      </ul>
+
+      <h2>3. Data NOT Collected</h2>
+      <ul>
+        <li>No advertising trackers or tracking cookies are used.</li>
+        <li>No composition data, preferences, or tool state is sent to any server — everything stays in your browser (localStorage).</li>
+        <li>No biometric, financial (card numbers), or sensitive data is collected directly by Contrepoint.</li>
+      </ul>
+
+      <h2>4. Retention Period</h2>
+      <ul>
+        <li><strong>Contact messages</strong>: retained as long as needed to process your request, maximum 2 years.</li>
+        <li><strong>Purchase data (email)</strong>: license duration + 3 years (accounting and legal obligations).</li>
+        <li><strong>Local data (localStorage)</strong>: until you delete it via your browser settings.</li>
+      </ul>
+
+      <h2>5. Third-Party Sharing</h2>
+      <p>Contrepoint shares data with the following third parties, solely for the purposes described above:</p>
+      <ul>
+        <li><strong>LemonSqueezy</strong> (payment and license management) — <a href="https://www.lemonsqueezy.com/privacy" target="_blank" rel="noopener">privacy policy</a></li>
+        <li><strong>Web3Forms</strong> (contact form transmission) — <a href="https://web3forms.com/privacy" target="_blank" rel="noopener">privacy policy</a></li>
+      </ul>
+      <p>No data is sold, rented, or shared for advertising purposes.</p>
+
+      <h2>6. Your Rights</h2>
+      <p>Under Quebec Law 25 and the GDPR, you have the following rights:</p>
+      <ul>
+        <li><strong>Right of access</strong>: obtain a copy of your personal data.</li>
+        <li><strong>Right to rectification</strong>: correct inaccurate data.</li>
+        <li><strong>Right to erasure</strong>: request deletion of your data.</li>
+        <li><strong>Right to portability</strong>: receive your data in a structured format.</li>
+        <li><strong>Right to object</strong>: object to the processing of your data.</li>
+      </ul>
+      <p>To exercise these rights, use the <a href="/" onclick="history.back()">contact form</a>. We respond within 30 days.</p>
+
+      <h2>7. Security</h2>
+      <p>All communications between your browser and our servers are encrypted via HTTPS/TLS. API keys and secrets are never exposed client-side. Contact data passes through a secure server-side proxy.</p>
+
+      <h2>8. Cookies</h2>
+      <p>Contrepoint does not use tracking or advertising cookies. The application only uses browser <strong>localStorage</strong> to store your preferences and license locally.</p>
+
+      <h2>9. Changes</h2>
+      <p>This policy may be updated. The last modification date is shown at the top of this page. Substantial changes will be announced in the application.</p>
+    </div>
+
+    <!-- ═══ ESPAÑOL ═══ -->
+    <div class="lang-section" id="lang-es">
+      <h1 class="privacy-title">Política de privacidad</h1>
+      <p class="privacy-updated">Última actualización: mayo de 2026</p>
+
+      <div class="highlight-box">
+        Esta política cumple con la <strong>Ley 25 de Quebec</strong> (Ley de protección de información personal en el sector privado) y el <strong>RGPD</strong> (Reglamento General de Protección de Datos, UE).
+      </div>
+
+      <h2>1. Responsable del tratamiento</h2>
+      <p>Contrepoint es desarrollado y operado por un desarrollador independiente con sede en Quebec, Canadá. Para cualquier pregunta sobre tus datos personales, utiliza el <a href="/" onclick="history.back()">formulario de contacto</a> integrado en la aplicación.</p>
+
+      <h2>2. Datos recopilados y finalidades</h2>
+      <p>Contrepoint recopila un mínimo de datos personales:</p>
+      <ul>
+        <li><strong>Formulario de contacto</strong>: nombre, dirección de correo electrónico, mensaje. Finalidad: responder a tu consulta. Base legal: consentimiento explícito (envío del formulario).</li>
+        <li><strong>Compra del Modo compositor</strong>: correo electrónico proporcionado en el pago vía LemonSqueezy. Finalidad: entrega de la clave de licencia y soporte. Base legal: ejecución del contrato.</li>
+        <li><strong>Clave de licencia</strong>: almacenada localmente en tu navegador (localStorage) únicamente. Ningún dato de licencia se transmite a nuestros servidores salvo durante la validación inicial.</li>
+      </ul>
+
+      <h2>3. Datos NO recopilados</h2>
+      <ul>
+        <li>No se utilizan rastreadores publicitarios ni cookies de seguimiento.</li>
+        <li>Ningún dato de composición, preferencia o estado de las herramientas se envía a ningún servidor — todo permanece en tu navegador (localStorage).</li>
+        <li>Contrepoint no recopila directamente datos biométricos, financieros (números de tarjeta) ni sensibles.</li>
+      </ul>
+
+      <h2>4. Período de conservación</h2>
+      <ul>
+        <li><strong>Mensajes de contacto</strong>: conservados el tiempo necesario para atender tu solicitud, máximo 2 años.</li>
+        <li><strong>Datos de compra (email)</strong>: duración de la licencia + 3 años (obligaciones contables y legales).</li>
+        <li><strong>Datos locales (localStorage)</strong>: hasta que los elimines en la configuración de tu navegador.</li>
+      </ul>
+
+      <h2>5. Compartición con terceros</h2>
+      <p>Contrepoint comparte datos con los siguientes terceros, únicamente para las finalidades descritas:</p>
+      <ul>
+        <li><strong>LemonSqueezy</strong> (pago y gestión de licencias) — <a href="https://www.lemonsqueezy.com/privacy" target="_blank" rel="noopener">política de privacidad</a></li>
+        <li><strong>Web3Forms</strong> (transmisión del formulario de contacto) — <a href="https://web3forms.com/privacy" target="_blank" rel="noopener">política de privacidad</a></li>
+      </ul>
+      <p>Ningún dato se vende, alquila ni comparte con fines publicitarios.</p>
+
+      <h2>6. Tus derechos</h2>
+      <p>Según la Ley 25 de Quebec y el RGPD, tienes los siguientes derechos:</p>
+      <ul>
+        <li><strong>Derecho de acceso</strong>: obtener una copia de tus datos personales.</li>
+        <li><strong>Derecho de rectificación</strong>: corregir datos inexactos.</li>
+        <li><strong>Derecho de supresión</strong>: solicitar la eliminación de tus datos.</li>
+        <li><strong>Derecho a la portabilidad</strong>: recibir tus datos en un formato estructurado.</li>
+        <li><strong>Derecho de oposición</strong>: oponerte al tratamiento de tus datos.</li>
+      </ul>
+      <p>Para ejercer estos derechos, usa el <a href="/" onclick="history.back()">formulario de contacto</a>. Respondemos en un plazo de 30 días.</p>
+
+      <h2>7. Seguridad</h2>
+      <p>Todas las comunicaciones entre tu navegador y nuestros servidores están cifradas mediante HTTPS/TLS. Las claves API y secretos nunca se exponen en el lado del cliente. Los datos de contacto pasan por un proxy seguro del lado del servidor.</p>
+
+      <h2>8. Cookies</h2>
+      <p>Contrepoint no utiliza cookies de seguimiento ni publicitarias. La aplicación solo usa el <strong>localStorage</strong> del navegador para almacenar tus preferencias y licencia localmente.</p>
+
+      <h2>9. Modificaciones</h2>
+      <p>Esta política puede actualizarse. La fecha de última modificación aparece en la parte superior de esta página. Los cambios sustanciales se anunciarán en la aplicación.</p>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <p>© 2026 Contrepoint — <a href="/">Retour à l'application</a></p>
+  </div>
+
+</div>
+
+<script>
+function setPrivacyLang(lang) {
+  document.querySelectorAll('.lang-section').forEach(function(el){ el.classList.remove('active'); });
+  document.querySelectorAll('.lang-btn').forEach(function(el){ el.classList.remove('active'); });
+  var section = document.getElementById('lang-' + lang);
+  if(section) section.classList.add('active');
+  event.target.classList.add('active');
+  document.documentElement.lang = lang;
+}
+
+// Auto-detect lang from URL param or browser
+(function(){
+  var params = new URLSearchParams(window.location.search);
+  var lang = params.get('lang') || navigator.language.substring(0,2);
+  if(['fr','en','es'].indexOf(lang) !== -1 && lang !== 'fr') {
+    document.querySelectorAll('.lang-section').forEach(function(el){ el.classList.remove('active'); });
+    document.querySelectorAll('.lang-btn').forEach(function(el){ el.classList.remove('active'); });
+    var s = document.getElementById('lang-' + lang);
+    if(s) s.classList.add('active');
+    var btns = document.querySelectorAll('.lang-btn');
+    btns.forEach(function(b){ if(b.textContent === lang.toUpperCase()) b.classList.add('active'); });
+    document.documentElement.lang = lang;
+  }
+})();
+</script>
+</body>
+</html>

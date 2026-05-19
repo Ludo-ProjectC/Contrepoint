@@ -1,3 +1,19 @@
+<style>
+.fm-gedalge-block{margin-top:16px;padding:14px 16px;background:linear-gradient(135deg,rgba(5,150,105,.07),rgba(16,185,129,.04));border:1.5px solid rgba(5,150,105,.25);border-radius:10px;font-size:12px;color:var(--txt2,#374151);line-height:1.7}
+.fm-gedalge-block h4{font-size:13px;font-weight:700;color:#059669;margin:0 0 10px 0;padding-bottom:6px;border-bottom:1px solid rgba(5,150,105,.2)}
+.fm-gedalge-block p{margin:0 0 9px 0}
+.fm-gedalge-block p:last-child{margin-bottom:0}
+.fm-gedalge-block strong{color:var(--txt1,#111827)}
+/* Slider horizontal pour la timeline (formes longues comme symphonie classique) */
+.fm-timeline-slider-wrap{display:flex;align-items:center;gap:6px;padding:0 12px;height:14px;background:transparent}
+.fm-timeline-slider-wrap .fm-slider-label{font-size:9px;color:var(--txt3,#9ca3af);white-space:nowrap;user-select:none;opacity:.7}
+.fm-timeline-slider{flex:1;-webkit-appearance:none;appearance:none;height:2px;background:linear-gradient(90deg,#EC4899,#3B82F6);border-radius:1px;outline:none;cursor:pointer;opacity:.6;transition:opacity .2s}
+.fm-timeline-slider:hover{opacity:1}
+.fm-timeline-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:10px;height:10px;border-radius:50%;background:#fff;border:1.5px solid #534AB7;box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:grab}
+.fm-timeline-slider::-webkit-slider-thumb:active{cursor:grabbing}
+.fm-timeline-slider::-moz-range-thumb{width:10px;height:10px;border-radius:50%;background:#fff;border:1.5px solid #534AB7;box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:grab;border:none}
+.fm-timeline-slider-wrap.fm-hidden{display:none}
+</style>
 <div class="pc-panel" id="panFormes">
 
 <div class="fm-toolbar">
@@ -17,12 +33,27 @@
     <button class="tbtn" onclick="FM_importJSON()">⬆ JSON</button>
     <button class="tbtn primary" onclick="FM_exportPDF()" data-i18n="fm_pdf">📄 PDF</button>
     <button class="tbtn" onclick="FM_showRepertoire()" data-i18n="fm_rep">🎼 Répertoire</button>
+    <button class="tbtn" onclick="FM_toggleExamples()" style="color:#EC4899;border-color:#EC4899;">🎵 Exemples</button>
   </div>
 </div>
 <div class="fm-main">
   <div class="alerts-bar" id="fm_alertsBar"></div>
+  <div class="fm-examples-section" id="fm_examplesSection" style="display:none; padding:16px; background:linear-gradient(135deg,rgba(236,74,155,.06),rgba(243,63,94,.04)); border-bottom:1px solid rgba(236,74,155,.15); margin-bottom:16px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <h3 data-i18n="fm_examples_title" style="margin:0; font-size:16px; font-weight:600; color:#EC4899;">🎵 Exemples du répertoire</h3>
+      <button onclick="FM_toggleExamples()" style="background:none; border:none; color:var(--txt2); font-size:18px; cursor:pointer; padding:4px;">✕</button>
+    </div>
+    <div class="fm-form-selector" style="margin-bottom:12px; display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="fm-example-btn" data-form="sonate" onclick="FM_showExamples('sonate')" data-i18n="fm_examples_sonate" style="padding:6px 12px; border:1px solid #EC4899; background:#fff; color:#EC4899; border-radius:6px; cursor:pointer; font-size:12px; font-weight:500;">Sonate</button>
+      <button class="fm-example-btn" data-form="rondo" onclick="FM_showExamples('rondo')" data-i18n="fm_examples_rondo" style="padding:6px 12px; border:1px solid #999; background:#fff; color:#666; border-radius:6px; cursor:pointer; font-size:12px; font-weight:500;">Rondo</button>
+      <button class="fm-example-btn" data-form="valse" onclick="FM_showExamples('valse')" data-i18n="fm_examples_valse" style="padding:6px 12px; border:1px solid #999; background:#fff; color:#666; border-radius:6px; cursor:pointer; font-size:12px; font-weight:500;">Valse</button>
+      <button class="fm-example-btn" data-form="fugue" onclick="FM_showExamples('fugue')" data-i18n="fm_examples_fugue" style="padding:6px 12px; border:1px solid #999; background:#fff; color:#666; border-radius:6px; cursor:pointer; font-size:12px; font-weight:500;">Fugue</button>
+      <button class="fm-example-btn" data-form="prelude" onclick="FM_showExamples('prelude')" data-i18n="fm_examples_prelude" style="padding:6px 12px; border:1px solid #999; background:#fff; color:#666; border-radius:6px; cursor:pointer; font-size:12px; font-weight:500;">Prélude</button>
+    </div>
+    <div id="fm_examplesContent" style="max-height:400px; overflow-y:auto;"></div>
+  </div>
   <div class="mvt-bar" id="fm_mvtBar"><div class="mvt-bar-label" data-i18n="fm_mvt">Mouvements</div><div class="mvt-row" id="fm_mvtRow"></div></div>
-  <div class="timeline-area"><div class="form-header" id="fm_formHeader"></div><div class="timeline-scroll"><div class="timeline" id="fm_timeline"></div><div class="fm-tonal-plan" id="fm_tonalPlan"></div></div></div>
+  <div class="timeline-area"><div class="form-header" id="fm_formHeader"></div><div class="timeline-scroll" id="fm_timelineScroll"><div class="timeline" id="fm_timeline"></div></div><div class="fm-timeline-slider-wrap fm-hidden" id="fm_sliderWrap"><span class="fm-slider-label">⇄</span><input type="range" class="fm-timeline-slider" id="fm_timelineSlider" min="0" max="100" value="0" oninput="FM_onSliderInput(this.value)"></div><div class="fm-tonal-plan" id="fm_tonalPlan"></div></div>
   <div class="bottom-area">
     <div class="ref-panel" id="fm_refPanel"><div class="ref-title"><span data-i18n="fm_rf">Forme de référence</span><button class="ref-close" onclick="FM_toggleRef()">✕</button></div><div id="fm_refContent"></div></div>
     <div class="detail-panel" id="fm_detailPanel"><div class="dp-empty" id="fm_dpEmpty" data-i18n="h_section">Sélectionner une section dans la timeline pour voir ses détails</div><div class="dp-card" id="fm_dpCard" style="display:none"></div></div>

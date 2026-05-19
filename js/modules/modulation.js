@@ -44,24 +44,32 @@ function MOD_maxInv(qual) {
 
 /* ═══ MIDI voicing from PC array (SATB) ═══ */
 function MOD_voiceSATB(pcs) {
-  const bass = 36 + pcs[0];
-  const b = bass < 36 ? bass+12 : bass;
+  // Bass: place root PC in bass register (MIDI ~36-52)
+  const bassPC = ((pcs[0] % 12) + 12) % 12;
+  let b = 36 + bassPC;
+  if (b > 52) b -= 12;
   let midis = [b];
-  for (let i=1; i<pcs.length; i++) {
-    let m = 55 + pcs[i];
-    while(m <= midis[midis.length-1]) m += 12;
-    if(m > 84) m -= 12;
+  // Inner voices: find correct PC above previous note
+  for (let i = 1; i < pcs.length; i++) {
+    const pc = ((pcs[i] % 12) + 12) % 12;
+    let prev = midis[midis.length - 1];
+    const diff = ((pc - (prev + 1) % 12) % 12 + 12) % 12;
+    let m = prev + 1 + diff;
+    if (m > 84) m -= 12;
     midis.push(m);
   }
-  while(midis.length < 4) {
-    let m = midis[0] + 12;
-    while(m <= midis[midis.length-1]) m += 12;
-    if(m > 84) m -= 12;
+  // Pad to 4 voices with root doublings if chord has fewer than 4 notes
+  while (midis.length < 4) {
+    const pc = ((pcs[0] % 12) + 12) % 12;
+    let prev = midis[midis.length - 1];
+    const diff = ((pc - (prev + 1) % 12) % 12 + 12) % 12;
+    let m = prev + 1 + diff;
+    if (m > 84) m -= 12;
     midis.push(m);
   }
-  midis.sort((a,c) => a-c);
-  if(midis[3]-midis[0] < 10 && midis[3] < 79) midis[3] += 12;
-  return { B:midis[0], T:midis[1], A:midis[2], S:midis[3] };
+  midis.sort((a, c) => a - c);
+  if (midis[3] - midis[0] < 10 && midis[3] < 79) midis[3] += 12;
+  return { B: midis[0], T: midis[1], A: midis[2], S: midis[3] };
 }
 
 /* ═══ Canvas Staff ═══ */
@@ -521,7 +529,25 @@ function genProg(tid){
     const satb=MOD_voiceSATB(invNotes);
     const key=slot.zone==='f'?fD:tD;
 
-    return{rn:rnLabel,nm:opt.nm||rnLabel,satb,zone:slot.zone,key,mode:slot.zone==='f'?MOD_S.fM:slot.zone==='t'?MOD_S.tM:(MOD_S.tM),inv,q:qual,notes:invNotes};
+    // Build chord name: always re-derive from rpc + qual + key to get correct spelling
+    // (avoids C# in a Db context, etc.)
+    const INV_SFX_TRI=['','⁶','⁶₄'];
+    const INV_SFX_7TH=['⁷','⁶₅','⁴₃','⁴₂'];
+    const is7th=['dom7','m7','maj7','dim7','hdim7'].includes(qual);
+    const invSuffix=is7th?(INV_SFX_7TH[Math.min(inv,3)]):(INV_SFX_TRI[Math.min(inv,2)]);
+    const rootName=rpc!==undefined?MOD_nn(rpc,key):(opt.nm||rnLabel).replace(/[mM7°+ø⁶⁷₅₄₃₂⁴]+$/,'');
+    const qualSym=is7th?'':(MOD_QS[qual]||''); // suffix already encoded in INV_SFX for 7ths
+    // For 7th chords, base name has no quality suffix (it's in invSuffix), except dim/hdim
+    let nmBase;
+    if(is7th){
+      const qBase=qual==='dim7'?'°':qual==='hdim7'?'ø':qual==='maj7'?'M':qual==='m7'?'m':'';
+      nmBase=rootName+qBase;
+    } else {
+      nmBase=rootName+(MOD_QS[qual]||'');
+    }
+    const nm=nmBase+invSuffix;
+
+    return{rn:rnLabel,nm,satb,zone:slot.zone,key,mode:slot.zone==='f'?MOD_S.fM:slot.zone==='t'?MOD_S.tM:(MOD_S.tM),inv,q:qual,notes:invNotes};
   });
 
   // Apply pedal: force the pedal voice to stay on the same MIDI note throughout
@@ -531,6 +557,29 @@ function genProg(tid){
   }
 
   MOD_S.prog={chords:prog,hasPedal:tech.hasPedal};
+
+  // Anti-repetition rule: never allow two consecutive identical chords in root position (5/3).
+  // If detected, force the second occurrence to 1st inversion (6/3) by re-voicing with 3rd in bass.
+  for (let i = 1; i < prog.length; i++) {
+    const prev = prog[i-1], cur = prog[i];
+    // Same pitch class root and same quality, both in root position (inv===0)
+    if (prev.inv === 0 && cur.inv === 0 &&
+        prev.q === cur.q &&
+        (((prev.notes[0] % 12) + 12) % 12) === (((cur.notes[0] % 12) + 12) % 12)) {
+      // Force 1st inversion on current: rotate notes so 3rd is in bass
+      if (cur.notes.length >= 2) {
+        const inv1 = MOD_invertChord(cur.notes, 1);
+        cur.notes = inv1;
+        cur.inv = 1;
+        cur.satb = MOD_voiceSATB(inv1);
+        // Recalculate nm with inversion suffix
+        const is7th=['dom7','m7','maj7','dim7','hdim7'].includes(cur.q);
+        const invSuffix=is7th?'⁶₅':'⁶';
+        const nmBase=cur.nm.replace(/[⁶⁷₅₄₃₂⁴]+$/,'');
+        cur.nm=nmBase+invSuffix;
+      }
+    }
+  }
 
   // Voice-leading: auto-fix then analyze
   const fD2=MOD_S.fM==='minor'?(MOD_KP.find(p=>p.m===MOD_S.fK)||{}).n||MOD_S.fK:MOD_S.fK;

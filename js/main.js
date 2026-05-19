@@ -1,4 +1,4 @@
-const MODULES = ['home', 'transposeur', 'intervalles', 'harmonie', 'accords', 'modes', 'cadences', 'metronome', 'rythme', 'formes', 'modulation', 'sequences', 'analyseur'];
+const MODULES = ['home', 'transposeur', 'intervalles', 'harmonie', 'accords', 'modes', 'cadences', 'metronome', 'rythme', 'formes', 'modulation', 'sequences', 'analyseur', 'faq'];
 const LOADED = new Set();
 const LOADING = new Map();
 const RENDER_FNS = {6: () => window.CAD_render && window.CAD_render(), 9: () => window.FM_render && window.FM_render(), 10: () => window.MOD_R && window.MOD_R(), 11: () => window.SEQ_render && window.SEQ_render(), 12: () => window.AH_render && window.AH_render()};
@@ -52,7 +52,7 @@ window.switchTab = async function(i) {
 };
 
 function panelIdFor(i) {
-  const MAP = ['panHome','panTranspo','panIntervalles','panHarmonie','panAccords','panModes','panCadences','panMetro','panRythme','panFormes','panModulation','panSequences','panAnalyseur'];
+  const MAP = ['panHome','panTranspo','panIntervalles','panHarmonie','panAccords','panModes','panCadences','panMetro','panRythme','panFormes','panModulation','panSequences','panAnalyseur','panFaq'];
   return MAP[i];
 }
 

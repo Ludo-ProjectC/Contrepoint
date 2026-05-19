@@ -1,7 +1,62 @@
   <div class="pc-panel" id="panAnalyseur"><div class="shell">
+
+    <!-- ═══ MODE SELECTOR — choose orchestration target ═══ -->
+    <div class="card" id="ah_modeSelectorCard" style="margin-bottom:10px">
+      <div class="card-title" data-i18n="ah_mode_title">Mode d'analyse — choisir la section orchestrale</div>
+      <div class="ah-mode-row" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
+        <button class="btn primary ah-mode-btn" data-mode="SATB" onclick="AH_setMode('SATB')" data-i18n="ah_mode_satb">🎼 SATB (Chœur)</button>
+        <button class="btn ah-mode-btn" data-mode="VENTS" onclick="AH_setMode('VENTS')" data-i18n="ah_mode_vents">🌬️ Vents</button>
+        <button class="btn ah-mode-btn" data-mode="CUIVRES" onclick="AH_setMode('CUIVRES')" data-i18n="ah_mode_cuivres">🎺 Cuivres</button>
+        <button class="btn ah-mode-btn" data-mode="CORDES" onclick="AH_setMode('CORDES')" data-i18n="ah_mode_cordes">🎻 Cordes</button>
+        <button class="btn ah-mode-btn" data-mode="TUTTI" onclick="AH_setMode('TUTTI')" data-i18n="ah_mode_tutti">🎭 Tutti orchestral</button>
+      </div>
+      <div style="font-size:10px;color:var(--t3);margin-top:8px;line-height:1.5" data-i18n="ah_mode_hint">
+        💡 Chaque mode applique les règles de conduite des voix de base, plus les règles spécifiques à la section (d'après le Traité d'orchestration de Berlioz).
+      </div>
+    </div>
+
+    <!-- ═══ PLACEHOLDER — non-SATB modes (hidden by default) ═══ -->
+    <div class="card" id="ah_placeholder" style="display:none;margin-bottom:10px;text-align:center;padding:30px 20px">
+      <div style="font-size:48px;margin-bottom:10px" id="ah_phIcon">🚧</div>
+      <div class="card-title" id="ah_phTitle" style="font-size:14px;margin-bottom:8px"></div>
+      <p style="font-size:11px;color:var(--t2);line-height:1.7;max-width:520px;margin:0 auto 14px" id="ah_phDesc"></p>
+      <div style="background:var(--abg);border-radius:8px;padding:12px;text-align:left;max-width:520px;margin:0 auto;font-size:10.5px;color:var(--t2);line-height:1.7">
+        <strong data-i18n="ah_ph_roadmap">📋 Feuille de route :</strong>
+        <ul style="margin:6px 0 0 18px;padding:0">
+          <li id="ah_phRm1"></li>
+          <li id="ah_phRm2"></li>
+          <li id="ah_phRm3"></li>
+          <li id="ah_phRm4"></li>
+        </ul>
+      </div>
+      <div style="margin-top:14px;font-size:10px;color:var(--t3)" data-i18n="ah_ph_note">
+        En attendant, utilisez le mode <strong>SATB</strong> qui est pleinement fonctionnel.
+      </div>
+      <button class="btn primary" style="margin-top:12px" onclick="AH_setMode('SATB')" data-i18n="ah_ph_back">← Retour au mode SATB</button>
+    </div>
+
+    <!-- ═══ SATB CONTENT (existing — wrapped for show/hide) ═══ -->
+    <div id="ah_satbWrapper">
+
     <!-- Score + Input -->
     <div class="card score-area">
-        <div class="card-title"><span data-i18n="t_score">Partition</span> <span class="limit-badge" id="ah_chordCount">0 / 20 <span data-i18n="ah_ch">accords</span></span></div>
+        <div class="card-title" style="flex-wrap:wrap;align-items:center;gap:6px">
+          <span data-i18n="t_score">Partition</span>
+          <span class="limit-badge" id="ah_chordCount">0 / 20 <span data-i18n="ah_ch">accords</span></span>
+          <!-- Boutons clef d'ut SATB (switch ON/OFF — bleu quand actif) -->
+          <button id="ah_altoClefBtn" class="btn" type="button"
+            onclick="AH_toggleAltoClef()"
+            title="Clef d'alto (Ut 3e) pour la voix Alto"
+            style="font-size:11px;padding:4px 10px;margin-left:auto">
+            <span style="font-family:'Times New Roman',serif;font-size:15px;line-height:1;margin-right:3px">𝄡</span><span data-i18n="str_clef_alto">Clef d'alto</span>
+          </button>
+          <button id="ah_tenorClefBtn" class="btn" type="button"
+            onclick="AH_toggleTenorClef()"
+            title="Clef de ténor (Ut 4e) pour la voix Ténor"
+            style="font-size:11px;padding:4px 10px">
+            <span style="font-family:'Times New Roman',serif;font-size:15px;line-height:1;margin-right:3px">𝄡</span><span data-i18n="str_clef_tenor">Clef de ténor</span>
+          </button>
+        </div>
         <canvas id="ah_scoreCanvas" class="score-canvas"></canvas>
         <div class="chord-labels" id="ah_chordLabels"></div>
         <div class="legend">
@@ -59,7 +114,6 @@
           <div class="chord-sel-row">
             <label data-i18n="ah_cl">Accord :</label>
             <select class="note-sel" id="ah_chordTypeSel" onchange="AH_onChordTypeChange()">
-              <option value="" data-i18n="ah_mn">— Manuel —</option>
             </select>
           </div>
           <div class="chord-sel-row">
@@ -664,6 +718,274 @@
           </div>
         </div>
       </div>
+
+    </div><!-- /ah_satbWrapper -->
+
+    <!-- ═══ VENTS CONTENT (woodwinds analyzer — hidden by default) ═══ -->
+    <div id="ah_ventsWrapper" style="display:none">
+
+      <!-- Configuration pupitres (générée dynamiquement par VTS_buildConfigPanel) -->
+      <div class="card">
+        <div class="card-title" data-i18n="vts_cfg_title">Configuration des pupitres</div>
+        <div id="vts_configPanel"></div>
+      </div>
+
+      <!-- Saisie + analyse -->
+      <div class="card" style="margin-top:10px">
+        <div class="card-title">
+          <span data-i18n="vts_input_title">Saisie — Accord vents</span>
+          <span class="limit-badge" id="vts_chordCount">0 / 20 <span data-i18n="ah_ch">accords</span></span>
+        </div>
+
+        <!-- Tonalité + mode -->
+        <div class="key-row" style="margin-bottom:8px">
+          <span class="key-label" data-i18n="ah_kl">Tonalité :</span>
+          <select class="note-sel" id="vts_keySel" onchange="VTS_updateKey()"></select>
+          <label style="font-size:11px;color:var(--t2);margin-left:14px" data-i18n="vts_mode">Mode :</label>
+          <select class="note-sel" id="vts_mode" onchange="VTS_onModeChange()">
+            <option value="single" data-i18n="vts_mode_single">Accord isolé</option>
+            <option value="progression" data-i18n="vts_mode_progression">Progression</option>
+          </select>
+        </div>
+
+        <!-- Saisie des notes — un bloc par instrument actif -->
+        <div id="vts_voiceInputs" style="display:flex;flex-direction:column;gap:4px"></div>
+
+        <!-- Boutons d'action -->
+        <div class="audio-row" style="margin-top:10px;flex-wrap:wrap">
+          <button class="btn primary" onclick="VTS_addChord()" data-i18n="vts_btn_add">+ Ajouter accord</button>
+          <button class="btn" onclick="VTS_updateChord()" data-i18n="vts_btn_update">↻ MAJ accord</button>
+          <button class="btn" onclick="VTS_removeSelected()" data-i18n="vts_btn_remove">− Retirer</button>
+          <button class="btn" onclick="VTS_clearAll()" data-i18n="vts_btn_clear">⌫ Tout effacer</button>
+          <button class="play-btn" id="vts_btnPlayAll" onclick="VTS_playAll()" data-i18n="btn_play_all" style="margin-left:auto">▶ Écouter tout</button>
+          <button class="play-btn" id="vts_btnPlaySel" onclick="VTS_playSelected()" data-i18n="btn_play_sel">▶ Accord</button>
+          <label style="font-size:11px;color:var(--t2)" data-i18n="ah_tp">Tempo:</label>
+          <input type="number" class="tempo-input" id="vts_tempoInput" value="72" min="30" max="200">
+          <span style="font-size:10px;color:var(--t3)">bpm</span>
+          <button class="btn" onclick="VTS_exportPDF()">📄 PDF</button>
+        </div>
+        <div style="font-size:10px;color:var(--t3);margin-top:6px;line-height:1.5" data-i18n="vts_hint">
+          💡 Saisissez la note <strong>écrite</strong> (ex : <code>C4</code>, <code>Bb5</code>, <code>F#3</code>). Pour les instruments transpositeurs, la note sonore réelle s'affiche à côté.
+        </div>
+      </div>
+
+      <!-- Partition (canvas multi-portées) -->
+      <div class="card" style="margin-top:10px">
+        <div class="card-title" data-i18n="t_score">Partition</div>
+        <div style="overflow-x:auto">
+          <canvas id="vts_scoreCanvas" class="score-canvas" style="min-height:300px"></canvas>
+        </div>
+        <div class="chord-labels" id="vts_chordLabels"></div>
+      </div>
+
+      <!-- Erreurs -->
+      <div class="card" style="margin-top:10px">
+        <div class="card-title">
+          <span data-i18n="t_errors">Analyse — Erreurs</span>
+          <span class="limit-badge" id="vts_errCount">0</span>
+        </div>
+        <div id="vts_errList" class="err-list"></div>
+      </div>
+
+      <!-- Panneau Théorie VENTS — style Liszt (accolades couleur par famille) -->
+      <div class="card" style="margin-top:10px">
+        <div class="card-title" data-i18n="vts_theory_title">Théorie — Écriture pour les bois</div>
+        <div style="max-height:600px;overflow-y:auto" id="vts_theoryPanel"></div>
+      </div>
+
+    </div><!-- /ah_ventsWrapper -->
+
+    <!-- ═══════════════════════════════════════════════════════════
+         MODULE CUIVRES
+         ═══════════════════════════════════════════════════════════ -->
+    <div id="ah_cuivresWrapper" style="display:none">
+
+      <!-- ── Configuration pupitres (style VENTS) ── -->
+      <div class="card">
+        <div class="card-title" data-i18n="brs_cfg_title">🎺 Configuration — Pupitres de cuivres</div>
+        <div id="brs_configPanel"></div>
+      </div>
+
+      <!-- ── Saisie + analyse (style VENTS) ── -->
+      <div class="card" style="margin-top:10px">
+        <div class="card-title">
+          <span data-i18n="brs_input_title">Saisie — Accord cuivres</span>
+          <span class="limit-badge" id="brs_chordCount">0 / 20 <span data-i18n="ah_ch">accords</span></span>
+        </div>
+
+        <!-- Tonalité + mode -->
+        <div class="key-row" style="margin-bottom:8px">
+          <span class="key-label" data-i18n="ah_kl">Tonalité :</span>
+          <select class="note-sel" id="brs_keySel" onchange="BRS_updateKey()"></select>
+          <label style="font-size:11px;color:var(--t2);margin-left:14px" data-i18n="vts_mode">Mode :</label>
+          <select class="note-sel" id="brs_modeSelect" onchange="BRS_onModeChange()">
+            <option value="single" data-i18n="vts_mode_single">Accord isolé</option>
+            <option value="progression" data-i18n="vts_mode_progression">Progression</option>
+          </select>
+        </div>
+
+        <!-- Saisie par instrument -->
+        <div id="brs_voiceInputs" style="display:flex;flex-direction:column;gap:4px"></div>
+
+        <!-- Boutons -->
+        <div class="audio-row" style="margin-top:10px;flex-wrap:wrap">
+          <button class="btn primary" onclick="BRS_addChord()" data-i18n="vts_btn_add">+ Ajouter accord</button>
+          <button class="btn" onclick="BRS_updateChord()" data-i18n="vts_btn_update">↻ MAJ accord</button>
+          <button class="btn" onclick="BRS_removeSelected()" data-i18n="vts_btn_remove">− Retirer</button>
+          <button class="btn" onclick="BRS_clearAll()" data-i18n="vts_btn_clear">⌫ Tout effacer</button>
+          <button class="play-btn" id="brs_btnPlayAll" onclick="BRS_playAll()" data-i18n="btn_play_all" style="margin-left:auto">▶ Écouter tout</button>
+          <button class="play-btn" id="brs_btnPlaySel" onclick="BRS_playSelected()" data-i18n="btn_play_sel">▶ Accord</button>
+          <label style="font-size:11px;color:var(--t2)" data-i18n="ah_tp">Tempo:</label>
+          <input type="number" class="tempo-input" id="brs_tempoInput" value="72" min="30" max="200">
+          <span style="font-size:10px;color:var(--t3)">bpm</span>
+          <button class="btn" onclick="BRS_exportPDF()">📄 PDF</button>
+        </div>
+        <div style="font-size:10px;color:var(--t3);margin-top:6px;line-height:1.5" data-i18n="brs_hint">
+          💡 Saisissez la note <strong>écrite</strong> (ex : <code>C4</code>, <code>Bb3</code>). Pour cors et trompettes, la note sonore réelle s'affiche à côté.
+        </div>
+      </div>
+
+      <!-- ── Partition (canvas multi-portées) ── -->
+      <div class="card" style="margin-top:10px">
+        <div class="card-title" data-i18n="t_score">Partition</div>
+        <div style="overflow-x:auto">
+          <canvas id="brs_scoreCanvas" class="score-canvas" style="min-height:300px"></canvas>
+        </div>
+      </div>
+
+      <!-- ── Erreurs ── -->
+      <div class="card" style="margin-top:10px">
+        <div class="card-title">
+          <span data-i18n="t_errors">Analyse — Erreurs</span>
+          <span class="limit-badge" id="brs_errCount">0</span>
+        </div>
+        <div id="brs_errList" class="err-list"></div>
+      </div>
+
+      <!-- ── Panneau Théorie ── -->
+      <div class="card" style="margin-top:10px">
+        <div class="card-title" data-i18n="brs_theory_title">Théorie — Écriture pour cuivres</div>
+        <div style="max-height:600px;overflow-y:auto" id="brs_theoryPanel"></div>
+      </div>
+
+    </div><!-- /ah_cuivresWrapper -->
+
+    <!-- ══════════════════════════════════
+         MODULE CORDES
+         ══════════════════════════════════ -->
+    <div id="ah_cordesWrapper" style="display:none">
+
+      <!-- Saisie -->
+      <div class="card">
+        <div class="card-title">
+          <span data-i18n="str_input_title">Saisie — Cordes</span>
+          <span class="limit-badge" id="str_chordCount">0 / 20 <span data-i18n="ah_ch">accords</span></span>
+        </div>
+
+        <!-- Tonalité + mode -->
+        <div class="key-row" style="margin-bottom:8px">
+          <span class="key-label" data-i18n="ah_kl">Tonalité :</span>
+          <select class="note-sel" id="str_keySel" onchange="STR_updateKey()"></select>
+          <label style="font-size:11px;color:var(--t2);margin-left:14px" data-i18n="vts_mode">Mode :</label>
+          <select class="note-sel" id="str_modeSelect" onchange="STR_onModeChange()">
+            <option value="single" data-i18n="vts_mode_single">Accord isolé</option>
+            <option value="progression" data-i18n="vts_mode_progression">Progression</option>
+          </select>
+        </div>
+
+        <!-- Saisie par pupitre -->
+        <div id="str_voiceInputs" style="display:flex;flex-direction:column;gap:4px"></div>
+
+        <!-- Boutons -->
+        <div class="audio-row" style="margin-top:10px;flex-wrap:wrap">
+          <button class="btn primary" onclick="STR_addChord()" data-i18n="vts_btn_add">+ Ajouter accord</button>
+          <button class="btn" onclick="STR_updateChord()" data-i18n="vts_btn_update">↻ MAJ accord</button>
+          <button class="btn" onclick="STR_removeSelected()" data-i18n="vts_btn_remove">− Retirer</button>
+          <button class="btn" onclick="STR_clearAll()" data-i18n="vts_btn_clear">⌫ Tout effacer</button>
+          <button class="play-btn" id="str_btnPlayAll" onclick="STR_playAll()" data-i18n="btn_play_all" style="margin-left:auto">▶ Écouter tout</button>
+          <button class="play-btn" id="str_btnPlaySel" onclick="STR_playSelected()" data-i18n="btn_play_sel">▶ Accord</button>
+          <label style="font-size:11px;color:var(--t2)" data-i18n="ah_tp">Tempo:</label>
+          <input type="number" class="tempo-input" id="str_tempoInput" value="72" min="30" max="200">
+          <span style="font-size:10px;color:var(--t3)">bpm</span>
+          <button class="btn" onclick="STR_exportPDF()">📄 PDF</button>
+        </div>
+        <div style="font-size:10px;color:var(--t3);margin-top:6px;line-height:1.5" data-i18n="str_hint">
+          💡 Saisissez la note sonnante (ex : <code>C4</code>, <code>Bb3</code>). Cordes non transpositrices.
+        </div>
+      </div>
+
+      <!-- Partition -->
+      <div class="card" style="margin-top:10px">
+        <div class="card-title" data-i18n="t_score">Partition</div>
+        <div style="overflow-x:auto">
+          <canvas id="str_scoreCanvas" class="score-canvas" style="min-height:300px"></canvas>
+        </div>
+      </div>
+
+      <!-- Erreurs -->
+      <div class="card" style="margin-top:10px">
+        <div class="card-title">
+          <span data-i18n="t_errors">Analyse — Erreurs</span>
+          <span class="limit-badge" id="str_errCount">0</span>
+        </div>
+        <div id="str_errList" class="err-list"></div>
+      </div>
+
+      <!-- Théorie -->
+      <div class="card" style="margin-top:10px">
+        <div class="card-title" data-i18n="str_theory_title">Théorie — Écriture pour cordes</div>
+        <div style="max-height:600px;overflow-y:auto" id="str_theoryPanel"></div>
+      </div>
+
+    </div><!-- /ah_cordesWrapper -->
+
+    <!-- ═══════════════ TUTTI WRAPPER ═══════════════ -->
+    <div id="ah_tuttiWrapper" style="display:none">
+
+      <!-- Bandeau d'info -->
+      <div class="card">
+        <div class="card-title">
+          <span data-i18n="tut_title">Vue Tutti orchestral</span>
+          <span class="limit-badge" id="tut_momentCount">0</span>
+        </div>
+        <div style="font-size:11px;color:var(--t2);line-height:1.5;margin-bottom:8px" data-i18n-html="tut_hint">
+          💡 Le Tutti agrège automatiquement les accords saisis dans <strong>Vents</strong>, <strong>Cuivres</strong> et <strong>Cordes</strong>. Cliquez sur une tête de note et glissez verticalement pour la modifier (snap diatonique).
+        </div>
+
+        <!-- Tonalité + contrôles -->
+        <div class="key-row" style="margin-bottom:6px;flex-wrap:wrap">
+          <span class="key-label" data-i18n="ah_kl">Tonalité :</span>
+          <select class="note-sel" id="tut_keySel" onchange="TUT_updateKey()"></select>
+          <button class="btn" onclick="TUT_render()" data-i18n="tut_refresh" style="margin-left:8px">↻ Rafraîchir</button>
+          <button class="play-btn" id="tut_btnPlayAll" onclick="TUT_playAll()" data-i18n="btn_play_all" style="margin-left:auto">▶ Écouter tout</button>
+          <button class="play-btn" id="tut_btnPlaySel" onclick="TUT_playSelected()" data-i18n="btn_play_sel">▶ Moment</button>
+          <label style="font-size:11px;color:var(--t2)" data-i18n="ah_tp">Tempo:</label>
+          <input type="number" class="tempo-input" id="tut_tempoInput" value="72" min="30" max="200">
+          <span style="font-size:10px;color:var(--t3)">bpm</span>
+          <button class="btn" onclick="TUT_exportPDF()" data-i18n="tut_btn_pdf_orch">📄 PDF Orchestre</button>
+          <button class="btn" onclick="TUT_exportReduction()" data-i18n="tut_btn_pdf_red">🎼 PDF Réduction</button>
+        </div>
+
+        <!-- Panneau résumé "Instruments actifs" -->
+        <div id="tut_summary" style="margin-top:8px;padding:8px;background:rgba(83,74,183,0.04);border-radius:6px;min-height:36px"></div>
+      </div>
+
+      <!-- Percussions panel -->
+      <div class="card" style="margin-top:10px">
+        <div class="card-title" data-i18n="tut_perc_title">🥁 Percussions</div>
+        <div id="tut_percPanel"></div>
+      </div>
+
+      <!-- Partition Tutti -->
+      <div class="card" style="margin-top:10px">
+        <div class="card-title" data-i18n="tut_score_title">Conducteur — Partition orchestrale</div>
+        <div style="overflow-x:auto;width:100%">
+          <canvas id="tut_scoreCanvas" class="score-canvas" style="min-height:300px;display:block"></canvas>
+        </div>
+      </div>
+
+    </div><!-- /ah_tuttiWrapper -->
+
   </div></div>
 
 </div>

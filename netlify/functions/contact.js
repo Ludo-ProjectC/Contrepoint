@@ -1,12 +1,8 @@
-(function(){
-  /*
-   * ══════════════════════════════════════════════════════
-   * IMPORTANT : remplace la valeur ci-dessous par ta clé
-   * d'accès Web3Forms (https://web3forms.com — gratuit).
-   * ══════════════════════════════════════════════════════
-   */
-  var W3F_KEY = 'YOUR_WEB3FORMS_ACCESS_KEY_HERE';
+// js/contact.js
+// Formulaire de contact — proxy via /api/contact (Netlify Function)
+// W3F_KEY n'est PLUS exposé ici
 
+(function(){
   var CT_I18N={
     fr:{title:'Nous contacter',sub:'Une question, un problème technique ou une suggestion ? Remplissez le formulaire ci-dessous.',name:'Votre nom',email:'Votre courriel',subject:'Sujet',message:'Message',btn:'Envoyer le message',sending:'Envoi en cours…',success:'Message envoyé avec succès ! Nous vous répondrons bientôt.',error:'Erreur lors de l\'envoi. Veuillez réessayer.',optGen:'Question générale',optBug:'Signaler un problème',optLic:'Licence / Paiement',optRef:'Demande de remboursement',optSug:'Suggestion',optOth:'Autre',errName:'Veuillez entrer votre nom.',errEmail:'Veuillez entrer un courriel valide.',errMsg:'Veuillez écrire un message.'},
     en:{title:'Contact Us',sub:'Have a question, technical issue, or suggestion? Fill out the form below.',name:'Your name',email:'Your email',subject:'Subject',message:'Message',btn:'Send message',sending:'Sending…',success:'Message sent successfully! We\'ll get back to you soon.',error:'Error sending message. Please try again.',optGen:'General question',optBug:'Report a bug',optLic:'License / Payment',optRef:'Refund request',optSug:'Suggestion',optOth:'Other',errName:'Please enter your name.',errEmail:'Please enter a valid email.',errMsg:'Please write a message.'},
@@ -19,20 +15,18 @@
     var item=btn.closest('.faq-item');
     if(!item)return;
     var isOpen=item.classList.contains('open');
-    /* Close all other items (single-open accordion behaviour) */
     var all=document.querySelectorAll('.faq-item');
     for(var i=0;i<all.length;i++){
       all[i].classList.remove('open');
       var b=all[i].querySelector('.faq-q');
       if(b)b.setAttribute('aria-expanded','false');
     }
-    /* Toggle the clicked item */
     if(!isOpen){
       item.classList.add('open');
       btn.setAttribute('aria-expanded','true');
     }
   };
-  /* Keyboard support: Enter/Space already handled by <button> natively. ESC closes any open item. */
+
   document.addEventListener('keydown',function(e){
     if(e.key==='Escape'){
       var openItem=document.querySelector('.faq-item.open');
@@ -85,18 +79,15 @@
     msg.className='ct-msg';
 
     try{
-      var res=await fetch('https://api.web3forms.com/submit',{
+      var res=await fetch('/api/contact',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({
-          access_key:W3F_KEY,
-          subject:'[Contrepoint] '+subjectText,
-          from_name:name,
-          replyto:email,
           name:name,
           email:email,
-          sujet:subjectText,
-          message:message
+          message:'['+subjectText+'] '+message,
+          // honeypot — toujours vide côté légit
+          website:''
         })
       });
       var data=await res.json();

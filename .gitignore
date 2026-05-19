@@ -1,0 +1,41 @@
+# ═══════════════════════════════════════════════════
+#  Contrepoint — .gitignore
+# ═══════════════════════════════════════════════════
+
+# ── SECRETS — ne jamais committer ─────────────────
+.env
+.env.local
+.env.production
+.env.staging
+*.pem
+*.key
+*.crt
+secrets.json
+config/secrets.*
+
+# ── Node ──────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-error.log
+package-lock.json
+
+# ── Logs ──────────────────────────────────────────
+logs/
+*.log
+
+# ── OS ────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Éditeurs ──────────────────────────────────────
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# ── Build / temp ──────────────────────────────────
+dist/
+build/
+.cache/
+tmp/

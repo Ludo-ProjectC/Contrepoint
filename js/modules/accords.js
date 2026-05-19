@@ -203,8 +203,22 @@ function staffSVG(chord,displayName){
     const acc=n.accStr;
     if(acc){const isDb=acc==='𝄪'||acc==='𝄫';const fs=isDb?18:14;svg+=`<text x="${x-13}" y="${y+5}" font-size="${fs}" fill="#1e1e2e" font-family="serif" text-anchor="middle">${acc}</text>`;}
     svg+=`<ellipse cx="${x}" cy="${y}" rx="${nR}" ry="${nR-1.5}" fill="#1e1e2e" transform="rotate(-12 ${x} ${y})"/>`;
-    svg+=`<text x="${x}" y="${lY(4)+26}" font-size="11" fill="${idx===0?'#534AB7':'#6b7280'}" font-weight="${idx===0?'700':'500'}" font-family="DM Sans,sans-serif" text-anchor="middle">${n.name.replace(/𝄪/g,'').replace(/𝄫/g,'')}</text>`;
-    const nAcc=n.name.substring(1);if(nAcc==='𝄪'||nAcc==='𝄫')svg+=`<text x="${x+12}" y="${lY(4)+26}" font-size="15" fill="${idx===0?'#534AB7':'#6b7280'}" font-family="serif" text-anchor="middle">${nAcc}</text>`;
+    {const baseLetter=n.name.charAt(0);
+    const rawAcc=n.name.substring(1);
+    const isDbAcc=rawAcc==='𝄪'||rawAcc==='𝄫';
+    const lblY=lY(4)+26;
+    const clr=idx===0?'#534AB7':'#6b7280';
+    const fw=idx===0?'700':'500';
+    if(!rawAcc){
+      svg+=`<text x="${x}" y="${lblY}" font-size="11" fill="${clr}" font-weight="${fw}" font-family="DM Sans,sans-serif" text-anchor="middle">${baseLetter}</text>`;
+    } else if(isDbAcc){
+      svg+=`<text x="${x}" y="${lblY}" font-size="11" fill="${clr}" font-weight="${fw}" font-family="DM Sans,sans-serif" text-anchor="middle">${baseLetter}</text>`;
+      svg+=`<text x="${x+8}" y="${lblY-4}" font-size="10" fill="${clr}" font-family="serif" text-anchor="middle">${rawAcc}</text>`;
+    } else {
+      /* ♯ or ♭: letter left-anchored, accidental as superscript */
+      svg+=`<text x="${x-3}" y="${lblY}" font-size="11" fill="${clr}" font-weight="${fw}" font-family="DM Sans,sans-serif" text-anchor="middle">${baseLetter}</text>`;
+      svg+=`<text x="${x+5}" y="${lblY-4}" font-size="9" fill="${clr}" font-family="serif" text-anchor="middle">${rawAcc}</text>`;
+    }}
   });
   svg+=`<text x="${W/2}" y="${H-6}" font-size="15" fill="#534AB7" font-weight="700" font-family="DM Sans,serif" text-anchor="middle">${displayName}</text>`;
   svg+='</svg>';return svg;

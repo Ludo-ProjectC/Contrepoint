@@ -504,32 +504,38 @@ function SEQ_computeSequence(){
   // ── Helper: build SATB voicing from pitch classes ──
   function SEQ_voiceSATB(pcs, roman, rootPC, qual, inversion){
     const rootName = SEQ_pcToName(rootPC, SEQ_S.key);
-    const bassPC = inversion === 1 ? pcs[1] : pcs[0];
-    let bassMidi = 48 + bassPC;
+
+    // Identify voice pitch classes
+    const bassPC  = inversion === 1 ? pcs[1] : pcs[0];
+    const tenorPC = inversion === 1 ? pcs[2] : pcs[1];
+    const altoPC  = inversion === 1 ? pcs[0] : pcs[2];
+    const sopPC   = pcs.length === 4 ? pcs[3] : pcs[0];
+
+    // Bass: G2(43)–G3(55)
+    let bassMidi = 36 + bassPC;
+    while(bassMidi < 43) bassMidi += 12;
     while(bassMidi > 55) bassMidi -= 12;
-    while(bassMidi < 36) bassMidi += 12;
-    
-    const tenPC = inversion === 1 ? pcs[2] : pcs[1];
-    let tenorMidi = 60 + tenPC;
-    while(tenorMidi < bassMidi + 3) tenorMidi += 12;
-    while(tenorMidi > 67) tenorMidi -= 12;
+
+    // Tenor: above bass, max B4(71)
+    let tenorMidi = 48 + tenorPC;
+    while(tenorMidi <= bassMidi) tenorMidi += 12;
+    while(tenorMidi > 71) tenorMidi -= 12;
     if(tenorMidi <= bassMidi) tenorMidi += 12;
-    
-    const altPC = inversion === 1 ? pcs[0] : pcs[2];
-    let altoMidi = 60 + altPC;
-    while(altoMidi < tenorMidi + 2) altoMidi += 12;
-    while(altoMidi > 76) altoMidi -= 12;
+
+    // Alto: above tenor, max D5(74)
+    let altoMidi = 60 + altoPC;
+    while(altoMidi <= tenorMidi) altoMidi += 12;
+    while(altoMidi > 74) altoMidi -= 12;
     if(altoMidi <= tenorMidi) altoMidi += 12;
-    
-    let sopMidi;
-    if(pcs.length === 4) sopMidi = 60 + pcs[3];
-    else sopMidi = 60 + pcs[0];
-    while(sopMidi < altoMidi) sopMidi += 12;
-    while(sopMidi > 84) sopMidi -= 12;
+
+    // Soprano: above alto, max G5(79)
+    let sopMidi = 60 + sopPC;
+    while(sopMidi <= altoMidi) sopMidi += 12;
+    while(sopMidi > 79) sopMidi -= 12;
     if(sopMidi <= altoMidi) sopMidi += 12;
-    
+
     const qualStr = qual === 'M' ? '' : qual === 'm' ? 'm' : qual === 'dim' ? 'dim' : qual === 'aug' ? '+' : qual === '7' ? '7' : qual === 'm7' ? 'm7' : qual === 'M7' ? 'Δ7' : qual === 'ø7' ? 'ø7' : qual === 'o7' ? 'o7' : qual === 'mM7' ? 'mΔ7' : qual;
-    
+
     return {
       pcs, midi: [bassMidi, tenorMidi, altoMidi, sopMidi],
       deg: 0, roman, quality: qual, inversion: inversion||0,
@@ -737,25 +743,24 @@ function SEQ_computeSequenceRaw(){
 
   function SEQ_voiceSATB_raw(pcs, roman, rootPC, qual, inversion){
     const rootName = SEQ_pcToName(rootPC, SEQ_S.key);
-    const bassPC = inversion === 1 ? pcs[1] : pcs[0];
-    let bassMidi = 48 + bassPC;
+    const bassPC  = inversion === 1 ? pcs[1] : pcs[0];
+    const tenorPC = inversion === 1 ? pcs[2] : pcs[1];
+    const altoPC  = inversion === 1 ? pcs[0] : pcs[2];
+    const sopPC   = pcs.length === 4 ? pcs[3] : pcs[0];
+    let bassMidi = 36 + bassPC;
+    while(bassMidi < 43) bassMidi += 12;
     while(bassMidi > 55) bassMidi -= 12;
-    while(bassMidi < 36) bassMidi += 12;
-    const tenPC = inversion === 1 ? pcs[2] : pcs[1];
-    let tenorMidi = 60 + tenPC;
-    while(tenorMidi < bassMidi + 3) tenorMidi += 12;
-    while(tenorMidi > 67) tenorMidi -= 12;
+    let tenorMidi = 48 + tenorPC;
+    while(tenorMidi <= bassMidi) tenorMidi += 12;
+    while(tenorMidi > 71) tenorMidi -= 12;
     if(tenorMidi <= bassMidi) tenorMidi += 12;
-    const altPC = inversion === 1 ? pcs[0] : pcs[2];
-    let altoMidi = 60 + altPC;
-    while(altoMidi < tenorMidi + 2) altoMidi += 12;
-    while(altoMidi > 76) altoMidi -= 12;
+    let altoMidi = 60 + altoPC;
+    while(altoMidi <= tenorMidi) altoMidi += 12;
+    while(altoMidi > 74) altoMidi -= 12;
     if(altoMidi <= tenorMidi) altoMidi += 12;
-    let sopMidi;
-    if(pcs.length === 4) sopMidi = 60 + pcs[3];
-    else sopMidi = 60 + pcs[0];
-    while(sopMidi < altoMidi) sopMidi += 12;
-    while(sopMidi > 84) sopMidi -= 12;
+    let sopMidi = 60 + sopPC;
+    while(sopMidi <= altoMidi) sopMidi += 12;
+    while(sopMidi > 79) sopMidi -= 12;
     if(sopMidi <= altoMidi) sopMidi += 12;
     const qualStr = qual === 'M' ? '' : qual === 'm' ? 'm' : qual === 'dim' ? 'dim' : qual === 'aug' ? '+' : qual === '7' ? '7' : qual === 'm7' ? 'm7' : qual === 'M7' ? 'Δ7' : qual === 'ø7' ? 'ø7' : qual === 'o7' ? 'o7' : qual === 'mM7' ? 'mΔ7' : qual;
     return {pcs, midi:[bassMidi, tenorMidi, altoMidi, sopMidi], deg:0, roman, quality:qual, inversion:inversion||0, rootName, name:rootName+qualStr};
@@ -1048,8 +1053,9 @@ function SEQ_renderStaffSVG(){
   }
   
   function SEQ_midiToBassY(midi){
-    const diaFromC3 = SEQ_midiToDia(midi) - SEQ_midiToDia(48);
-    return bY(4) - (diaFromC3 - 2) * (LS/2); // E3 at bottom line
+    // Bass clef bottom line = G2 (MIDI 43), top line = A3 (MIDI 57)
+    const diaFromG2 = SEQ_midiToDia(midi) - SEQ_midiToDia(43);
+    return bY(4) - diaFromG2 * (LS/2);
   }
   
   function SEQ_midiToDia(midi){

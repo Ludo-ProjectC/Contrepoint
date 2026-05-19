@@ -1,0 +1,8 @@
+{
+  "name": "contrepoint-functions",
+  "version": "1.0.0",
+  "description": "Netlify Functions for Contrepoint backend",
+  "dependencies": {
+    "sanitize-html": "^2.13.0"
+  }
+}
