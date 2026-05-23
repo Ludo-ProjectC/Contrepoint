@@ -1758,7 +1758,7 @@ mark.fm-dict-hl{background:#fef08a;color:#1e1e2e;padding:0 1px;border-radius:2px
 .home-price-box{text-align:center;padding:20px;background:rgba(255,255,255,.7);border-radius:14px;margin-top:8px}
 .home-price-amount{font-size:42px;font-weight:800;color:#534AB7;letter-spacing:-.03em}
 .home-price-text{font-size:13px;color:#6b7280;margin:4px 0 16px}
-.home-footer{display:flex;align-items:center;justify-content:space-between;padding:16px 4px;margin-top:10px;border-top:1px solid #e5e7eb;font-size:11px;color:#9ca3af;flex-wrap:wrap;gap:8px}
+.home-footer{display:flex;align-items:center;justify-content:space-between;padding:16px 4px;margin-top:10px;border-top:1px solid #e5e7eb;font-size:11px;color:#6b7280;flex-wrap:wrap;gap:8px}
 .home-footer-link{color:#534AB7;text-decoration:none;font-weight:500;font-size:11px}
 .home-footer-link:hover{text-decoration:underline}
 .home-footer-links{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -1887,7 +1887,7 @@ mark.fm-dict-hl{background:#fef08a;color:#1e1e2e;padding:0 1px;border-radius:2px
 .home-footer-share-btn{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;min-width:28px;min-height:28px;max-width:28px;max-height:28px;border-radius:50%;background:#f3f4f6;color:#6b7280;border:none;cursor:pointer;transition:all .2s;text-decoration:none;flex-shrink:0;padding:0;line-height:0}
 .home-footer-share-btn:hover{background:#e0dfe8;color:#534AB7;transform:translateY(-1px)}
 .home-footer-share-btn svg{width:13px;height:13px;min-width:13px;min-height:13px;max-width:13px;max-height:13px;fill:currentColor;display:block;flex-shrink:0}
-.home-footer-share-label{font-size:11px;color:#9ca3af;margin-right:4px;flex-shrink:0}
+.home-footer-share-label{font-size:11px;color:#6b7280;margin-right:4px;flex-shrink:0}
 
 /* ═══ SHARE MODAL & TOAST (CSS manquant — fix logos énormes) ═══ */
 .share-modal-bg{
@@ -2027,7 +2027,7 @@ mark.fm-dict-hl{background:#fef08a;color:#1e1e2e;padding:0 1px;border-radius:2px
 .home-section-faq{max-width:920px;margin:60px auto 50px;padding:0 24px}
 .home-faq-label{display:inline-block;background:#EEEDFE;color:#534AB7;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1.2px;margin-bottom:16px}
 .home-faq-title{font-size:32px;font-weight:700;color:#1e1e2e;margin-bottom:8px;letter-spacing:-0.5px;line-height:1.15}
-.home-faq-sub{font-size:15px;color:#6b7280;margin-bottom:32px;line-height:1.6}
+.home-faq-sub{font-size:15px;color:#4b5563;margin-bottom:32px;line-height:1.6}
 .faq-list{display:flex;flex-direction:column;gap:10px}
 .faq-item{background:#fff;border:1px solid #f0f0f4;border-radius:12px;overflow:hidden;transition:border-color .2s,box-shadow .2s}
 .faq-item:hover{border-color:#d1cfe6}

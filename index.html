@@ -355,7 +355,7 @@
   <div class="topbar">
     <div class="logo" id="logoText">Contrepoint</div>
     <div class="lang-sel" id="langSel">
-      <button class="lang-btn" onclick="toggleLangDD()" aria-label="Choisir la langue" aria-haspopup="true" aria-expanded="false" id="langBtn">
+      <button class="lang-btn" onclick="toggleLangDD()" aria-label="FR" aria-haspopup="true" aria-expanded="false" id="langBtn">
         <span id="langLabel">FR</span>
         <svg width="10" height="6" viewBox="0 0 10 6" style="margin-left:2px" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
       </button>
@@ -391,15 +391,15 @@
 
 <!-- ═══ Scripts globaux (chargés dans l'ordre) ═══ -->
 <!-- 1. i18n + globals partagés (avant tout module) -->
-<script src="js/i18n.js"></script>
-<script src="js/shared.js"></script>
+<script src="js/i18n.js" defer></script>
+<script src="js/shared.js" defer></script>
 <!-- 2. Services transversaux -->
-<script src="js/premium.js"></script>
-<script src="js/contact.js"></script>
-<script src="js/seo.js"></script>
-<script src="js/sw.js"></script>
+<script src="js/premium.js" defer></script>
+<script src="js/contact.js" defer></script>
+<script src="js/seo.js" defer></script>
+<script src="js/sw.js" defer></script>
 <!-- 3. Loader principal (ESM pour permettre import() dynamique) -->
-<script src="js/main.js"></script>
+<script src="js/main.js" defer></script>
 
 <!-- License Modal (premium.js uses this) -->
 <div id="licModalBg" class="lm-bg" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center" onclick="if(event.target===this)closeLicModal()">
@@ -419,10 +419,10 @@
 </div>
 
 <!-- ═══ Footer légal ═══ -->
-<footer style="text-align:center;padding:12px 16px;font-size:11px;color:#9ca3af;margin-top:auto;border-top:1px solid #f0f0f4">
-  <a href="/privacy" style="color:#9ca3af;text-decoration:none" onmouseover="this.style.color='#534AB7'" onmouseout="this.style.color='#9ca3af'">Politique de confidentialité · Privacy Policy · Política de privacidad</a>
+<footer style="text-align:center;padding:12px 16px;font-size:11px;color:#6b7280;margin-top:auto;border-top:1px solid #f0f0f4">
+  <a href="/privacy" style="color:#6b7280;text-decoration:none" onmouseover="this.style.color='#534AB7'" onmouseout="this.style.color='#6b7280'">Politique de confidentialité · Privacy Policy · Política de privacidad</a>
 </footer>
 
-<script src="js/google-drive.js"></script>
+<script src="js/google-drive.js" defer></script>
 </body>
 </html>
