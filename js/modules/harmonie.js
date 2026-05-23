@@ -444,14 +444,201 @@ document.addEventListener('click',function(e){
   if(dd&&!dd.contains(e.target))dd.classList.remove('open');
 });
 
+/* ── Cercle des Quintes ── */
+(function(){
+  // Labels trilingues par tonalité
+  const LABELS_MAJ={
+    fr:['Do','Sol','Ré','La','Mi','Si','Fa♯','Ré♭','La♭','Mi♭','Si♭','Fa'],
+    en:['C','G','D','A','E','B','F♯','D♭','A♭','E♭','B♭','F'],
+    es:['Do','Sol','Re','La','Mi','Si','Fa♯','Re♭','La♭','Mi♭','Si♭','Fa'],
+  };
+  const LABELS_MIN={
+    fr:['La m','Mi m','Si m','Fa♯m','Do♯m','Sol♯m','Ré♯m','Si♭m','Fa m','Do m','Sol m','Ré m'],
+    en:['Am','Em','Bm','F♯m','C♯m','G♯m','D♯m','B♭m','Fm','Cm','Gm','Dm'],
+    es:['La m','Mi m','Si m','Fa♯m','Do♯m','Sol♯m','Re♯m','Si♭m','Fa m','Do m','Sol m','Re m'],
+  };
+
+  const COF_MAJOR=[
+    {key:'C',  angle:0},  {key:'G',  angle:30}, {key:'D',  angle:60},
+    {key:'A',  angle:90}, {key:'E',  angle:120},{key:'B',  angle:150},
+    {key:'F♯', angle:180},{key:'D♭', angle:210},{key:'A♭', angle:240},
+    {key:'E♭', angle:270},{key:'B♭', angle:300},{key:'F',  angle:330},
+  ];
+  const COF_MINOR=[
+    {key:'A',  angle:0},  {key:'E',  angle:30}, {key:'B',  angle:60},
+    {key:'F♯', angle:90}, {key:'C♯', angle:120},{key:'G♯', angle:150},
+    {key:'D♯', angle:180},{key:'B♭', angle:210},{key:'F',  angle:240},
+    {key:'C',  angle:270},{key:'G',  angle:300}, {key:'D',  angle:330},
+  ];
+
+  const CHORD_MAJOR={
+    'C':'C | F | G7','G':'G | C | D7','D':'D | G | A7','A':'A | D | E7',
+    'E':'E | A | B7','B':'B | E | F♯7','F♯':'F♯ | B | C♯7','D♭':'D♭ | G♭ | A♭7',
+    'A♭':'A♭ | D♭ | E♭7','E♭':'E♭ | A♭ | B♭7','B♭':'B♭ | E♭ | F7','F':'F | B♭ | C7'
+  };
+  const CHORD_MINOR={
+    'A':'Am | Dm | Em','E':'Em | Am | Bm','B':'Bm | Em | F♯m','F♯':'F♯m | Bm | C♯m',
+    'C♯':'C♯m | F♯m | G♯m','G♯':'G♯m | C♯m | D♯m','D♯':'D♯m | G♯m | A♯m',
+    'B♭':'B♭m | E♭m | Fm','F':'Fm | B♭m | Cm','C':'Cm | Fm | Gm',
+    'G':'Gm | Cm | Dm','D':'Dm | Gm | Am'
+  };
+
+  let selectedKey=null, selectedMode=null;
+
+  function toRad(deg){return deg*Math.PI/180;}
+
+  // Palette majeur : dégradé violet → indigo → bleu → teal → vert → or → orange → rouge → rose — cycle chromatique
+  const MAJ_COLORS=[
+    {fill:'#6366f1',hover:'#818cf8',text:'#fff'},  // C  — indigo
+    {fill:'#8b5cf6',hover:'#a78bfa',text:'#fff'},  // G  — violet
+    {fill:'#a855f7',hover:'#c084fc',text:'#fff'},  // D  — purple
+    {fill:'#ec4899',hover:'#f472b6',text:'#fff'},  // A  — pink
+    {fill:'#ef4444',hover:'#f87171',text:'#fff'},  // E  — red
+    {fill:'#f97316',hover:'#fb923c',text:'#fff'},  // B  — orange
+    {fill:'#eab308',hover:'#facc15',text:'#fff'},  // F# — yellow
+    {fill:'#84cc16',hover:'#a3e635',text:'#fff'},  // Db — lime
+    {fill:'#22c55e',hover:'#4ade80',text:'#fff'},  // Ab — green
+    {fill:'#14b8a6',hover:'#2dd4bf',text:'#fff'},  // Eb — teal
+    {fill:'#06b6d4',hover:'#22d3ee',text:'#fff'},  // Bb — cyan
+    {fill:'#3b82f6',hover:'#60a5fa',text:'#fff'},  // F  — blue
+  ];
+  // Palette mineur : versions plus sombres/désaturées des mêmes teintes
+  const MIN_COLORS=[
+    {fill:'#312e81',hover:'#3730a3',text:'#e0e7ff'}, // Am
+    {fill:'#4c1d95',hover:'#5b21b6',text:'#ede9fe'}, // Em
+    {fill:'#6b21a8',hover:'#7e22ce',text:'#f3e8ff'}, // Bm
+    {fill:'#831843',hover:'#9d174d',text:'#fce7f3'}, // F#m
+    {fill:'#7f1d1d',hover:'#991b1b',text:'#fee2e2'}, // C#m
+    {fill:'#7c2d12',hover:'#9a3412',text:'#ffedd5'}, // G#m
+    {fill:'#713f12',hover:'#854d0e',text:'#fef9c3'}, // D#m
+    {fill:'#365314',hover:'#3f6212',text:'#f7fee7'}, // Bbm
+    {fill:'#14532d',hover:'#166534',text:'#dcfce7'}, // Fm
+    {fill:'#134e4a',hover:'#115e59',text:'#ccfbf1'}, // Cm
+    {fill:'#164e63',hover:'#155e75',text:'#cffafe'}, // Gm
+    {fill:'#1e3a8a',hover:'#1e40af',text:'#dbeafe'}, // Dm
+  ];
+
+  function getLang(){return(typeof window.currentLang!=='undefined'?window.currentLang:null)||(document.documentElement.lang)||'fr';}
+
+  function drawCircle(){
+    const svg=document.getElementById('circleOfFifths');
+    if(!svg)return;
+    const lang=getLang(); 
+    const lMaj=LABELS_MAJ[lang]||LABELS_MAJ.fr;
+    const lMin=LABELS_MIN[lang]||LABELS_MIN.fr;
+    const cx=200,cy=200;
+    const rOut=192, rMid=128, rIn=72;
+    const gap=1.2;
+    let html='';
+
+    html+=`<defs>
+      <filter id="cof-shadow" x="-5%" y="-5%" width="110%" height="110%">
+        <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0002"/>
+      </filter>
+    </defs>`;
+    html+=`<circle cx="${cx}" cy="${cy}" r="${rOut+4}" fill="#fff"/>`;
+
+    function sector(r1,r2,aDeg,palette,idx,key,mode,label,bold){
+      const isSel=selectedKey===key&&selectedMode===mode;
+      const a1=toRad(aDeg-15+gap-90);
+      const a2=toRad(aDeg+15-gap-90);
+      const p=(a)=>({x:cx+r2*Math.cos(a),y:cy+r2*Math.sin(a)});
+      const q=(a)=>({x:cx+r1*Math.cos(a),y:cy+r1*Math.sin(a)});
+      const P1=p(a1),P2=p(a2),Q1=q(a1),Q2=q(a2);
+      const col=palette[idx];
+      const fill=isSel?col.hover:col.fill;
+      const opacity=isSel?1:0.88;
+      const sw=isSel?2.5:0;
+      const sCol='#fff';
+      html+=`<path d="M${Q1.x},${Q1.y} A${r1},${r1} 0 0,1 ${Q2.x},${Q2.y} L${P2.x},${P2.y} A${r2},${r2} 0 0,0 ${P1.x},${P1.y} Z"
+        fill="${fill}" opacity="${opacity}" stroke="${sCol}" stroke-width="${sw}"
+        style="cursor:pointer;transition:opacity .15s"
+        onclick="T3.selectCircle('${key}','${mode}')"
+        onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity='${isSel?1:0.88}'"/>`;
+      const rTxt=(r1+r2)/2;
+      const tx=cx+rTxt*Math.cos(toRad(aDeg-90));
+      const ty=cy+rTxt*Math.sin(toRad(aDeg-90));
+      // Sépare accidentel pour rendu en exposant
+      const accMatch=label.match(/(♯|♭)/);
+      const accTxt=accMatch?accMatch[1]:'';
+      const mainTxt=accTxt?label.replace(accTxt,''):label;
+      const fs=bold?(isSel?14:13):(isSel?11:10);
+      const fw=isSel?'700':'600';
+      if(accTxt){
+        // Lettre principale
+        html+=`<text x="${tx}" y="${ty+1}" text-anchor="middle" dominant-baseline="middle"
+          font-size="${fs}" font-weight="${fw}" fill="${col.text}"
+          font-family="system-ui,sans-serif" style="pointer-events:none">${mainTxt}</text>`;
+        // Accidentel en exposant décalé
+        const offX=bold?8:6, offY=bold?-6:-4;
+        html+=`<text x="${tx+offX}" y="${ty+offY}" text-anchor="middle" dominant-baseline="middle"
+          font-size="${fs-3}" font-weight="${fw}" fill="${col.text}"
+          font-family="system-ui,sans-serif" style="pointer-events:none">${accTxt}</text>`;
+      } else {
+        html+=`<text x="${tx}" y="${ty+1}" text-anchor="middle" dominant-baseline="middle"
+          font-size="${fs}" font-weight="${fw}" fill="${col.text}"
+          font-family="system-ui,sans-serif" style="pointer-events:none">${label}</text>`;
+      }
+    }
+
+    COF_MAJOR.forEach((item,i)=>{
+      sector(rMid+1,rOut,item.angle,MAJ_COLORS,i,item.key,'major',lMaj[i],true);
+    });
+    COF_MINOR.forEach((item,i)=>{
+      sector(rIn+1,rMid,item.angle,MIN_COLORS,i,item.key,'minor',lMin[i],false);
+    });
+
+    html+=`<circle cx="${cx}" cy="${cy}" r="${rMid}" fill="none" stroke="#ffffff" stroke-width="2.5"/>`;
+    html+=`<circle cx="${cx}" cy="${cy}" r="${rOut}" fill="none" stroke="#ffffff" stroke-width="2"/>`;
+    html+=`<circle cx="${cx}" cy="${cy}" r="${rIn+1}" fill="none" stroke="#ffffff" stroke-width="2"/>`;
+
+    html+=`<circle cx="${cx}" cy="${cy}" r="${rIn}" fill="#fff" filter="url(#cof-shadow)"/>`;
+    const centreLabel=lang==='en'?'Circle of':'Cercle';
+    const centreLabel2=lang==='en'?'Fifths':lang==='es'?'de Quintas':'des Quintes';
+    html+=`<text x="${cx}" y="${cy-9}" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="700" fill="#1e1e2e" font-family="system-ui,sans-serif" letter-spacing="-0.4">${centreLabel}</text>`;
+    html+=`<text x="${cx}" y="${cy+8}" text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="500" fill="#6b7280" font-family="system-ui,sans-serif">${centreLabel2}</text>`;
+
+    svg.innerHTML=html;
+  }
+
+  window._cofDraw=drawCircle;
+  window._cofSelect=function(key,mode){
+    selectedKey=key; selectedMode=mode;
+    const lang=getLang();
+    const nameEl=document.getElementById('tonalityName');
+    const chordsEl=document.getElementById('tonalityChords');
+    if(nameEl){
+      const idx=mode==='major'?COF_MAJOR.findIndex(x=>x.key===key):COF_MINOR.findIndex(x=>x.key===key);
+      const lbl=mode==='major'?(LABELS_MAJ[lang]||LABELS_MAJ.fr)[idx]:(LABELS_MIN[lang]||LABELS_MIN.fr)[idx];
+      nameEl.textContent=lbl||key;
+    }
+    if(chordsEl){
+      chordsEl.textContent=(mode==='major'?(CHORD_MAJOR[key]||'—'):(CHORD_MINOR[key]||'—'));
+    }
+    drawCircle();
+    // Sync avec le sélecteur principal
+    const kp=window._COF_KP||(window._COF_KP=[{maj:'C',min:'A'},{maj:'G',min:'E'},{maj:'D',min:'B'},{maj:'A',min:'F♯'},{maj:'E',min:'C♯'},{maj:'B',min:'G♯'},{maj:'F♯',min:'D♯'},{maj:'G♭',min:'E♭'},{maj:'D♭',min:'B♭'},{maj:'A♭',min:'F'},{maj:'E♭',min:'C'},{maj:'B♭',min:'G'},{maj:'F',min:'D'}]);
+    const idx=kp.findIndex(p=>p.maj===key||p.min===key);
+    if(idx>=0)try{T3.pickKey(idx);T3.setMode(mode);}catch(e){}
+  };
+})();
+
 return{
-  langUpdate(){render();},
+  langUpdate(){render();const c=document.getElementById('circleContainer');if(c&&c.style.display!=='none')try{window._cofDraw();}catch(e){}},
   setMode(m){st3.mode=m;st3.sel=null;render();},
   doSelect:doSelect,
   toggleDD(){document.getElementById('t3kdd').classList.toggle('open');},
   pickKey(i){st3.pairIdx=i;document.getElementById('t3kdd').classList.remove('open');render();},
   play(){if(st3.lastChord)playChordAudio(st3.lastChord);},
   setPM(m){playMode=m;document.querySelectorAll('.t3-pm-btn').forEach(b=>{const txt=b.textContent;b.classList.toggle('on',(m==='chord'&&(txt==='Accord'||txt==='Chord'))||(m==='arp'&&(txt==='Arpège'||txt==='Arpeggio')));});},
+  toggleCircle(){
+    const c=document.getElementById('circleContainer');
+    if(!c)return;
+    const shown=c.style.display!=='none';
+    c.style.display=shown?'none':'block';
+    if(!shown)try{window._cofDraw();}catch(e){}
+  },
+  selectCircle(key,mode){try{window._cofSelect(key,mode);}catch(e){}},
   init(){render();}
 };
 })();

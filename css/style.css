@@ -345,6 +345,14 @@ input[type=text]:focus{border-color:#7F77DD}
 .t3-pm{display:inline-flex;background:#eae8f4;border-radius:6px;padding:2px}
 .t3-pm-btn{padding:4px 10px;border:none;background:transparent;border-radius:5px;font-family:inherit;font-size:11px;font-weight:500;color:#7c7a9a;cursor:pointer;transition:all .15s}
 .t3-pm-btn.on{background:#fff;color:#534AB7;box-shadow:0 1px 2px rgba(83,74,183,.1)}
+/* ── Cercle des Quintes ── */
+.t3-circle-toggle-btn{padding:5px 12px;border:1.5px solid #e5e7eb;border-radius:20px;background:#fff;font-family:inherit;font-size:12px;font-weight:500;color:#534AB7;cursor:pointer;transition:all .15s}
+.t3-circle-toggle-btn:hover{border-color:#534AB7;background:#f5f3ff}
+.harmonie-circle-container{margin:0 0 10px 0}
+#circleOfFifths{display:block;margin:0 auto}
+#selectedTonalityInfo{color:#374151}
+#selectedTonalityInfo p{margin:4px 0}
+@media(max-width:480px){#circleOfFifths{width:300px;height:300px}}
 /* ═══ ACCORDS ═══ */
 
 
@@ -2495,4 +2503,186 @@ html { -webkit-text-size-adjust: 100%; }
 @media (max-width: 768px) {
   .pc-panel { overflow-x: hidden; }
   .shell { overflow-x: hidden; }
+}
+
+/* ═══ Google Drive Button ═══ */
+.gdrive-btn {
+  background: #fff;
+  color: #4285F4;
+  border: 1.5px solid #4285F4;
+  transition: background .2s, color .2s;
+}
+.gdrive-btn:hover {
+  background: #4285F4;
+  color: #fff;
+}
+.gdrive-btn:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+@media (max-width: 600px) {
+  .gdrive-btn { font-size: 11px; padding: 4px 8px; }
+}
+
+/* ═══ POLYRHYTHMIE ═══ */
+.rythme-polyrhythm-container {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 16px 0 0;
+}
+.polyrhythm-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.polyrhythm-controls label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 12px;
+}
+.polyrhythm-controls select {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+}
+.polyrhythm-controls input[type="range"] {
+  width: 90px;
+  cursor: pointer;
+  accent-color: #534AB7;
+}
+.polyrhythm-controls button {
+  padding: 6px 12px;
+  background: #534AB7;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+}
+.polyrhythm-controls button:hover { background: #3730A3; }
+.polyrhythm-controls button:disabled { background: #ccc; cursor: not-allowed; }
+.polyrhythm-grid {
+  position: relative;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow-x: auto;
+  padding: 10px;
+  min-height: 180px;
+}
+.polyrhythm-cursor {
+  position: absolute;
+  width: 2px;
+  background: #111;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  height: 100%;
+  display: none;
+  pointer-events: none;
+}
+.polyrhythm-info {
+  margin-top: 12px;
+  padding: 10px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: monospace;
+}
+.polyrhythm-info p { margin: 3px 0; }
+.polyrhythm-legend {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #6b7280;
+}
+.poly-toggle-btn.on {
+  background: #534AB7;
+  color: white;
+}
+
+/* ═══ POLYRYTHMIE ═══ */
+.rythme-polyrhythm-container {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 16px 0 0;
+}
+.polyrhythm-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.polyrhythm-controls label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 12px;
+}
+.polyrhythm-controls select {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+}
+.polyrhythm-controls input[type="range"] {
+  width: 90px;
+  cursor: pointer;
+  accent-color: #534AB7;
+}
+.polyrhythm-controls button {
+  padding: 6px 12px;
+  background: #534AB7;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+}
+.polyrhythm-controls button:hover { background: #3730A3; }
+.polyrhythm-controls button:disabled { background: #ccc; cursor: not-allowed; }
+.polyrhythm-grid {
+  position: relative;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow-x: auto;
+  padding: 10px;
+  min-height: 180px;
+}
+.polyrhythm-cursor {
+  position: absolute;
+  width: 2px;
+  background: #111;
+  top: 0; left: 0;
+  z-index: 10;
+  height: 100%;
+  display: none;
+  pointer-events: none;
+}
+.polyrhythm-info {
+  margin-top: 12px;
+  padding: 10px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: monospace;
+}
+.polyrhythm-info p { margin: 3px 0; }
+.polyrhythm-legend {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #6b7280;
+}
+.poly-toggle-btn.on {
+  background: #534AB7 !important;
+  color: white !important;
 }

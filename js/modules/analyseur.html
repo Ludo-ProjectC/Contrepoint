@@ -76,6 +76,7 @@
           <span style="font-size:10px;color:var(--t3)">bpm</span>
           <button class="btn" onclick="AH_exportPDF()" style="margin-left:auto">📄 PDF</button>
           <button class="btn" onclick="AH_exportMIDI()">🎹 MIDI</button>
+          <button class="btn gdrive-btn" onclick="AH_exportToGoogleDrive(this)" data-i18n="gdrive.btn" data-i18n-title="gdrive.hint">☁️ Drive</button>
         </div>
       </div>
 
@@ -979,6 +980,14 @@
       <!-- Partition Tutti -->
       <div class="card" style="margin-top:10px">
         <div class="card-title" data-i18n="tut_score_title">Conducteur — Partition orchestrale</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <label style="font-size:11px;color:var(--t2);white-space:nowrap" data-i18n="tut_sketch_label">Nom du sketch :</label>
+          <input type="text" id="tut_sketchNameInput"
+                 style="flex:1;padding:4px 8px;font-size:12px;border:1px solid var(--bd);border-radius:6px;font-family:inherit"
+                 data-ph="tut_sketch_placeholder"
+                 placeholder="Mon esquisse orchestrale…"
+                 oninput="TUT_sketchName=this.value">
+        </div>
         <div style="overflow-x:auto;width:100%">
           <canvas id="tut_scoreCanvas" class="score-canvas" style="min-height:300px;display:block"></canvas>
         </div>

@@ -2,6 +2,7 @@
 <div class="sec-nav">
     <button class="sec-btn on" onclick="switchSec(0)" data-i18n="btn_ts">Indication de mesure</button>
     <button class="sec-btn" onclick="switchSec(1)" data-i18n="btn_bd">Division du temps</button>
+    <button class="sec-btn poly-toggle-btn" onclick="POLY.toggle()" data-i18n="rythme.togglePolyrhythm">⚡ Polyrythmie</button>
   </div>
 
   <div class="rythme-content">
@@ -56,6 +57,48 @@
       </div>
     </div>
   </div>
+
+  <!-- ═══════ POLYRYTHMIE — DANS pc-panel ═══════ -->
+  <div class="rythme-polyrhythm-container" id="polyrhythmPanel" style="display:none;">
+    <div class="polyrhythm-controls">
+      <label data-i18n="rythme.meters">Mètres:</label>
+      <select id="polyrhythmPreset" onchange="POLY.onPresetChange()">
+        <option value="2-3">2/4 + 3/4</option>
+        <option value="4-3">4/4 + 3/4</option>
+        <option value="3-5">3/4 + 5/4</option>
+        <option value="custom" data-i18n-opt="rythme.custom">Personnalisé</option>
+      </select>
+      <div id="polyCustomInputs" style="display:none;gap:6px;align-items:center;flex-wrap:wrap;">
+        <input type="number" id="polyMeter1" min="2" max="9" value="2" style="width:46px;padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;" oninput="POLY.onCustomChange()" onchange="POLY.onCustomChange()">
+        <span>/4 +</span>
+        <input type="number" id="polyMeter2" min="2" max="9" value="3" style="width:46px;padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;" oninput="POLY.onCustomChange()" onchange="POLY.onCustomChange()">
+        <span>/4</span>
+      </div>
+      <label data-i18n="rythme.measures">Mesures:</label>
+      <input type="range" id="polyrhythmMeasures" min="2" max="16" value="8" oninput="POLY.onMeasuresChange(this.value)">
+      <span id="measuresDisplay">8</span>
+      <label data-i18n="rythme.bpm">Tempo (BPM):</label>
+      <input type="range" id="polyrhythmTempo" min="40" max="200" value="120" oninput="POLY.onTempoChange(this.value)">
+      <span id="tempoDisplay">120</span>
+      <button id="polyrhythmPlayBtn" onclick="POLY.play()">▶ Play</button>
+      <button id="polyrhythmStopBtn" onclick="POLY.stop()" disabled>⏹ Stop</button>
+    </div>
+
+    <div class="polyrhythm-grid" id="polyrhythmGrid">
+      <div class="polyrhythm-cursor" id="polyCursor"></div>
+      <svg id="polySVG" style="display:block;"></svg>
+    </div>
+
+    <div class="polyrhythm-info" id="polyrhythmInfo">
+      <p><span style="color:#EF4444;font-weight:600;" id="polyLabel1">2/4:</span> <span data-i18n="rythme.beat">Temps</span> <span id="polyBeat1">1</span> / <span data-i18n="rythme.measure">Mesure</span> <span id="polyMeasure1">1</span></p>
+      <p><span style="color:#3B82F6;font-weight:600;" id="polyLabel2">3/4:</span> <span data-i18n="rythme.beat">Temps</span> <span id="polyBeat2">1</span> / <span data-i18n="rythme.measure">Mesure</span> <span id="polyMeasure2">1</span></p>
+      <p><span data-i18n="rythme.syncStatus">Synchronisation:</span> <strong id="polySyncStatus">—</strong></p>
+    </div>
+
+    <div class="polyrhythm-legend">
+      <span>🔴 <span data-i18n="rythme.legendDown">Downbeat (Temps 1)</span></span>&nbsp;&nbsp;
+      <span>⬜ <span data-i18n="rythme.legendBeat">Temps</span></span>
+    </div>
   </div>
 
-
+  </div>

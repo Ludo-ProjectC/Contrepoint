@@ -396,6 +396,15 @@ const VTS_FAMILIES = [
     ]
   },
   {
+    key:'englishhorn', color:'#059669', maxCount:1,
+    label:{fr:'🎼 Cor anglais',en:'🎼 English Horn',es:'🎼 Corno inglés'},
+    types:[
+      {instId:'CA', label:{fr:'Cor anglais en Fa (–7)',en:'English Horn in F (–7)',es:'Corno inglés en Fa (–7)'}}
+    ],
+    hasAux:false,
+    auxTypes:[]
+  },
+  {
     key:'clarinets', color:'#D97706', maxCount:3,
     label:{fr:'🎼 Clarinettes',en:'🎼 Clarinets',es:'🎼 Clarinetes'},
     types:[
@@ -488,10 +497,11 @@ function VTS_midiToName(midi, useFlats){
 
 /* ─── State ─── */
 let VTS_config = JSON.parse(JSON.stringify({
-  flutes:    {count:2, type:'FL',  aux:false, auxType:'PICC'},
-  oboes:     {count:2, type:'OB',  aux:false, auxType:'CA'},
-  clarinets: {count:2, type:'CL',  aux:false, auxType:'CLB'},
-  bassoons:  {count:2, type:'BN',  aux:false, auxType:'CBN'}
+  flutes:      {count:2, type:'FL',  aux:false, auxType:'PICC'},
+  oboes:       {count:2, type:'OB',  aux:false, auxType:'CA'},
+  englishhorn: {count:0, type:'CA',  aux:false, auxType:'CA'},
+  clarinets:   {count:2, type:'CL',  aux:false, auxType:'CLB'},
+  bassoons:    {count:2, type:'BN',  aux:false, auxType:'CBN'}
 }));
 let VTS_activeInsts = [];
 let VTS_chords = [];
@@ -1038,7 +1048,7 @@ function VTS_midiToY(midi, staffTop, clefKind){
   const diaPos = oct*7 + VTS_DIA[pc];
   // treble: B4(71) dia34 sur 3e ligne
   // bass  : D3(50) dia22 sur 3e ligne
-  // tenor : A3(57) dia27 sur 4e ligne (+VTS_LS offset)
+  // tenor : pivot décalé +1 ton vers le haut (ref=28 au lieu de 26 original)
   if(clefKind === 'treble') return staffTop + 2*VTS_LS - (diaPos - 34) * (VTS_LS/2);
   if(clefKind === 'tenor')  return staffTop + 2*VTS_LS - (diaPos - 26) * (VTS_LS/2);
   return staffTop + 2*VTS_LS - (diaPos - 22) * (VTS_LS/2);
@@ -1846,6 +1856,7 @@ function BRS_midiToY(midi, staffTop, clef){
   const pc  = ((midi%12)+12)%12;
   const diaPos = oct*7 + BRS_DIA[pc];
   if(clef === 'treble') return staffTop + 2*BRS_LS - (diaPos - 34)*(BRS_LS/2);
+  if(clef === 'tenor')  return staffTop + 2*BRS_LS - (diaPos - 26)*(BRS_LS/2);
   return staffTop + 2*BRS_LS - (diaPos - 22)*(BRS_LS/2);
 }
 function BRS_interval(a,b){ return Math.abs(b-a)%12; }
@@ -2743,6 +2754,12 @@ window.addEventListener('contrepoint:langchange', ()=>{
 /* ── Toggle clef ténor pour trombone ──────────────────────────────── */
 function BRS_toggleTenorClef(slotId){
   BRS_tenorClef[slotId] = !BRS_tenorClef[slotId];
+  const btn = document.getElementById('brs_tenorbtn_'+slotId);
+  if(btn){
+    btn.style.background = BRS_tenorClef[slotId] ? '#534AB7' : 'var(--bg)';
+    btn.style.color = BRS_tenorClef[slotId] ? '#fff' : 'var(--t2)';
+  }
+  if(typeof TUT_render === 'function') TUT_render();
   if(typeof BRS_render === 'function') BRS_render();
 }
 
@@ -2898,9 +2915,11 @@ function STR_motionType(a1,a2,b1,b2){
 // bass   : ligne 3 = D3 (midi 50)
 // alto   : ligne 3 = C4 (midi 60)  [clé d'ut 3e ligne]
 function STR_midiToY(midi, yTop, clef){
-  // référence : note sur la 3e ligne (du bas) de la portée
-  // treble: B4(71) sur 3e ligne, bass: D3(50) sur 3e ligne, alto: C4(60) sur 3e ligne, tenor: A3(57) sur 3e ligne
+  // référence : note sur la 3e ligne (du bas) de la portée (index 2 depuis le haut)
+  // treble: B4(71), bass: D3(50), alto: C4(60) — tous sur la 3e ligne (yTop+2*LS)
+  // tenor : C4(60) sur la 4e ligne (yTop+3*LS) → refLine=3
   const ref = clef==='treble' ? 71 : clef==='bass' ? 50 : clef==='alto' ? 60 : clef==='tenor' ? 57 : 50;
+  const refLine = 2;
   const diatonicSteps = [0,0,1,1,2,3,3,4,4,5,5,6];
   function midiToDiatonic(m){
     const oct = Math.floor(m/12);
@@ -2908,7 +2927,7 @@ function STR_midiToY(midi, yTop, clef){
     return oct*7 + diatonicSteps[pc];
   }
   const dy = midiToDiatonic(ref) - midiToDiatonic(midi);
-  return yTop + 2*STR_LS + dy*(STR_LS/2);
+  return yTop + refLine*STR_LS + dy*(STR_LS/2);
 }
 
 /* ─── Dessine une clef de ténor (Ut 4e ligne) sur le canvas ─── */
@@ -2918,9 +2937,7 @@ function STR_midiToY(midi, yTop, clef){
  * Design : deux rectangles verticaux + "C" stylisé pointant sur la 4e ligne.
  */
 function STR_drawTenorClef(ctx, x, yTop, ls){
-  // Clef de ténor : Do central sur 4e ligne (lineIdx 3),
-  // positionnée 1 espace (= 2 tons) au-dessus de la clef d'alto (lineIdx 2)
-  // → lineIdx 1 (2e ligne depuis le haut)
+  // Clef de ténor : C4 sur 2e ligne (index 1)
   STR_drawCClef(ctx, x, yTop, ls, 1);
 }
 
@@ -2959,17 +2976,17 @@ function STR_drawCClef(ctx, x, yTop, ls, lineIdx, color){
   const SVG_STAFF_H   = 1919.501;
   const SVG_MID_C     = 973.696;
 
-  // cy = position canvas du Do central voulu
+  // cy = position canvas du Do central voulu (ligne lineIdx depuis le haut)
   const cy = yTop + lineIdx * ls;
 
   // Scale : 4 espaces canvas = SVG_STAFF_H
   const scaleY = (4 * ls) / SVG_STAFF_H;
   const scaleX = scaleY;
 
-  // Aligner la 1re ligne de portée SVG sur yTop :
-  //   yTop = svgOriginY + SVG_STAFF_TOP * scaleY
-  //   svgOriginY = yTop - SVG_STAFF_TOP * scaleY
-  const svgOriginY = yTop - SVG_STAFF_TOP * scaleY;
+  // Aligner le Do central du glyphe (SVG_MID_C) sur cy :
+  //   cy = svgOriginY + SVG_MID_C * scaleY
+  //   svgOriginY = cy - SVG_MID_C * scaleY
+  const svgOriginY = cy - SVG_MID_C * scaleY;
 
   ctx.save();
   ctx.fillStyle = col;
@@ -3011,11 +3028,14 @@ function STR_buildInputs(){
       ? `<button onclick="STR_toggleTenorClef('${id}')" id="str_tenorbtn_${id}" title="${window.t('str_clef_tenor')||'Clef de ténor'}"
            style="font-size:9px;padding:2px 6px;border-radius:4px;border:1px solid var(--bd);background:${(STR_tenorClef&&STR_tenorClef[id])?'#534AB7':'var(--bg)'};color:${(STR_tenorClef&&STR_tenorClef[id])?'#fff':'var(--t2)'};cursor:pointer;margin-left:2px;font-weight:600" data-i18n="str_clef_tenor">${window.t('str_clef_tenor')||'Clef de ténor'}</button>`
       : '';
-    // Bouton clef d'alto / clef de sol pour VLA (par défaut clef d'alto, bouton bascule en treble)
+    // Bouton clef d'alto / clef de sol pour VLA
     const hasAltClef = (id === 'VLA');
+    // Par défaut VLA = clef d'alto. STR_altClef[VLA]=true → basculé en clef de sol.
+    // Convention : bouton ÉTEINT = état par défaut (alto actif), bouton ALLUMÉ = clef de sol active.
+    const isTrebleActive = !!(STR_altClef && STR_altClef[id]); // true = clef de sol en cours
     const altBtn = hasAltClef
-      ? `<button onclick="STR_toggleAltClef('${id}')" id="str_altbtn_${id}" title="${(STR_altClef&&STR_altClef[id])?(window.t('str_clef_treble')||'Clef de sol'):(window.t('str_clef_alto')||"Clef d'alto (par défaut)")}"
-           style="font-size:9px;padding:2px 6px;border-radius:4px;border:1px solid var(--bd);background:${(STR_altClef&&STR_altClef[id])?'#534AB7':'var(--bg)'};color:${(STR_altClef&&STR_altClef[id])?'#fff':'var(--t2)'};cursor:pointer;margin-left:2px;font-weight:600">${(STR_altClef&&STR_altClef[id])?(window.t('str_clef_treble')||'Clef de sol'):(window.t('str_clef_alto')||"Clef d'alto")}</button>`
+      ? `<button onclick="STR_toggleAltClef('${id}')" id="str_altbtn_${id}" title="${isTrebleActive?(window.t('str_clef_treble')||'Clef de sol (actif)'):(window.t('str_clef_alto')||"Clef d'alto (actif)")}"
+           style="font-size:9px;padding:2px 6px;border-radius:4px;border:1px solid var(--bd);background:${isTrebleActive?'#534AB7':'var(--bg)'};color:${isTrebleActive?'#fff':'var(--t2)'};cursor:pointer;margin-left:2px;font-weight:600">${isTrebleActive?(window.t('str_clef_treble')||'Clef de sol'):(window.t('str_clef_alto')||"Clef d'alto")}</button>`
       : '';
     h += `
       <div class="voice-row str-voice-row" style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:5px;background:rgba(0,0,0,0.02);border-left:3px solid ${inst.color}">
@@ -3086,8 +3106,18 @@ function STR_toggleTenorClef(id){
 
 function STR_toggleAltClef(id){
   STR_altClef[id] = !STR_altClef[id];
-  // Re-render des inputs pour mettre à jour le label/titre du bouton (Sol/Ut3)
-  if(typeof STR_buildInputs === 'function') STR_buildInputs();
+  const isTrebleActive = !!STR_altClef[id];
+  const btn = document.getElementById('str_altbtn_'+id);
+  if(btn){
+    btn.style.background = isTrebleActive ? '#534AB7' : 'var(--bg)';
+    btn.style.color = isTrebleActive ? '#fff' : 'var(--t2)';
+    btn.textContent = isTrebleActive
+      ? (window.t('str_clef_treble')||'Clef de sol')
+      : (window.t('str_clef_alto')||"Clef d'alto");
+    btn.title = isTrebleActive
+      ? (window.t('str_clef_treble')||'Clef de sol (actif)')
+      : (window.t('str_clef_alto')||"Clef d'alto (actif)");
+  }
   if(typeof TUT_render === 'function') TUT_render();
   STR_render();
 }
@@ -4309,7 +4339,7 @@ function AH_renderScore(){
   }
   if(window.AH_useTenorClef){
     // Remplace la clef de fa sur la portée du bas → Ut 4e ligne
-    AH_drawCClef(ctx, AH_LM+4, AH_bassTop, AH_LS, 1);
+    AH_drawCClef(ctx, AH_LM+4, AH_bassTop, AH_LS, 3);
   }
 
   if(!AH_chords.length) return;
@@ -4639,6 +4669,7 @@ const TUT_TOP = 28;
 let TUT_selMoment = -1;
 let TUT_initialized = false;
 let TUT_keyInfo = { root:0, minor:false, sharps:0 };
+let TUT_sketchName = ''; // nom du sketch saisi par l'utilisateur
 
 // État du drag
 let TUT_drag = null; // {staffData, momentIdx, startY, startMidi, currentMidi}
@@ -4670,12 +4701,14 @@ function TUT_diatonicToMidi(d, useFlats){
 function TUT_midiToY(midi, yTop, clef){
   // treble: B4(71), bass: D3(50), alto: C4(60), tenor: A3(57)
   const ref = clef==='treble' ? 71 : clef==='bass' ? 50 : clef==='alto' ? 60 : clef==='tenor' ? 57 : 50;
+  const refLine = 2;
   const dy = TUT_midiToDiatonic(ref) - TUT_midiToDiatonic(midi);
-  return yTop + 2*TUT_LS + dy*(TUT_LS/2);
+  return yTop + refLine*TUT_LS + dy*(TUT_LS/2);
 }
 function TUT_yToMidi(y, yTop, clef){
   const ref = clef==='treble' ? 71 : clef==='bass' ? 50 : clef==='alto' ? 60 : clef==='tenor' ? 57 : 50;
-  const dy = (y - (yTop + 2*TUT_LS)) / (TUT_LS/2);
+  const refLine = 2;
+  const dy = (y - (yTop + refLine*TUT_LS)) / (TUT_LS/2);
   const refDia = TUT_midiToDiatonic(ref);
   const d = Math.round(refDia - dy);
   return TUT_diatonicToMidi(d);
@@ -5122,7 +5155,10 @@ function TUT_render(){
       ctx.beginPath(); ctx.moveTo(px+5, py1); ctx.lineTo(px+5, py2); ctx.stroke();
     } else if(s.clef === 'tenor'){
       if(typeof STR_drawTenorClef === 'function') STR_drawTenorClef(ctx, TUT_LM+3, s.yTop, TUT_LS);
-    } else if(s.clef === 'treble' || s.clef === 'alto'){
+    } else if(s.clef === 'alto'){
+      if(typeof STR_drawAltClef === 'function') STR_drawAltClef(ctx, TUT_LM+3, s.yTop, TUT_LS);
+      else if(typeof STR_drawCClef === 'function') STR_drawCClef(ctx, TUT_LM+3, s.yTop, TUT_LS, 2);
+    } else if(s.clef === 'treble'){
       ctx.font = `${fs}px "Times New Roman",Georgia,serif`;
       const m = ctx.measureText('\uD834\uDD1E');
       const h = (m.actualBoundingBoxAscent||fs*0.75)+(m.actualBoundingBoxDescent||fs*0.25);
@@ -5515,7 +5551,10 @@ function TUT_exportPDF(){
   // Image canvas
   const imgData = canvas.toDataURL('image/png');
 
-  const title = tx('tut_pdf_title') || 'Contrepoint — Tutti orchestral';
+  const baseTitle = (typeof window.t==='function' && window.t('tut_pdf_title')) || 'Contrepoint — Tutti orchestral';
+  const title = (typeof TUT_sketchName !== 'undefined' && TUT_sketchName.trim())
+    ? TUT_sketchName.trim()
+    : baseTitle;
   const html = `<!DOCTYPE html><html lang="${L}"><head><meta charset="utf-8"><title>${title}</title>
 <style>
 body{font-family:'DM Sans',Arial,sans-serif;color:#1e1e2e;padding:24px;margin:0}

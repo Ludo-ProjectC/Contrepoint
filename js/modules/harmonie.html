@@ -1,5 +1,20 @@
   <div class="pc-panel" id="panHarmonie">
 <div class="t3-wrap">
+      <!-- Bouton toggle Carte Tonale -->
+      <div style="text-align:right;margin-bottom:6px;">
+        <button class="t3-circle-toggle-btn" id="circleToggle" onclick="T3.toggleCircle()" data-i18n="harmonie.toggleCircle">🔄 Carte tonale</button>
+      </div>
+      <!-- Cercle des Quintes -->
+      <div class="harmonie-circle-container" id="circleContainer" style="display:none;">
+        <div class="t3-card" style="padding:16px;text-align:center;">
+          <div class="t3-title" data-i18n-title="harmonie.circleInfo">Cliquez une tonalité pour explorer ses accords</div>
+          <svg id="circleOfFifths" width="400" height="400" viewBox="0 0 400 400" style="max-width:100%;height:auto;"></svg>
+          <div id="selectedTonalityInfo" style="margin-top:10px;font-size:13px;">
+            <p><span data-i18n="harmonie.selected">Tonalité :</span> <strong id="tonalityName" style="color:#534AB7;">—</strong></p>
+            <p><span data-i18n="harmonie.chords">Accords :</span> <span id="tonalityChords" style="font-weight:600;color:#1e1e2e;">—</span></p>
+          </div>
+        </div>
+      </div>
       <div class="t3-card">
         <div class="t3-title" data-i18n="t_key">Tonalité</div>
         <div class="t3-key-row">

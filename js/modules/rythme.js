@@ -428,3 +428,227 @@ const DIV=(function(){
 /* ── Init auto ── */
 try{TR.init()}catch(e){console.error('TR:',e)}
 try{DIV.init()}catch(e){console.error('DIV:',e)}
+
+/* ══════════════════════════════════════
+   POLYRYTHMIE — Emboîtement Métrique
+   ══════════════════════════════════════ */
+const POLY = (function(){
+  let m1=2, m2=3, numMeasures=8, bpm=120;
+  let playing=false, animId=null, startTime=null, audioCtx=null;
+  const beatW=40, rowH=60, rowGap=24, padX=44, padY=14;
+  const C1='#EF4444', C2='#3B82F6';
+
+  function gcd(a,b){return b===0?a:gcd(b,a%b);}
+  function lcm(a,b){return (a*b)/gcd(a,b);}
+
+  function updateLabels(){
+    const l1=document.getElementById('polyLabel1');
+    const l2=document.getElementById('polyLabel2');
+    if(l1) l1.textContent=m1+'/4:';
+    if(l2) l2.textContent=m2+'/4:';
+  }
+
+  function buildGrid(){
+    const svg=document.getElementById('polySVG');
+    if(!svg) return;
+    updateLabels();
+    const isMobile=window.innerWidth<600;
+    const bw=isMobile?25:beatW;
+    const totalBeats1=numMeasures*m1;
+    const totalBeats2=numMeasures*m2;
+    const maxBeats=Math.max(totalBeats1,totalBeats2);
+    const W=padX+maxBeats*bw+20;
+    const H=padY+rowH*2+rowGap+padY+10;
+    svg.setAttribute('width',W);
+    svg.setAttribute('height',H);
+    svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+    document.getElementById('polyrhythmGrid').style.minHeight=(H+20)+'px';
+
+    let html='';
+    const y1=padY;
+    const y2=padY+rowH+rowGap;
+
+    // Labels axes
+    html+=`<text x="4" y="${y1+rowH/2+5}" font-size="11" fill="${C1}" font-weight="700">${m1}/4</text>`;
+    html+=`<text x="4" y="${y2+rowH/2+5}" font-size="11" fill="${C2}" font-weight="700">${m2}/4</text>`;
+
+    [
+      {beats:totalBeats1,meter:m1,y:y1,color:C1},
+      {beats:totalBeats2,meter:m2,y:y2,color:C2},
+    ].forEach(({beats,meter,y,color})=>{
+      // Beats
+      for(let b=0;b<beats;b++){
+        const x=padX+b*bw;
+        const isDown=b%meter===0;
+        html+=`<rect x="${x}" y="${y}" width="${bw-2}" height="${rowH}" rx="3"
+          fill="${color}" fill-opacity="${isDown?'0.35':'0.10'}"
+          stroke="${color}" stroke-opacity="${isDown?'0.7':'0.2'}" stroke-width="${isDown?2:1}"/>`;
+        // Numéro temps dans mesure
+        const beatInMeasure=(b%meter)+1;
+        html+=`<text x="${x+(bw-2)/2}" y="${y+15}" font-size="9" fill="${color}"
+          opacity="${isDown?'0.9':'0.45'}" text-anchor="middle">${beatInMeasure}</text>`;
+        // Numéro mesure sur downbeat
+        if(isDown){
+          const mNum=Math.floor(b/meter)+1;
+          html+=`<text x="${x+(bw-2)/2}" y="${y+rowH-8}" font-size="9" fill="${color}"
+            font-weight="700" text-anchor="middle" opacity="0.8">${mNum}</text>`;
+        }
+      }
+      // Barlines mesures
+      for(let m=0;m<=numMeasures;m++){
+        const x=padX+m*meter*bw;
+        if(x<=padX+beats*bw)
+          html+=`<line x1="${x}" y1="${y}" x2="${x}" y2="${y+rowH}" stroke="${color}" stroke-width="2" stroke-opacity="0.55"/>`;
+      }
+    });
+
+    // Ligne de coincidence LCM (downbeat simultanés)
+    const syncEvery=lcm(m1,m2);
+    for(let step=0;step*bw<padX+Math.max(totalBeats1,totalBeats2)*bw+1;step+=syncEvery){
+      if(step===0) continue;
+      const x=padX+step*bw;
+      if(x<=padX+Math.min(totalBeats1,totalBeats2)*bw)
+        html+=`<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2+rowH}" stroke="#818CF8" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.5"/>`;
+    }
+
+    svg.innerHTML=html;
+    updateSyncStatus();
+  }
+
+  function updateSyncStatus(){
+    const el=document.getElementById('polySyncStatus');
+    if(!el) return;
+    const lang=typeof currentLang!=='undefined'?currentLang:'fr';
+    const s=lcm(m1,m2);
+    if(lang==='en') el.textContent=`Every ${s} beats`;
+    else if(lang==='es') el.textContent=`Cada ${s} pulsos`;
+    else el.textContent=`Tous les ${s} temps`;
+  }
+
+  function audioTick(t, isDown){
+    if(!audioCtx) return;
+    const osc=audioCtx.createOscillator();
+    const gain=audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.frequency.value=isDown?1000:700;
+    gain.gain.setValueAtTime(0.08,t);
+    gain.gain.exponentialRampToValueAtTime(0.001,t+0.05);
+    osc.start(t); osc.stop(t+0.05);
+  }
+
+  function play(){
+    if(playing) return;
+    playing=true;
+    document.getElementById('polyrhythmPlayBtn').disabled=true;
+    document.getElementById('polyrhythmStopBtn').disabled=false;
+    try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}
+    const beatSec=60/bpm;
+    const totalBeats1=numMeasures*m1;
+    const totalBeats2=numMeasures*m2;
+    const maxBeats=Math.max(totalBeats1,totalBeats2);
+    const totalMs=maxBeats*(beatSec*1000);
+    // Schedule audio
+    if(audioCtx){
+      const now=audioCtx.currentTime;
+      for(let b=0;b<totalBeats1;b++) audioTick(now+b*beatSec, b%m1===0);
+      for(let b=0;b<totalBeats2;b++) audioTick(now+b*beatSec, b%m2===0);
+    }
+    startTime=performance.now();
+    const isMobile=window.innerWidth<600;
+    const bw=isMobile?25:beatW;
+    const maxW=padX+maxBeats*bw+20;
+    const cursor=document.getElementById('polyCursor');
+    cursor.style.display='block';
+    function frame(){
+      if(!playing) return;
+      const elapsed=performance.now()-startTime;
+      if(elapsed>=totalMs){stop();return;}
+      const prog=elapsed/totalMs;
+      cursor.style.left=(padX+prog*(maxW-padX))+'px';
+      // Info temps réel
+      const beatIdx=Math.floor(elapsed/(beatSec*1000));
+      const b1=(beatIdx%m1)+1, mes1=Math.min(Math.floor(beatIdx/m1)+1,numMeasures);
+      const b2=(beatIdx%m2)+1, mes2=Math.min(Math.floor(beatIdx/m2)+1,numMeasures);
+      const pb1=document.getElementById('polyBeat1'); if(pb1) pb1.textContent=b1;
+      const pm1=document.getElementById('polyMeasure1'); if(pm1) pm1.textContent=mes1;
+      const pb2=document.getElementById('polyBeat2'); if(pb2) pb2.textContent=b2;
+      const pm2=document.getElementById('polyMeasure2'); if(pm2) pm2.textContent=mes2;
+      animId=requestAnimationFrame(frame);
+    }
+    animId=requestAnimationFrame(frame);
+  }
+
+  function stop(){
+    playing=false;
+    if(animId){cancelAnimationFrame(animId);animId=null;}
+    const cursor=document.getElementById('polyCursor');
+    if(cursor) cursor.style.display='none';
+    const pb=document.getElementById('polyrhythmPlayBtn');
+    const sb=document.getElementById('polyrhythmStopBtn');
+    if(pb) pb.disabled=false;
+    if(sb) sb.disabled=true;
+    ['polyBeat1','polyMeasure1','polyBeat2','polyMeasure2'].forEach(id=>{
+      const el=document.getElementById(id); if(el) el.textContent='1';
+    });
+    if(audioCtx){try{audioCtx.close();}catch(e){}audioCtx=null;}
+  }
+
+  function toggle(){
+    const panel=document.getElementById('polyrhythmPanel');
+    if(!panel) return;
+    const btn=document.querySelector('.poly-toggle-btn');
+    if(panel.style.display==='none'){
+      panel.style.display='block';
+      if(btn) btn.classList.add('on');
+      buildGrid();
+    } else {
+      stop();
+      panel.style.display='none';
+      if(btn) btn.classList.remove('on');
+    }
+  }
+
+  function onPresetChange(){
+    const val=document.getElementById('polyrhythmPreset').value;
+    const ci=document.getElementById('polyCustomInputs');
+    if(val==='custom'){
+      ci.style.display='flex';
+      // Lire les valeurs actuelles des inputs
+      m1=parseInt(document.getElementById('polyMeter1').value)||2;
+      m2=parseInt(document.getElementById('polyMeter2').value)||3;
+    } else {
+      ci.style.display='none';
+      const parts=val.split('-');
+      m1=parseInt(parts[0]); m2=parseInt(parts[1]);
+    }
+    buildGrid();
+  }
+
+  function onCustomChange(){
+    const raw1=document.getElementById('polyMeter1').value.trim();
+    const raw2=document.getElementById('polyMeter2').value.trim();
+    const v1=parseInt(raw1,10);
+    const v2=parseInt(raw2,10);
+    // Ne rebuilder que si les valeurs sont valides (pas NaN, pas vide)
+    const ok1=!isNaN(v1)&&v1>=2&&v1<=9;
+    const ok2=!isNaN(v2)&&v2>=2&&v2<=9;
+    if(ok1) m1=v1;
+    if(ok2) m2=v2;
+    // Rebuild seulement si au moins une valeur valide a changé
+    if(ok1||ok2) buildGrid();
+  }
+
+  function onMeasuresChange(v){
+    numMeasures=parseInt(v);
+    document.getElementById('measuresDisplay').textContent=v;
+    buildGrid();
+  }
+
+  function onTempoChange(v){
+    bpm=parseInt(v);
+    document.getElementById('tempoDisplay').textContent=v;
+  }
+
+  return{toggle,play,stop,buildGrid,onPresetChange,onCustomChange,onMeasuresChange,onTempoChange};
+})();
+window.POLY=POLY;
