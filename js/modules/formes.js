@@ -544,11 +544,11 @@ const FM_DEGREES_MIN=[{cat:'Diatoniques',items:['i','ii°','III','iv','v','VI','
 const FM_DYNAMICS=['ppp','pp','p','mp','mf','f','ff','fff','fp','sfz','cresc.','decresc.'];
 
 const FM_INSTRUMENTS=[
-{fam:'Bois',items:[{id:'picc',n:'Piccolo',k:''},{id:'fl',n:'Flûte',k:''},{id:'fl2',n:'Flûte 2',k:''},{id:'ob',n:'Hautbois',k:''},{id:'ob2',n:'Hautbois 2',k:''},{id:'ca',n:'Cor anglais',k:'en Fa'},{id:'clBb',n:'Clarinette',k:'en Si♭'},{id:'clA',n:'Clarinette',k:'en La'},{id:'clEb',n:'Petite clarinette',k:'en Mi♭'},{id:'clB',n:'Clarinette basse',k:'en Si♭'},{id:'bn',n:'Basson',k:''},{id:'bn2',n:'Basson 2',k:''},{id:'cbn',n:'Contrebasson',k:''}]},
+{fam:'Bois',items:[{id:'picc',n:'Piccolo',k:''},{id:'fl',n:'Flûte 1',k:''},{id:'fl2',n:'Flûte 2',k:''},{id:'fl3',n:'Flûte 3',k:''},{id:'ob',n:'Hautbois 1',k:''},{id:'ob2',n:'Hautbois 2',k:''},{id:'ca',n:'Cor anglais',k:'en Fa'},{id:'clBb',n:'Clarinette 1',k:'en Si♭'},{id:'clA',n:'Clarinette 2',k:'en La'},{id:'clEb',n:'Petite clarinette',k:'en Mi♭'},{id:'clB',n:'Clarinette basse',k:'en Si♭'},{id:'bn',n:'Basson 1',k:''},{id:'bn2',n:'Basson 2',k:''},{id:'bn3',n:'Basson 3',k:''},{id:'bn4',n:'Basson 4',k:''},{id:'cbn',n:'Contrebasson',k:''}]},
 {fam:'Cuivres',items:[{id:'hn',n:'Cor',k:'en Fa'},{id:'hn2',n:'Cor 2',k:'en Fa'},{id:'hn3',n:'Cor 3',k:'en Fa'},{id:'hn4',n:'Cor 4',k:'en Fa'},{id:'tpBb',n:'Trompette',k:'en Si♭'},{id:'tpC',n:'Trompette',k:'en Do'},{id:'tp2',n:'Trompette 2',k:'en Si♭'},{id:'tbn',n:'Trombone',k:''},{id:'tbn2',n:'Trombone 2',k:''},{id:'btbn',n:'Trombone basse',k:''},{id:'tba',n:'Tuba',k:''}]},
 {fam:'Percussion',items:[{id:'timp',n:'Timbales',k:''},{id:'gc',n:'Grosse caisse',k:''},{id:'cc',n:'Caisse claire',k:''},{id:'cym',n:'Cymbales',k:''},{id:'tri',n:'Triangle',k:''},{id:'xyl',n:'Xylophone',k:''},{id:'glock',n:'Glockenspiel',k:''},{id:'tamb',n:'Tambourin',k:''},{id:'perc',n:'Percussion (autre)',k:''}]},
 {fam:'Claviers / Cordes pincées',items:[{id:'harp',n:'Harpe',k:''},{id:'cel',n:'Célesta',k:''},{id:'pno',n:'Piano',k:''},{id:'org',n:'Orgue',k:''}]},
-{fam:'Cordes',items:[{id:'vn1',n:'Violon I',k:''},{id:'vn2',n:'Violon II',k:''},{id:'vla',n:'Alto',k:''},{id:'vc',n:'Violoncelle',k:''},{id:'cb',n:'Contrebasse',k:''}]},
+{fam:'Cordes',items:[{id:'vn1',n:'Violon I',k:''},{id:'vn1d',n:'Violon I div.',k:''},{id:'vn2',n:'Violon II',k:''},{id:'vn2d',n:'Violon II div.',k:''},{id:'vla',n:'Alto',k:''},{id:'vlad',n:'Alto div.',k:''},{id:'vc',n:'Violoncelle',k:''},{id:'vcd',n:'Violoncelle div.',k:''},{id:'cb',n:'Contrebasse',k:''}]},
 {fam:'Voix',items:[{id:'sop',n:'Soprano',k:''},{id:'mez',n:'Mezzo-soprano',k:''},{id:'alt',n:'Alto (voix)',k:''},{id:'ten',n:'Ténor',k:''},{id:'bar',n:'Baryton',k:''},{id:'bas',n:'Basse',k:''},{id:'choeur',n:'Chœur SATB',k:''}]},
 {fam:'Solistes',items:[{id:'sol1',n:'Soliste 1',k:''},{id:'sol2',n:'Soliste 2',k:''},{id:'sol3',n:'Soliste 3',k:''}]}
 ];
@@ -1272,19 +1272,17 @@ function FM_renderDetail(){
     (currentLang==='en'?['Melodic ornamentation','Mode change','Rhythmic variation','Meter change','Register/texture variation','Character variation','Double (diminution)','Ground bass variation','Free variation','Other']:currentLang==='es'?['Ornamentación melódica','Cambio de modo','Variación rítmica','Cambio de compás','Variación de registro/textura','Variación de carácter','Doble (disminución)','Variación sobre bajo','Variación libre','Otro']:['Ornementation mélodique','Changement de mode','Variation rythmique','Changement de mètre','Variation de registre/texture','Variation de caractère','Double (diminution)','Variation sur basse','Variation libre','Autre']).forEach(t=>{h+='<option value="'+t+'"'+(s.variationTech===t?' selected':'')+'>'+t+'</option>'});
     h+='</select></div></div>'}h+='</div>'}
   // Nouveaux blocs Tier 2
-  h+='<div class="fm-advanced-fields">';
-  h+='<details class="fm-collapsible"><summary>🎼 '+(tx('Grille harmonique','Harmonic grid','Rejilla armónica'))+'</summary><div class="fm-grid-editor"><textarea placeholder="'+(tx('Ex: I → V⁶/V → V → I','Ex: I → V⁶/V → V → I','Ej: I → V⁶/V → V → I'))+'" oninput="FM_updField(\''+s.id+'\',\'harmGrid\',this.value)">'+FM_esc(s.harmGrid||'')+'</textarea></div></details>';
-  h+='<details class="fm-collapsible"><summary>🎨 '+(tx('Matériau thématique','Thematic material','Material temático'))+'</summary><div class="fm-theme-fields"><div class="dp-row"><div class="dp-field"><label>'+(tx('Étiquette','Label','Etiqueta'))+'</label><input type="text" value="'+FM_esc(s.themeLabel||'')+'" placeholder="'+(tx('Thème A, Motif héroïque','Theme A, Heroic motif','Tema A, Motivo heroico'))+'" oninput="FM_updField(\''+s.id+'\',\'themeLabel\',this.value)"></div></div><div class="dp-row full"><div class="dp-field"><label>'+(tx('Incipit / Description','Incipit / Description','Incipit / Descripción'))+'</label><textarea placeholder="'+(tx('♩. ♪ ♩ ♩ ou description libre','♩. ♪ ♩ ♩ or free description','♩. ♪ ♩ ♩ o descripción libre'))+'" oninput="FM_updField(\''+s.id+'\',\'themeIncipit\',this.value)">'+FM_esc(s.themeIncipit||'')+'</textarea></div></div></div></details>';
-  h+='<details class="fm-collapsible"><summary>🎭 '+(tx('Texture / Densité','Texture / Density','Textura / Densidad'))+'</summary><div class="fm-texture-fields"><div class="dp-row"><div class="dp-field"><label>'+(tx('Type de texture','Texture type','Tipo de textura'))+'</label><select onchange="FM_updField(\''+s.id+'\',\'texture\',this.value)"><option value="">'+(tx('— Choisir —','— Choose —','— Elegir —'))+'</option>';
-  (currentLang==='en'?['Monophonic','Homophonic','Polyphonic','Fugal','Melody+Acc.','Choral']:currentLang==='es'?['Monofónica','Homofónica','Polifónica','Fugada','Melodía+Acomp.','Coral']:['Monodique','Homophonique','Polyphonique','Fugué','Mélodie+Accomp.','Choral']).forEach(t=>{h+='<option value="'+t+'"'+(s.texture===t?' selected':'')+'>'+t+'</option>'});
-  h+='</select></div><div class="dp-field"><label>'+(tx('Densité','Density','Densidad'))+' (1-5)</label><input type="range" min="1" max="5" value="'+(s.density||3)+'" oninput="this.nextElementSibling.textContent=this.value;FM_updField(\''+s.id+'\',\'density\',parseInt(this.value))"><span>'+(s.density||3)+'</span></div></div></div></details>';
-  h+='</div>';
+
   h+='<div class="dp-row full"><div class="dp-field"><label>Notes</label><textarea oninput="FM_updField(\''+s.id+'\',\'notes\',this.value)" placeholder="'+(tx('Notes libres…','Free notes…','Notas libres…'))+'">'+FM_esc(s.notes)+'</textarea></div></div>';
   h+='<div style="display:flex;gap:6px;margin-top:8px"><button class="tbtn sm" onclick="FM_duplicateSection(\''+s.id+'\')">'+(tx('📋 Dupliquer','📋 Duplicate','📋 Duplicar'))+'</button><button class="tbtn sm danger" onclick="FM_delSectionById(\''+s.id+'\')">'+(tx('🗑 Supprimer','🗑 Delete','🗑 Eliminar'))+'</button></div>';
   // Règles de Gedalge pour les sections de fugue
   const gedalgeRules=FM_getGedalgeRules(s.type,FM_curFormId());
   if(gedalgeRules){h+='<div class="fm-gedalge-block">'+gedalgeRules+'</div>'}
   card.innerHTML=h;
+  // Panel sous-sections
+  const _ssWrap=document.createElement('div');
+  _ssWrap.innerHTML=FM_renderSubSections(s.id);
+  while(_ssWrap.firstChild)card.appendChild(_ssWrap.firstChild);
 }
 
 function FM_getGedalgeRules(sectionType,formId){
@@ -1612,6 +1610,231 @@ function FM_renderMvtConfig(card,m){
 function FM_selectSection(id){FM_state.selectedId=id;FM_render()}
 function FM_selectMovement(i){FM_state.activeMovementIdx=i;FM_state.selectedId=null;FM_render()}
 function FM_updField(id,field,val){const s=FM_curSections().find(x=>x.id===id);if(s){s[field]=val;FM_renderTimeline();FM_renderFormHeader();FM_saveHistory()}}
+
+// ── SOUS-SECTIONS ──────────────────────────────────────────────────────────
+const FM_SUBSEC_MAX=8;
+function FM_getSubSections(sId){const s=FM_curSections().find(x=>x.id===sId);return s?s.subSections||(s.subSections=[]):[];}
+function FM_addSubSection(sId){
+  const ss=FM_getSubSections(sId);
+  if(ss.length>=FM_SUBSEC_MAX){FM_showToast(tx('Maximum 8 sous-sections.','Maximum 8 sub-sections.','Máximo 8 subsecciones.'));return;}
+  const names=[tx('Mélodie','Melody','Melodía'),tx('Harmonie','Harmony','Armonía'),tx('Contrechant','Counter-melody','Contracanto'),tx('Basse','Bass','Bajo')];
+  ss.push({id:FM_uid(),name:names[ss.length]||('SS '+(ss.length+1)),instruments:[],harmony:'',measures:0});
+  FM_saveHistory();FM_renderDetail();
+}
+function FM_delSubSection(sId,ssId){
+  const s=FM_curSections().find(x=>x.id===sId);if(!s||!s.subSections)return;
+  s.subSections=s.subSections.filter(x=>x.id!==ssId);
+  FM_saveHistory();FM_renderDetail();
+}
+function FM_updSubSection(sId,ssId,field,val){
+  const ss=FM_getSubSections(sId).find(x=>x.id===ssId);if(!ss)return;
+  ss[field]=val;
+  if(field==='measures')FM_renderTimeline();
+  FM_saveHistory();FM_renderDetail();
+}
+function FM_toggleSubSecInstr(sId,ssId,instrId,instrName){
+  const ss=FM_getSubSections(sId).find(x=>x.id===ssId);if(!ss)return;
+  ss.instruments=ss.instruments||[];
+  const idx=ss.instruments.findIndex(x=>x.id===instrId);
+  if(idx>=0)ss.instruments.splice(idx,1);
+  else ss.instruments.push({id:instrId,name:instrName});
+  FM_saveHistory();
+  // Update DOM without closing dropdown
+  // 1. Refresh tag display
+  const disp=document.getElementById('fmss_disp_'+ssId);
+  if(disp){
+    disp.innerHTML='';
+    if(ss.instruments.length){
+      ss.instruments.forEach(x=>{const t=document.createElement('span');t.className='fm-subsec-instr-tag';t.textContent=x.name;disp.appendChild(t);});
+      const arr=document.createElement('span');arr.className='fm-subsec-instr-arrow';arr.textContent='▾';disp.appendChild(arr);
+    } else {
+      const ph=document.createElement('span');ph.className='fm-subsec-instr-ph';
+      const lang=typeof currentLang!=='undefined'?currentLang:'fr';
+      ph.textContent=lang==='en'?'Choose instruments…':lang==='es'?'Elegir instrumentos…':'Choisir des instruments…';
+      disp.appendChild(ph);
+      const arr=document.createElement('span');arr.className='fm-subsec-instr-arrow';arr.textContent='▾';disp.appendChild(arr);
+    }
+  }
+  // 2. Refresh checkmark in dropdown
+  const dd=document.getElementById('fmss_dd_'+ssId);
+  if(dd){
+    // (find by iterating labels below)
+    // Find by iterating labels
+    dd.querySelectorAll('label.fm-subsec-instr-opt').forEach(l=>{
+      const cb=l.querySelector('input[type="checkbox"]');
+      if(!cb)return;
+      // Match by onchange containing instrId
+      if(cb.getAttribute('onchange')&&cb.getAttribute('onchange').includes("'"+instrId+"'")){
+        const isNowChecked=ss.instruments.some(x=>x.id===instrId);
+        cb.checked=isNowChecked;
+        l.classList.toggle('is-checked',isNowChecked);
+        const chkSpan=l.querySelector('.fm-subsec-instr-check');
+        if(chkSpan)chkSpan.textContent=isNowChecked?'✓':'';
+      }
+    });
+    // 3. Update count
+    const cnt=document.getElementById('fmss_cnt_'+ssId);
+    if(cnt){
+      const lang=typeof currentLang!=='undefined'?currentLang:'fr';
+      cnt.textContent=ss.instruments.length?ss.instruments.length+' '+(lang==='en'?'selected':lang==='es'?'seleccionado(s)':'sélectionné(s)'):'';
+    }
+  }
+  // 4. Update header total
+  const hdr=document.querySelector('#fmss_'+ssId+' .fm-subsec-header .fm-subsec-total');
+  // Refresh full subsection header total via re-render would close dropdown; skip
+}
+// Instruments palette (from FM_ORCH_INSTRUMENTS line 547)
+function FM_getInstrPalette(){
+  // Use FM_INSTRUMENTS as single source of truth
+  return typeof FM_INSTRUMENTS!=='undefined'?FM_INSTRUMENTS:[];
+}
+function FM_renderSubSections(sId){
+  const ss=FM_getSubSections(sId);
+  const lang=typeof currentLang!=='undefined'?currentLang:'fr';
+  const T=(f,e,s)=>lang==='en'?e:lang==='es'?s:f;
+  const palette=FM_getInstrPalette();
+  const totalSubMes=ss.reduce((a,x)=>a+(parseInt(x.measures)||0),0);
+  // Common chord chips
+  const chordChips=['I','ii','iii','IV','V','vi','vii°','I⁷','V⁷','ii⁷','IV⁷','N⁶','V/V','♭VII','♭VI','Cm','Dm','Em','Fm','Gm','Am','C','D','E','F','G','A','B','Cm7','Dm7','G7','Fmaj7'];
+  let h='<div class="fm-subsec-panel">';
+  h+='<div class="fm-subsec-header">';
+  h+='<h4>🎵 '+T('Sous-sections','Sub-sections','Subsecciones');
+  if(ss.length>0)h+='<span class="fm-subsec-total"> · '+totalSubMes+' '+T('mes. total','bars total','comp. total')+'</span>';
+  h+='</h4>';
+  h+='<button class="fm-subsec-add-btn" '+(ss.length>=FM_SUBSEC_MAX?'disabled':'')+' onclick="FM_addSubSection(\''+sId+'\')">'+(ss.length>=FM_SUBSEC_MAX?'Max 8':'+ '+T('Ajouter','Add','Agregar'))+'</button>';
+  h+='</div>';
+  if(ss.length===0){
+    h+='<div style="font-size:11px;color:var(--txt3);padding:6px 2px">'+T('Aucune sous-section. Ajoutez des voix ou couches musicales à cette section.','No sub-sections yet. Add musical voices or layers to this section.','Sin subsecciones. Agregue voces o capas musicales a esta sección.')+'</div>';
+  }
+  h+='<div class="fm-subsec-list">';
+  ss.forEach((sub,idx)=>{
+    const instrNames=sub.instruments&&sub.instruments.length?sub.instruments.map(x=>x.name).join(', '):'';
+    h+='<div class="fm-subsec-item" id="fmss_'+sub.id+'">';
+    // Header row
+    h+='<div class="fm-subsec-item-header">';
+    h+='<span class="fm-subsec-num">'+(idx+1)+'</span>';
+    h+='<input class="fm-subsec-name-input" type="text" value="'+FM_esc(sub.name)+'" oninput="FM_updSubSection(\''+sId+'\',\''+sub.id+'\',\'name\',this.value)">';
+    h+='<button class="fm-subsec-del" onclick="FM_delSubSection(\''+sId+'\',\''+sub.id+'\')" title="'+T('Supprimer','Delete','Eliminar')+'">✕</button>';
+    h+='</div>';
+    // Fields grid
+    h+='<div class="fm-subsec-fields">';
+    // Instruments (wide)
+    h+='<div class="fm-subsec-field fm-subsec-field-wide"><label>'+T('Instruments','Instruments','Instrumentos')+'</label>';
+    h+='<div class="fm-subsec-instr-wrap">';
+    h+='<div class="fm-subsec-instr-display" onclick="FM_toggleSubSecInstrDD(\''+sId+'\',\''+sub.id+'\')" id="fmss_disp_'+sub.id+'">';
+    if(sub.instruments&&sub.instruments.length){
+      sub.instruments.forEach(x=>{h+='<span class="fm-subsec-instr-tag">'+FM_esc(x.name)+'</span>';});
+      h+='<span class="fm-subsec-instr-arrow">▾</span>';
+    }else{
+      h+='<span class="fm-subsec-instr-ph">'+T('Choisir des instruments…','Choose instruments…','Elegir instrumentos…')+'</span><span class="fm-subsec-instr-arrow">▾</span>';
+    }
+    h+='</div>';
+    h+='<div class="fm-subsec-instr-dropdown" id="fmss_dd_'+sub.id+'" style="display:none">';
+    h+='<div class="fm-subsec-instr-search"><span class="fm-subsec-instr-search-icon">🔍</span><input type="text" class="fm-subsec-instr-search-input" placeholder="'+T('Rechercher…','Search…','Buscar…')+'" oninput="FM_filterSubSecInstr(this,\'fmss_opts_'+sub.id+'\')" autocomplete="off"></div>';
+    h+='<div class="fm-subsec-instr-sel-count" id="fmss_cnt_'+sub.id+'">'+(sub.instruments&&sub.instruments.length?sub.instruments.length+' '+T('sélectionné(s)','selected','seleccionado(s)'):'')+'</div>';
+    h+='<div class="fm-subsec-instr-opts" id="fmss_opts_'+sub.id+'">';
+    palette.forEach(fam=>{
+      h+='<div class="fm-subsec-instr-group" data-fam>';
+      h+='<div class="fm-subsec-instr-group-label">'+FM_esc(fam.fam)+'</div>';
+      fam.items.forEach(inst=>{
+        const chk=sub.instruments&&sub.instruments.some(x=>x.id===inst.id);
+        h+='<label class="fm-subsec-instr-opt'+(chk?' is-checked':'')+'" data-name="'+FM_esc((inst.n+(inst.k?' '+inst.k:'')).toLowerCase())+'">';
+        h+='<span class="fm-subsec-instr-check">'+(chk?'✓':'')+'</span>';
+        h+='<span class="fm-subsec-instr-name">'+FM_esc(inst.n)+'</span>';
+        h+=(inst.k?'<span class="fm-subsec-instr-key">'+FM_esc(inst.k)+'</span>':'');
+        h+='<input type="checkbox" '+(chk?'checked':'')+' style="display:none" onchange="FM_toggleSubSecInstr(\''+sId+'\',\''+sub.id+'\',\''+inst.id+'\',\''+FM_esc(inst.n)+'\')">';
+        h+='</label>';
+      });
+      h+='</div>';
+    });
+    h+='</div></div></div></div>';
+    // Harmony
+    h+='<div class="fm-subsec-field"><label>'+T('Accord / Ton.','Chord / Key','Acorde / Ton.')+'</label>';
+    h+='<div style="position:relative">';
+    h+='<div class="fm-subsec-harm-row">';
+    h+='<input class="fm-subsec-harm-input" type="text" value="'+FM_esc(sub.harmony||'')+'" placeholder="'+T('Cm, F7, I→V…','Cm, F7, I→V…','Cm, F7, I→V…')+'" oninput="FM_updSubSection(\''+sId+'\',\''+sub.id+'\',\'harmony\',this.value)">';
+    h+='<button style="padding:3px 6px;border:1.5px solid var(--border);border-radius:5px;background:var(--bg);font-size:10px;cursor:pointer;flex-shrink:0" onclick="FM_toggleSubSecHarmDD(\''+sub.id+'\')" title="'+T('Accords prédéfinis','Preset chords','Acordes predefinidos')+'">▾</button>';
+    h+='</div>';
+    h+='<div class="fm-subsec-harm-picker" id="fmss_harm_'+sub.id+'" style="display:none">';
+    chordChips.forEach(c=>{h+='<button class="fm-subsec-harm-chip" onclick="FM_appendSubSecHarm(\''+sId+'\',\''+sub.id+'\',\''+c+'\')">'+c+'</button>'});
+    h+='</div></div></div>';
+    // Measures
+    h+='<div class="fm-subsec-field"><label>'+T('Mes.','Bars','Comp.')+'</label>';
+    h+='<input type="number" min="0" max="999" value="'+(sub.measures||0)+'" onchange="FM_updSubSection(\''+sId+'\',\''+sub.id+'\',\'measures\',parseInt(this.value)||0)" style="width:58px;font-size:12px;padding:4px 6px;border:1.5px solid var(--border);border-radius:6px;text-align:center;font-family:inherit;background:var(--bg);color:var(--txt1)">';
+    h+='</div>';
+    h+='</div>'; // end fields grid
+    h+='</div>'; // end item
+  });
+  h+='</div></div>';
+  return h;
+}
+function FM_toggleSubSecInstrDD(sId,ssId){
+  // Close other dropdowns
+  document.querySelectorAll('.fm-subsec-instr-dropdown').forEach(el=>{
+    if(el.id!=='fmss_dd_'+ssId){el.style.display='none';document.getElementById(el.id.replace('fmss_dd_','fmss_disp_'))?.classList.remove('open');}
+  });
+  document.querySelectorAll('.fm-subsec-harm-picker').forEach(el=>el.style.display='none');
+  const dd=document.getElementById('fmss_dd_'+ssId);
+  const disp=document.getElementById('fmss_disp_'+ssId);
+  if(!dd||!disp)return;
+  const isOpen=dd.style.display!=='none';
+  if(!isOpen){
+    // Position fixed relative to trigger
+    const rect=disp.getBoundingClientRect();
+    const spaceBelow=window.innerHeight-rect.bottom;
+    const ddH=Math.min(260,spaceBelow>200?260:spaceBelow-8);
+    dd.style.width=rect.width+'px';
+    dd.style.left=rect.left+'px';
+    dd.style.maxHeight=Math.max(150,ddH)+'px';
+    // Open above if not enough space below
+    if(spaceBelow<180){
+      dd.style.top='';
+      dd.style.bottom=(window.innerHeight-rect.top+4)+'px';
+    } else {
+      dd.style.bottom='';
+      dd.style.top=(rect.bottom+4)+'px';
+    }
+    dd.style.display='block';
+    disp.classList.add('open');
+    setTimeout(()=>{const inp=dd.querySelector('.fm-subsec-instr-search-input');if(inp){inp.value='';FM_filterSubSecInstr(inp,dd.querySelector('.fm-subsec-instr-opts')?.id);inp.focus();}},50);
+  } else {
+    dd.style.display='none';
+    disp.classList.remove('open');
+  }
+}
+function FM_filterSubSecInstr(inp,optsId){
+  const q=(inp.value||'').toLowerCase().trim();
+  const opts=document.getElementById(optsId);
+  if(!opts)return;
+  opts.querySelectorAll('[data-fam]').forEach(grp=>{
+    let anyVisible=false;
+    grp.querySelectorAll('label[data-name]').forEach(lbl=>{
+      const match=!q||lbl.dataset.name.includes(q);
+      lbl.style.display=match?'':'none';
+      if(match)anyVisible=true;
+    });
+    grp.style.display=anyVisible?'':'none';
+  });
+}
+function FM_toggleSubSecHarmDD(ssId){
+  document.querySelectorAll('.fm-subsec-instr-dropdown').forEach(el=>{el.style.display='none';document.getElementById(el.id.replace('fmss_dd_','fmss_disp_'))?.classList.remove('open')});
+  document.querySelectorAll('.fm-subsec-harm-picker').forEach(el=>{if(el.id!=='fmss_harm_'+ssId)el.style.display='none'});
+  const pk=document.getElementById('fmss_harm_'+ssId);if(!pk)return;
+  pk.style.display=pk.style.display==='none'?'block':'none';
+}
+function FM_appendSubSecHarm(sId,ssId,chord){
+  const ss=FM_getSubSections(sId).find(x=>x.id===ssId);if(!ss)return;
+  ss.harmony=ss.harmony?(ss.harmony+' → '+chord):chord;
+  const pk=document.getElementById('fmss_harm_'+ssId);if(pk)pk.style.display='none';
+  FM_saveHistory();FM_renderDetail();
+}
+// Close dropdowns on outside click
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.fm-subsec-instr-wrap')&&!e.target.closest('.fm-subsec-harm-row')){
+    document.querySelectorAll('.fm-subsec-instr-dropdown').forEach(el=>{el.style.display='none';document.getElementById(el.id.replace('fmss_dd_','fmss_disp_'))?.classList.remove('open')});
+    document.querySelectorAll('.fm-subsec-harm-picker').forEach(el=>el.style.display='none');
+  }
+});
 function FM_updMvt(i,field,val){if(FM_state.movements[i]){FM_state.movements[i][field]=val;FM_render();FM_saveHistory()}}
 function FM_updateVarLabel(id){const s=FM_curSections().find(x=>x.id===id);if(s&&s.variationNum)s.label='Var. '+s.variationNum;FM_render();FM_saveHistory()}
 function delSection(idx){const secs=FM_curSections();if(secs.length<=1)return;if(secs[idx].id===FM_state.selectedId)FM_state.selectedId=null;secs.splice(idx,1);FM_setCurSections(secs);FM_render();FM_saveHistory()}
@@ -1699,19 +1922,32 @@ function FM_exportPDF(){
     secs.forEach(s=>{const col=FM_sColor(s);html+='<tr><td><span class="dot" style="background:'+col+'"></span></td><td><b>'+FM_esc(s.label)+'</b><br><span style="color:#9ca3af;font-size:10px">'+(FM_typeMap[s.type]?.label||'')+'</span></td><td class="mono">'+FM_esc(s.degree)+'</td><td>'+FM_cadShort(s.cadence)+'</td><td>'+(s.measures||'')+'</td><td>'+FM_esc(s.tempo)+'</td><td>'+FM_esc(s.character)+'</td><td style="font-style:italic">'+FM_esc(s.dynamics)+'</td><td>'+FM_esc(s.notes)+(s.variationTech?' <b>['+FM_esc(s.variationTech)+']</b>':'')+'</td></tr>'});
     html+='</table>';
     secs.forEach(s=>{
-      const hasHarm=s.harmGrid&&s.harmGrid.trim();
-      const hasTheme=(s.themeLabel&&s.themeLabel.trim())||(s.themeIncipit&&s.themeIncipit.trim());
-      if(!hasHarm&&!hasTheme)return;
-      html+='<div style="margin:6px 0 10px 0;padding:8px 12px;border-left:3px solid '+FM_sColor(s)+';background:#f9fafb;border-radius:0 6px 6px 0;font-size:11px">';
-      html+='<div style="font-weight:700;color:#374151;margin-bottom:6px">'+FM_esc(s.label)+'</div>';
-      if(hasHarm)html+='<div style="margin-bottom:'+(hasTheme?'6px':'0')+'"><span style="font-weight:600;color:#534AB7;text-transform:uppercase;font-size:10px;letter-spacing:.04em">🎼 '+(tx('Grille harmonique','Harmonic grid','Rejilla armónica'))+'</span><div style="margin-top:3px;font-family:monospace;color:#1f2937;white-space:pre-wrap">'+FM_esc(s.harmGrid)+'</div></div>';
-      if(hasTheme){
-        html+='<div><span style="font-weight:600;color:#059669;text-transform:uppercase;font-size:10px;letter-spacing:.04em">🎨 '+(tx('Matériau thématique','Thematic material','Material temático'))+'</span>';
-        if(s.themeLabel&&s.themeLabel.trim())html+='<div style="margin-top:3px;font-weight:600;color:#374151">'+FM_esc(s.themeLabel)+'</div>';
-        if(s.themeIncipit&&s.themeIncipit.trim())html+='<div style="margin-top:2px;color:#4b5563;white-space:pre-wrap">'+FM_esc(s.themeIncipit)+'</div>';
-        html+='</div>';
+      // Sous-sections PDF
+      if(s.subSections&&s.subSections.length){
+        const lang=typeof currentLang!=='undefined'?currentLang:'fr';
+        const txL=(f,e,sp)=>lang==='en'?e:lang==='es'?sp:f;
+        html+='<div style="margin:6px 0 10px 0;padding:8px 12px;border-left:3px solid '+FM_sColor(s)+';background:#f9fafb;border-radius:0 6px 6px 0;font-size:11px">';
+        html+='<div style="font-weight:700;color:#374151;margin-bottom:6px;font-size:12px">'+FM_esc(s.label)+'</div>';
+        html+='<div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#534AB7;letter-spacing:.04em;margin-bottom:6px">🎵 '+txL('Sous-sections','Sub-sections','Subsecciones')+'</div>';
+        html+='<table style="width:100%;border-collapse:collapse;font-size:11px">';
+        html+='<tr><th style="background:#eae8f4;padding:4px 8px;text-align:left;font-size:10px;text-transform:uppercase;color:#534AB7;border-bottom:1px solid #d4d0ee">N°</th>';
+        html+='<th style="background:#eae8f4;padding:4px 8px;text-align:left;font-size:10px;text-transform:uppercase;color:#534AB7;border-bottom:1px solid #d4d0ee">'+txL('Nom','Name','Nombre')+'</th>';
+        html+='<th style="background:#eae8f4;padding:4px 8px;text-align:left;font-size:10px;text-transform:uppercase;color:#534AB7;border-bottom:1px solid #d4d0ee">'+txL('Instruments','Instruments','Instrumentos')+'</th>';
+        html+='<th style="background:#eae8f4;padding:4px 8px;text-align:left;font-size:10px;text-transform:uppercase;color:#534AB7;border-bottom:1px solid #d4d0ee">'+txL('Accord / Ton.','Chord / Key','Acorde')+'</th>';
+        html+='<th style="background:#eae8f4;padding:4px 8px;text-align:center;font-size:10px;text-transform:uppercase;color:#534AB7;border-bottom:1px solid #d4d0ee">'+txL('Mes.','Bars','Comp.')+'</th></tr>';
+        s.subSections.forEach((ss,i)=>{
+          const instrStr=ss.instruments&&ss.instruments.length?ss.instruments.map(x=>x.name).join(', '):'—';
+          html+='<tr style="background:'+(i%2===0?'#ffffff':'#f5f4fb')+'">';
+          html+='<td style="padding:4px 8px;border-bottom:1px solid #f0f0f4;font-weight:700;color:#534AB7">'+(i+1)+'</td>';
+          html+='<td style="padding:4px 8px;border-bottom:1px solid #f0f0f4;font-weight:600">'+FM_esc(ss.name||'')+'</td>';
+          html+='<td style="padding:4px 8px;border-bottom:1px solid #f0f0f4;color:#4b5563">'+FM_esc(instrStr)+'</td>';
+          html+='<td style="padding:4px 8px;border-bottom:1px solid #f0f0f4;font-family:monospace;color:#374151">'+FM_esc(ss.harmony||'—')+'</td>';
+          html+='<td style="padding:4px 8px;border-bottom:1px solid #f0f0f4;text-align:center;font-weight:600">'+((ss.measures||0)||'—')+'</td>';
+          html+='</tr>';
+        });
+        html+='</table></div>';
       }
-      html+='</div>';
+
     });
   }
   if(FM_state.isMultiMovement){FM_state.movements.forEach((m,i)=>{const mK=m.key||FM_state.globalKey,mM=m.mode||FM_state.globalMode,mfn=FM_FORMS[m.formId]?.name||'';pdfSecs(m.sections,'Mouvement '+(FM_ROMAN[i]||i+1)+' — '+FM_esc(m.name)+' ('+mfn+', '+mK+' '+(mM==='major'?'M':'m')+(m.tempo?', '+FM_esc(m.tempo):'')+')' ,m.orchestration||[]);  })}else{pdfSecs(FM_state.sections,null)}

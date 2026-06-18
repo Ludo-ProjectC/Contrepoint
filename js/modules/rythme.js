@@ -7,6 +7,7 @@
 /* ═══ RYTHME ═══ */
 /* ── Section switching ── */
 function switchSec(i){
+  if(typeof CLICK!=='undefined') CLICK.stop();
   document.querySelectorAll('.sec-btn').forEach((b,j)=>b.classList.toggle('on',j===i));
   document.querySelectorAll('.section').forEach((s,j)=>s.classList.toggle('active',j===i));
 }
@@ -169,16 +170,27 @@ const TR=(function(){
   }
   function pLine(lbl,sub,nM,dC,fn){let h=`<div class="pulse-row"><div class="pulse-lbl">${lbl}<br><span style="font-size:9px;font-weight:400;color:#b0aec4">${sub}</span></div><div class="pulse-dots">`;for(let m=0;m<nM;m++){if(m>0)h+=`<div class="barline"></div>`;for(let i=0;i<dC;i++)h+=`<div class="pdot">${fn(i)}</div>`;}h+=`</div></div>`;return h;}
 
-  function render(){renderSel();renderInfo();renderHier();renderPulse();}
+  function render(){renderSel();renderInfo();renderHier();renderPulse();if(typeof CLICK!=='undefined')CLICK.rebuild();}
 
   return{
     setType(t){mType=t;selIdx=(t==='simple'?12:4);hlLayer=-1;render();},
     selMeter(i){selIdx=i;hlLayer=-1;render();},
     setGrp6(g){grp6=g;render();},
-    toggleHL(i){hlLayer=(hlLayer===i)?-1:i;renderHier();},
-    init(){render();}
+    toggleHL(i){hlLayer=(hlLayer===i)?-1:i;renderHier();if(typeof CLICK!=='undefined')CLICK.setLayer(i);},
+    init(){render();if(typeof CLICK!=='undefined')CLICK.init();},
+    _cur(){return cur();},
+    _isCompound(){return mType==='compound';},
+    _layers(){return buildLayers(cur());},
+    _levelOf(ch,i){return lLevel(ch,i);},
+    _accs(count,li,ch){
+      const m=cur();
+      const lvl=lLevel(ch,li);
+      if(count===1) return['s'];
+      return getAcc(count,lvl==='beat'?'beat':'sub',m);
+    }
   };
 })();
+window.TR=TR;
 
 /* ══════════════════════════════════════
    SECTION 2 — Division du temps
@@ -652,3 +664,241 @@ const POLY = (function(){
   return{toggle,play,stop,buildGrid,onPresetChange,onCustomChange,onMeasuresChange,onTempoChange};
 })();
 window.POLY=POLY;
+
+/* ══════════════════════════════════════
+   MÉTRONOME VISUEL — CLICK module v2
+   Layer-linked: adapts cells to buildLayers output
+   ══════════════════════════════════════ */
+const CLICK=(function(){
+
+  /* ── Syllables per subdivision ── */
+  function getSyl(){
+    if(window.currentLang==='en') return{s1:'and',s2:'ah'};
+    if(window.currentLang==='es') return{s1:'y',s2:'ah'};
+    return{s1:'et',s2:'ah'};
+  }
+
+  /* ── Note symbols map ── */
+  const NOTE_SYM={
+    whole:'𝅝',dWhole:'𝅝·',half:'𝅗𝅥',dHalf:'𝅗𝅥·',
+    quarter:'♩',dQuarter:'♩·',eighth:'♪',dEighth:'♪·',
+    sixteenth:'𝅘𝅥𝅯',dSixteenth:'𝅘𝅥𝅯·',thirtysecond:'𝅘𝅥𝅰',sixtyfourth:'𝅘𝅥𝅱'
+  };
+
+  /* ── Audio ── */
+  const FREQ  ={strong:960,strong2:780,medium:700,light:580};
+  const VOL   ={strong:0.34,strong2:0.22,medium:0.16,light:0.09};
+  let audioCtx=null;
+
+  function beep(accent){
+    if(!audioCtx) return;
+    try{
+      const osc=audioCtx.createOscillator(), gain=audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.type='sine';
+      osc.frequency.setValueAtTime(FREQ[accent]||600,audioCtx.currentTime);
+      gain.gain.setValueAtTime(VOL[accent]||0.1,audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+0.072);
+      osc.start(audioCtx.currentTime);
+      osc.stop(audioCtx.currentTime+0.072);
+    }catch(e){}
+  }
+
+  /* ── State ── */
+  let playing=false, idx=0, bpm=80, timerId=null;
+  let cells=[];        // [{accent, beatIdx, subIdx}]
+  let layerIdx=1;      // index into buildLayers() array (default = beat layer)
+  let layerCount=0;    // total layers available
+
+  function getInterval(){return Math.round(60000/bpm);}
+
+  /* ── Get hierarchy layers from TR ── */
+  function getLayers(){
+    if(!window.TR) return null;
+    const m=window.TR._cur();
+    if(!m) return null;
+    // Call internal buildLayers via TR._layers()
+    return window.TR._layers();
+  }
+
+  /* ── Build cells from a specific layer ──
+     Each cell = one note at that layer level.
+     Accents derived from getAcc().
+  */
+  function buildCells(layers, li){
+    if(!layers || !layers[li]) return _fallback();
+    const layer = layers[li];
+    const count = Math.min(layer.count, 32);
+    const accs  = window.TR._accs(count, li, layers);
+    const isCompound = window.TR._isCompound();
+
+    // How many subdivisions per "beat" at this layer?
+    // We need to figure grouping: for beat layer it's divsPerBeat
+    // For subdivision layers, group by beat
+    const beatLayerIdx = layers.findIndex((_,i)=>window.TR._levelOf(layers,i)==='beat');
+    const beatCount = beatLayerIdx>=0 ? Math.min(layers[beatLayerIdx].count,32) : count;
+    const perBeat = count>0 && beatCount>0 ? Math.round(count/beatCount) : 1;
+
+    const result=[];
+    for(let i=0;i<count;i++){
+      const a=accs[i]||'w';
+      let accent='light';
+      if(a==='s')  accent = i===0?'strong':'medium';
+      if(a==='ss') accent = 'strong2';
+      // First beat override
+      if(i===0) accent='strong';
+      // Mid-bar: for layers >= beat, mark mid-bar beat
+      const nb=beatCount;
+      if(nb>=4 && i>0 && i===Math.floor(nb/2)*perBeat && a==='s') accent='strong2';
+
+      const beatIdx = Math.floor(i/perBeat);
+      const subIdx  = i % perBeat;
+      result.push({accent, beatIdx, subIdx, perBeat, beatCount});
+    }
+    return result;
+  }
+
+  function _fallback(){
+    const r=[];
+    for(let b=0;b<4;b++) for(let s=0;s<2;s++)
+      r.push({accent:b===0&&s===0?'strong':b===2&&s===0?'strong2':s===0?'medium':'light',beatIdx:b,subIdx:s,perBeat:2,beatCount:4});
+    return r;
+  }
+
+  /* ── Render layer selector pills ── */
+  function renderLayerPills(layers){
+    const row=document.getElementById('clickLayerRow');
+    if(!row) return;
+    if(!layers){row.style.display='none';return;}
+    row.style.display='flex';
+
+    const NF_fr={whole:'Ronde',dWhole:'Ronde·',half:'Blanche',dHalf:'Blanche·',quarter:'Noire',dQuarter:'Noire·',eighth:'Croche',dEighth:'Croche·',sixteenth:'D.croche',dSixteenth:'D.croche·',thirtysecond:'T.croche',sixtyfourth:'Q.croche'};
+    const NF_en={whole:'Whole',dWhole:'Dotted whole',half:'Half',dHalf:'Dotted half',quarter:'Quarter',dQuarter:'Dotted quarter',eighth:'Eighth',dEighth:'Dotted eighth',sixteenth:'16th',dSixteenth:'Dotted 16th',thirtysecond:'32nd',sixtyfourth:'64th'};
+    const NF_es={whole:'Redonda',dWhole:'Redonda·',half:'Blanca',dHalf:'Blanca·',quarter:'Negra',dQuarter:'Negra·',eighth:'Corchea',dEighth:'Corchea·',sixteenth:'Semicorchea',dSixteenth:'Semicorchea·',thirtysecond:'Fusa',sixtyfourth:'Semifusa'};
+    const NF=window.currentLang==='en'?NF_en:window.currentLang==='es'?NF_es:NF_fr;
+
+    let h='<span class="click-layer-lbl">'+(window.currentLang==='en'?'Level:':window.currentLang==='es'?'Nivel:':'Niveau :')+'</span>';
+    layers.forEach((l,i)=>{
+      const sym=NOTE_SYM[l.note]||l.note;
+      const name=NF[l.note]||l.note;
+      const on=i===layerIdx?' on':'';
+      h+=`<button class="click-layer-pill${on}" onclick="CLICK.setLayer(${i})" title="${l.count}× ${name}"><span class="clp-sym">${sym}</span> ${name}</button>`;
+    });
+    row.innerHTML=h;
+  }
+
+  /* ── Build grid HTML ── */
+  function buildGrid(){
+    const g=document.getElementById('clickGrid');
+    if(!g) return;
+
+    const layers=getLayers();
+    layerCount=layers?layers.length:0;
+
+    // Clamp layerIdx to beat layer by default on rebuild
+    if(layers){
+      const bi=layers.findIndex((_,i)=>window.TR._levelOf(layers,i)==='beat');
+      if(bi>=0 && layerIdx>=layerCount) layerIdx=bi;
+    }
+
+    renderLayerPills(layers);
+    cells = layers ? buildCells(layers, layerIdx) : _fallback();
+
+    const sl=getSyl();
+    // Group by beatIdx
+    const beats={};
+    cells.forEach((c,i)=>{
+      if(!beats[c.beatIdx]) beats[c.beatIdx]=[];
+      beats[c.beatIdx].push({...c,ci:i});
+    });
+
+    const numBeats=Object.keys(beats).length;
+    const noteLayer=layers&&layers[layerIdx];
+    const sym=noteLayer?NOTE_SYM[noteLayer.note]||'♪':'♪';
+    let h='';
+
+    Object.keys(beats).forEach((b,gi)=>{
+      const bNum=parseInt(b);
+      const isMid=numBeats>2&&gi===Math.floor(numBeats/2);
+      h+=`<div class="click-group${isMid?' click-sep-mid':''}">`;
+      beats[b].forEach(({ci,subIdx,accent,perBeat})=>{
+        let lbl='';
+        if(subIdx===0)      lbl=`<b>${bNum+1}</b>`;
+        else if(subIdx===1) lbl=perBeat===3?sl.s1:sl.s1;
+        else if(subIdx===2) lbl=sl.s2;
+        h+=`<div class="click-cell-wrap">`;
+        h+=`<div class="click-cell click-accent-${accent}" id="cc${ci}"><span class="click-note-sym">${sym}</span></div>`;
+        h+=`<div class="click-label">${lbl}</div>`;
+        h+=`</div>`;
+      });
+      h+=`</div>`;
+    });
+    g.innerHTML=h;
+  }
+
+  function tick(){
+    document.querySelectorAll('.click-cell').forEach((el,i)=>el.classList.toggle('now',i===idx));
+    if(cells[idx]) beep(cells[idx].accent);
+    idx=(idx+1)%Math.max(cells.length,1);
+    if(playing) timerId=setTimeout(tick,getInterval());
+  }
+
+  function toggle(){if(!playing) start(); else stop();}
+
+  function start(){
+    const btn=document.getElementById('clickPlayBtn');
+    if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended') audioCtx.resume();
+    playing=true; idx=0;
+    buildGrid();
+    if(btn){
+      btn.innerHTML='<span class="cpb-icon">⏹</span><span class="cpb-label">'+_t('rythme.clickStop','Stop')+'</span>';
+      btn.classList.add('playing');
+    }
+    tick();
+  }
+
+  function stop(){
+    playing=false;
+    if(timerId){clearTimeout(timerId);timerId=null;}
+    idx=0;
+    document.querySelectorAll('.click-cell').forEach(el=>el.classList.remove('now'));
+    const btn=document.getElementById('clickPlayBtn');
+    if(btn){
+      btn.innerHTML='<span class="cpb-icon">▶</span><span class="cpb-label">'+_t('rythme.clickPlay','Jouer')+'</span>';
+      btn.classList.remove('playing');
+    }
+    if(audioCtx){try{audioCtx.close();}catch(e){}audioCtx=null;}
+  }
+
+  function setLayer(i){
+    layerIdx=i;
+    const wasPlaying=playing;
+    if(wasPlaying){stop(); /* rebuild then restart */ buildGrid(); start();}
+    else buildGrid();
+  }
+
+  function rebuild(){
+    // Reset layer selection to beat layer when signature changes
+    const layers=getLayers();
+    if(layers){
+      const bi=layers.findIndex((_,i)=>window.TR._levelOf(layers,i)==='beat');
+      if(bi>=0) layerIdx=bi;
+    }
+    idx=0;
+    buildGrid();
+  }
+  function onBpm(v){bpm=parseInt(v);const d=document.getElementById('clickBpmVal');if(d)d.textContent=v;}
+  function _t(k,fb){return(window.t&&window.t(k))||fb;}
+  function init(){
+    const layers=getLayers();
+    if(layers){
+      const bi=layers.findIndex((_,i)=>window.TR._levelOf(layers,i)==='beat');
+      layerIdx=bi>=0?bi:Math.min(1,layers.length-1);
+    } else layerIdx=1;
+    buildGrid();
+  }
+
+  return{toggle,stop,rebuild,onBpm,setLayer,init};
+})();
+window.CLICK=CLICK;

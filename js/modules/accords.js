@@ -172,7 +172,7 @@ function buildChordData(chordType){
 /* ── SVG Staff (no key signature) ── */
 function staffSVG(chord,displayName){
   if(!chord)return'';
-  const W=340,H=150,sTop=28,lG=11;
+  const W=360,H=150,sTop=28,lG=11;
   const lY=i=>sTop+i*lG;
   const letterDia={"C":0,"D":1,"E":2,"F":3,"G":4,"A":5,"B":6};
   const names=chord.noteNames;
@@ -196,7 +196,7 @@ function staffSVG(chord,displayName){
   for(let i=0;i<5;i++)svg+=`<line x1="16" y1="${lY(i)}" x2="${W-16}" y2="${lY(i)}" stroke="#d1cfe6" stroke-width="1"/>`;
   svg+=`<text x="30" y="${lY(3)+2}" font-size="48" fill="#534AB7" font-family="serif" text-anchor="middle">𝄞</text>`;
 
-  const nX0=68,nSp=30,nR=5.5;
+  const nX0=85,nSp=30,nR=5.5;
   noteData.forEach((n,idx)=>{const x=nX0+idx*nSp,y=n.y;
     if(y>lY(4)+1)for(let ly=lY(4)+lG;ly<=y+1;ly+=lG)svg+=`<line x1="${x-10}" y1="${ly}" x2="${x+10}" y2="${ly}" stroke="#d1cfe6" stroke-width="1"/>`;
     if(y<lY(0)-1)for(let ly=lY(0)-lG;ly>=y-1;ly-=lG)svg+=`<line x1="${x-10}" y1="${ly}" x2="${x+10}" y2="${ly}" stroke="#d1cfe6" stroke-width="1"/>`;

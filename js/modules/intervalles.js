@@ -49,9 +49,25 @@ const T2=(function(){
     {st:15,abr:'m10',nom:'Minor 10th',gen:9},
     {st:16,abr:'M10',nom:'Major 10th',gen:9},
     {st:17,abr:'A10',nom:'Augmented 10th',gen:9},
+    /* ── Intervalles composés étendus (12e et 15e) ── */
+    {st:17,abr:'P11',nom:'Perfect 11th',gen:10},
+    {st:18,abr:'A11',nom:'Augmented 11th',gen:10},
+    {st:17,abr:'d12',nom:'Diminished 12th',gen:11},
+    {st:18,abr:'P12',nom:'Perfect 12th',gen:11},
+    {st:19,abr:'A12',nom:'Augmented 12th',gen:11},
+    {st:19,abr:'d13',nom:'Diminished 13th',gen:12},
+    {st:20,abr:'m13',nom:'Minor 13th',gen:12},
+    {st:21,abr:'M13',nom:'Major 13th',gen:12},
+    {st:22,abr:'A13',nom:'Augmented 13th',gen:12},
+    {st:21,abr:'d14',nom:'Diminished 14th',gen:13},
+    {st:22,abr:'m14',nom:'Minor 14th',gen:13},
+    {st:23,abr:'M14',nom:'Major 14th',gen:13},
+    {st:24,abr:'A14',nom:'Augmented 14th',gen:13},
+    {st:23,abr:'d15',nom:'Diminished 15th',gen:14},
+    {st:24,abr:'P15',nom:'Perfect 15th',gen:14},
   ];
 
-  let note=0, noteOct=1, dir='up', acc='s', selIv=13, showInv=false;
+  let note=0, noteOct=1, dir='up', acc='s', selIv=13, showInv=false, invType='8';
   function nn(n){return(acc==='s'?NS:NF)[n]}
 
   /* ── Enharmonic-correct interval spelling ── */
@@ -189,23 +205,21 @@ const T2=(function(){
     });
     /* Inversion highlight */
     if(showInv){
-      const invAbr=INV_MAP[IV[selIv].abr];
-      if(invAbr){
-        const invIdx=findIvByAbr(invAbr);
-        if(invIdx>=0){
-          const origSt=IV[selIv].st;
-          const invSemi=origSt<=12?12-origSt:24-origSt;
-          const startMidi=noteOct*12+note;
-          const invNoteMidi=dir==='up'?startMidi-invSemi:startMidi+invSemi;
-          const invNotePC=((invNoteMidi%12)+12)%12;
-          const invNoteOct=Math.floor(invNoteMidi/12);
-          if(invNoteOct>=0&&invNoteOct<=2){
-            el.querySelectorAll('.wkey2,.bkey2').forEach(k=>{
-              if(parseInt(k.dataset.midi)===invNotePC&&parseInt(k.dataset.oct)===invNoteOct&&!k.classList.contains('sel')&&!k.classList.contains('sel2')){
-                k.classList.add('inv');
-              }
-            });
-          }
+      const SPAN_ST_HL={'8':12,'12':19,'15':24};
+      const spanSt=SPAN_ST_HL[invType]||12;
+      const origSt=IV[selIv].st;
+      if(origSt<=spanSt){
+        const invSt=spanSt-origSt;
+        const startMidi=noteOct*12+note;
+        const invNoteMidi=dir==='up'?startMidi-invSt:startMidi+invSt;
+        const invNotePC=((invNoteMidi%12)+12)%12;
+        const invNoteOct=Math.floor(invNoteMidi/12);
+        if(invNoteOct>=0&&invNoteOct<=2){
+          el.querySelectorAll('.wkey2,.bkey2').forEach(k=>{
+            if(parseInt(k.dataset.midi)===invNotePC&&parseInt(k.dataset.oct)===invNoteOct&&!k.classList.contains('sel')&&!k.classList.contains('sel2')){
+              k.classList.add('inv');
+            }
+          });
         }
       }
     }
@@ -232,31 +246,57 @@ const T2=(function(){
       </div>
     </div>`;
 
-    /* Inversion button */
-    const invAbr=INV_MAP[r.iv.abr];
-    if(invAbr){
-      const invIdx=findIvByAbr(invAbr);
-      if(invIdx>=0){
-        const invIv=IV[invIdx];
-        h+=`<div style="text-align:center;margin-top:8px">`;
-        h+=`<button class="inv-toggle${showInv?' on':''}" onclick="T2.toggleInv()"><svg viewBox="0 0 24 24"><path d="M7.5 21.5c-.3 0-.5-.1-.7-.3s-.3-.5-.3-.7V14c0-.3.1-.5.3-.7s.4-.3.7-.3.5.1.7.3.3.4.3.7v2.6l7.1-7.1c.2-.2.4-.3.7-.3s.5.1.7.3.3.4.3.7-.1.5-.3.7l-7.1 7.1H12c.3 0 .5.1.7.3s.3.4.3.7-.1.5-.3.7-.4.3-.7.3H7.5zm9-12c-.3 0-.5-.1-.7-.3s-.3-.5-.3-.7V5.9L8.4 13c-.2.2-.4.3-.7.3s-.5-.1-.7-.3-.3-.4-.3-.7.1-.5.3-.7l7.1-7.1H12c-.3 0-.5-.1-.7-.3S11 3.8 11 3.5s.1-.5.3-.7.4-.3.7-.3h4.5c.3 0 .5.1.7.3s.3.5.3.7V8.5c0 .3-.1.5-.3.7s-.4.3-.7.3z"/></svg>${t('iv_r')}</button>`;
-        if(showInv){
-          const invSemi=r.iv.st<=12?12-r.iv.st:24-r.iv.st;
-          const invDir=dir==='up'?'↓':'↑';
-          const invSemiDir=dir==='up'?-invSemi:invSemi;
-          const invTargetName=spellTarget(note,invIv.gen,invSemiDir);
-          const invMidi=dir==='up'?(realStartOct*12+note-invSemi):(realStartOct*12+note+invSemi);
-          const invOct=Math.floor(invMidi/12);
+    /* Inversion section — type selector + result */
+    /* spanGen: diatonic steps in span (octave=7, 12th=11, 15th=14) */
+    const SPAN_ST={'8':12,'12':19,'15':24};
+    const SPAN_GEN={'8':7,'12':11,'15':14};
+    function invData(type){
+      const spanSt=SPAN_ST[type];
+      const spanGen=SPAN_GEN[type];
+      const st=r.iv.st;
+      if(st>spanSt)return null;
+      const invSt=spanSt-st;
+      const invGen=spanGen-r.iv.gen;
+      /* Match by st + gen (exact), fallback to st only */
+      let invIdx=IV.findIndex(x=>x.st===invSt&&x.gen===invGen);
+      if(invIdx<0)invIdx=IV.findIndex(x=>x.st===invSt);
+      if(invIdx<0)return null;
+      const invIv=IV[invIdx];
+      const invDir=dir==='up'?'↓':'↑';
+      const invSemiDir=dir==='up'?-invSt:invSt;
+      const invTargetName=spellTarget(note,invIv.gen,invSemiDir);
+      const invMidi=dir==='up'?(realStartOct*12+note-invSt):(realStartOct*12+note+invSt);
+      const invOct=Math.floor(invMidi/12);
+      return{invAbr:invIv.abr,invIv,invDir,invSemiDir,invTargetName,invOct,invSt};
+    }
+
+    /* Always show the inversion block if possible */
+    const invAbr0=INV_MAP[r.iv.abr];
+    if(invAbr0){
+      const d=invData(invType);
+      h+=`<div style="text-align:center;margin-top:8px">`;
+      /* Toggle button */
+      h+=`<button class="inv-toggle${showInv?' on':''}" onclick="T2.toggleInv()"><svg viewBox="0 0 24 24"><path d="M7.5 21.5c-.3 0-.5-.1-.7-.3s-.3-.5-.3-.7V14c0-.3.1-.5.3-.7s.4-.3.7-.3.5.1.7.3.3.4.3.7v2.6l7.1-7.1c.2-.2.4-.3.7-.3s.5.1.7.3.3.4.3.7-.1.5-.3.7l-7.1 7.1H12c.3 0 .5.1.7.3s.3.4.3.7-.1.5-.3.7-.4.3-.7.3H7.5zm9-12c-.3 0-.5-.1-.7-.3s-.3-.5-.3-.7V5.9L8.4 13c-.2.2-.4.3-.7.3s-.5-.1-.7-.3-.3-.4-.3-.7.1-.5.3-.7l7.1-7.1H12c-.3 0-.5-.1-.7-.3S11 3.8 11 3.5s.1-.5.3-.7.4-.3.7-.3h4.5c.3 0 .5.1.7.3s.3.5.3.7V8.5c0 .3-.1.5-.3.7s-.4.3-.7.3z"/></svg>${t('iv_r')}</button>`;
+      if(showInv){
+        /* Type selector pills */
+        h+=`<div style="display:flex;justify-content:center;gap:6px;margin:8px 0 4px">`;
+        h+=`<button class="pref-btn2${invType==='8'?' on':''}" onclick="T2.setInvType('8')">${t('iv_inv_oct')}</button>`;
+        h+=`<button class="pref-btn2${invType==='12'?' on':''}" onclick="T2.setInvType('12')">${t('iv_inv_12')}</button>`;
+        h+=`<button class="pref-btn2${invType==='15'?' on':''}" onclick="T2.setInvType('15')">${t('iv_inv_15')}</button>`;
+        h+=`</div>`;
+        if(d){
           h+=`<div class="inv-box"><div class="inv-res">`;
-          h+=`<div class="inv-note"><div class="n">${invTargetName}</div><div class="o">oct. ${invOct}</div></div>`;
-          h+=`<div style="text-align:center"><div class="inv-name">${invAbr}</div><div class="inv-detail">${tIv(invIv.nom)} ${invDir}</div></div>`;
+          h+=`<div class="inv-note"><div class="n">${d.invTargetName}</div><div class="o">oct. ${d.invOct}</div></div>`;
+          h+=`<div style="text-align:center"><div class="inv-name">${d.invAbr}</div><div class="inv-detail">${tIv(d.invIv.nom)} ${d.invDir}</div></div>`;
           h+=`<div class="res-note"><div class="n">${r.startName}</div><div class="o">oct. ${realStartOct}</div></div>`;
           h+=`</div>`;
           h+=`<div class="inv-legend"><span><span class="dot c1"></span>${t("iv_s")}</span><span><span class="dot c2"></span>${t("iv_i")}</span><span><span class="dot c3"></span>${t("iv_r")}</span></div>`;
           h+=`</div>`;
+        }else{
+          h+=`<div style="color:#9ca3af;font-size:12px;margin-top:6px">${t('iv_oor')}</div>`;
         }
-        h+=`</div>`;
       }
+      h+=`</div>`;
     }
 
     el.innerHTML=h;
@@ -273,6 +313,7 @@ const T2=(function(){
     setDir(d){dir=d;document.getElementById('dirUp2').classList.toggle('on',d==='up');document.getElementById('dirDn2').classList.toggle('on',d==='down');render();},
     setAcc(a){acc=a;document.getElementById('prefS2').classList.toggle('on',a==='s');document.getElementById('prefF2').classList.toggle('on',a==='f');render();},
     toggleInv(){showInv=!showInv;render();},
+    setInvType(t){invType=t;render();},
     init(){render();}
   };
 })();

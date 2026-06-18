@@ -20,6 +20,23 @@
         <div class="info-badge" id="infoBadge" style="user-select:none"></div>
       </div>
 
+      <!-- ═══ MÉTRONOME VISUEL (intégré) ═══ -->
+      <div class="click-box">
+        <div class="click-box-head">
+          <div class="click-box-title" data-i18n="rythme.clickTitle">Métronome visuel</div>
+          <button id="clickPlayBtn" class="click-play-btn" onclick="CLICK.toggle()">
+            <span class="cpb-icon">▶</span><span class="cpb-label">Jouer</span>
+          </button>
+          <div class="click-bpm-row">
+            <label data-i18n="rythme.clickBpm">BPM</label>
+            <input type="range" id="clickBpmSlider" min="30" max="200" value="80" oninput="CLICK.onBpm(this.value)">
+            <span id="clickBpmVal">80</span>
+          </div>
+        </div>
+        <div class="click-layer-row" id="clickLayerRow"></div>
+        <div class="click-track-grid" id="clickGrid"></div>
+      </div>
+
       <div class="hier-box">
         <div class="hier-title"><span data-i18n="t_hier">Hiérarchie rythmique</span> <span style="font-weight:400;color:#b0aec4;text-transform:none;letter-spacing:0" data-i18n="h_hier">— cliquez sur un niveau pour l'isoler</span></div>
         <div id="hierContent"></div>

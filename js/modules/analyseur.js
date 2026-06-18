@@ -4169,23 +4169,22 @@ const AH_LM=60,AH_RM=20,AH_LS=16;
 let AH_trebleTop,AH_bassTop,AH_canvasH;
 function AH_calcLayout(){AH_trebleTop=50;AH_bassTop=AH_trebleTop+5*AH_LS+42;AH_canvasH=AH_bassTop+5*AH_LS+46;}
 
-/* ─── SATB Clef toggles (clef d'ut Alto / Ténor) ─── */
-window.AH_useAltoClef  = false;
-window.AH_useTenorClef = false;
-function AH_toggleAltoClef(){
-  window.AH_useAltoClef = !window.AH_useAltoClef;
-  const btn = document.getElementById('ah_altoClefBtn');
-  if(btn) btn.classList.toggle('primary', window.AH_useAltoClef);
+/* ─── SATB Clef selectors (portée haute : treble/alto  |  portée basse : bass/tenor) ─── */
+window.AH_clefTop = 'treble'; // 'treble' | 'alto'
+window.AH_clefBot = 'bass';   // 'bass'   | 'tenor'
+
+function AH_onClefChange(){
+  const selTop = document.getElementById('ah_clefTopSel');
+  const selBot = document.getElementById('ah_clefBotSel');
+  if(selTop) window.AH_clefTop = selTop.value;
+  if(selBot) window.AH_clefBot = selBot.value;
   AH_render();
 }
-function AH_toggleTenorClef(){
-  window.AH_useTenorClef = !window.AH_useTenorClef;
-  const btn = document.getElementById('ah_tenorClefBtn');
-  if(btn) btn.classList.toggle('primary', window.AH_useTenorClef);
-  AH_render();
-}
-window.AH_toggleAltoClef  = AH_toggleAltoClef;
-window.AH_toggleTenorClef = AH_toggleTenorClef;
+window.AH_onClefChange = AH_onClefChange;
+
+/* Compatibilité rétro (anciens onclick éventuels) */
+window.AH_toggleAltoClef  = function(){ const s=document.getElementById('ah_clefTopSel'); if(s){s.value=s.value==='alto'?'treble':'alto';} AH_onClefChange(); };
+window.AH_toggleTenorClef = function(){ const s=document.getElementById('ah_clefBotSel'); if(s){s.value=s.value==='tenor'?'bass':'tenor';} AH_onClefChange(); };
 
 /* ─── Clef d'ut standard SMuFL (glyphe Unicode 𝄡) ───
  *  lineIdx : 2 = clef d'alto (Ut 3e ligne), 3 = clef de ténor (Ut 4e ligne)
@@ -4209,12 +4208,36 @@ function AH_drawCClef(ctx, x, yTop, ls, lineIdx, color){
   ctx.restore();
 }
 window.AH_drawCClef = AH_drawCClef;
-function AH_midiToY(midi){
-  const oct=Math.floor(midi/12)-1,pc=midi%12,diaPos=oct*7+AH_DIA[pc];
-  const trebleRef=34,trebleRefY=AH_trebleTop+2*AH_LS,bassRef=22,bassRefY=AH_bassTop+2*AH_LS;
-  if(midi>=57)return{y:trebleRefY-(diaPos-trebleRef)*(AH_LS/2),staff:'treble'};
-  return{y:bassRefY-(diaPos-bassRef)*(AH_LS/2),staff:'bass'};
+/* ─── Pivot de référence par clef (note MIDI sur la 3e ligne de portée) ─── */
+// treble : B4 = 71  (diaPos 34, ligne 2 du haut = 3e ligne)
+// alto   : C4 = 60  (Ut3 — clef centrée sur 3e ligne)
+// tenor  : A3 = 57  (Ut4 — clef centrée sur 4e ligne = 2e en partant du bas)
+// bass   : D3 = 50  (diaPos 22)
+function AH_clefRef(clef){ return clef==='treble'?{midi:71,diaRef:34} : clef==='alto'?{midi:60,diaRef:28} : clef==='tenor'?{midi:57,diaRef:26} : {midi:50,diaRef:22}; }
+
+function AH_midiToY(midi, staffHint){
+  const oct=Math.floor(midi/12)-1, pc=midi%12, diaPos=oct*7+AH_DIA[pc];
+
+  /* Décision de portée :
+     - staffHint ('top'/'bot', dérivé de la voix S/A vs T/B) si fourni : fiable quelle que soit la clef.
+     - sinon repli sur l'ancien seuil midi>=57 (La3). */
+  let useTop;
+  if(staffHint==='top') useTop=true;
+  else if(staffHint==='bot') useTop=false;
+  else useTop = (midi>=57);
+
+  if(useTop){
+    const {diaRef}=AH_clefRef(window.AH_clefTop||'treble');
+    const refY = AH_trebleTop + 2*AH_LS;
+    return {y: refY - (diaPos - diaRef)*(AH_LS/2), staff:'treble'};
+  } else {
+    const {diaRef}=AH_clefRef(window.AH_clefBot||'bass');
+    const refY = AH_bassTop + 2*AH_LS;
+    return {y: refY - (diaPos - diaRef)*(AH_LS/2), staff:'bass'};
+  }
 }
+/* Map voix → portée : S,A = haute ; T,B = basse */
+function AH_voiceStaff(v){ return (v==='S'||v==='A') ? 'top' : 'bot'; }
 
 /* Drag & Drop */
 let AH_dragState=null;
@@ -4222,9 +4245,18 @@ function AH_getCanvasPos(e){const c=document.getElementById('ah_scoreCanvas'),r=
 function AH_findNoteAt(x,y){
   if(!AH_chords.length)return null;const cE=document.getElementById('ah_scoreCanvas'),cw=cE.parentElement.clientWidth-28;
   const csX=(window._ksEndX||AH_LM+40)+10,chW=Math.min(80,(cw-csX-AH_RM-10)/AH_chords.length);
-  for(let ci=0;ci<AH_chords.length;ci++){const cx=csX+ci*chW+chW/2;for(const v of['S','A','T','B']){const{y:ny}=AH_midiToY(AH_chords[ci][v]);if(Math.abs(x-cx)<14&&Math.abs(y-ny)<10)return{chordIdx:ci,voice:v,midi:AH_chords[ci][v]};}}return null;
+  for(let ci=0;ci<AH_chords.length;ci++){const cx=csX+ci*chW+chW/2;for(const v of['S','A','T','B']){const{y:ny}=AH_midiToY(AH_chords[ci][v],AH_voiceStaff(v));if(Math.abs(x-cx)<14&&Math.abs(y-ny)<10)return{chordIdx:ci,voice:v,midi:AH_chords[ci][v]};}}return null;
 }
-function AH_yToMidi(y,voice){const[lo,hi]=AH_RANGE[voice];let best=lo,bd=999;for(let m=lo;m<=hi;m++){const d=Math.abs(y-AH_midiToY(m).y);if(d<bd){bd=d;best=m;}}return best;}
+function AH_yToMidi(y,voice){
+  // Déterminer la portée cible et la clef selon la voix
+  const onTreble = (voice==='S'||voice==='A');
+  const clef = onTreble ? (window.AH_clefTop||'treble') : (window.AH_clefBot||'bass');
+  const [lo,hi]=AH_RANGE[voice];
+  const sh=AH_voiceStaff(voice);
+  let best=lo,bd=999;
+  for(let m=lo;m<=hi;m++){const d=Math.abs(y-AH_midiToY(m,sh).y);if(d<bd){bd=d;best=m;}}
+  return best;
+}
 function AH_setupCanvasEvents(){
   const c=document.getElementById('ah_scoreCanvas');
   c.addEventListener('mousedown',e=>{const p=AH_getCanvasPos(e),h=AH_findNoteAt(p.x,p.y);if(h){AH_dragState={chordIdx:h.chordIdx,voice:h.voice};c.style.cursor='ns-resize';e.preventDefault();}});
@@ -4288,27 +4320,34 @@ function AH_renderScore(){
   ctx.fill(new Path2D("M20 498Q43 514 62 557Q81 600 82 646Q82 650 82 654Q82 658 81 662Q74 709 60 768Q46 826 44 869Q45 909 56 941Q67 972 72 980Q74 984 76 986Q77 988 77 990Q77 992 75 995Q73 997 71 997Q70 997 68 995Q66 994 63 990Q23 943 11 870Q0 798 2 737Q3 689 12 639Q22 589 22 548Q22 537 21 527Q20 516 18 506Q17 501 15 499Q14 498 11 498Q7 498 5 495Q2 493 2 490Q2 491 5 487Q7 484 11 483Q14 483 15 482Q17 480 18 476Q20 466 21 453Q22 440 22 431Q22 391 12 342Q3 293 2 244Q0 183 11 111Q23 39 63 -9Q66 -13 68 -14Q70 -16 71 -16Q73 -16 75 -14Q77 -11 77 -9Q77 -7 76 -5Q74 -3 72 1Q67 9 56 40Q45 72 44 112Q46 155 60 213Q74 272 81 319Q82 323 82 327Q82 331 82 335Q81 381 62 424Q43 467 20 483Q18 486 18 491Q18 496 20 498Z"));
   ctx.restore();}
 
-  // Clefs — Times New Roman, proportional to AH_LS, style séquentiel
+  // Clefs — Times New Roman, proportional to AH_LS
   const trebleFS=AH_LS*5.4;
-  ctx.fillStyle='#1e1e2e';ctx.textAlign='left';ctx.textBaseline='alphabetic';
-  // Clef de sol (portée du haut) — sauf si clef d'alto activée
-  if(!window.AH_useAltoClef){
-    ctx.font=`${trebleFS}px "Times New Roman",Georgia,serif`;
-    const tM=ctx.measureText('\uD834\uDD1E');
-    const tH=(tM.actualBoundingBoxAscent||trebleFS*0.75)+(tM.actualBoundingBoxDescent||trebleFS*0.25);
-    ctx.fillText('\uD834\uDD1E',AH_LM+3,(AH_trebleTop+3*AH_LS)+tH*0.38-(tM.actualBoundingBoxDescent||trebleFS*0.25));
-  }
-
   const bassFS=trebleFS*0.75;
-  // Clef de fa (portée du bas) — sauf si clef de ténor activée
-  if(!window.AH_useTenorClef){
-    ctx.font=`${bassFS}px "Times New Roman",Georgia,serif`;
-    const bM=ctx.measureText('\uD834\uDD22');
-    const bH=(bM.actualBoundingBoxAscent||bassFS*0.8)+(bM.actualBoundingBoxDescent||bassFS*0.1);
-    ctx.fillText('\uD834\uDD22',AH_LM+4,(AH_bassTop+AH_LS)-bH*0.15+(bM.actualBoundingBoxAscent||bassFS*0.8));
-  }
+  const clefTop=window.AH_clefTop||'treble';
+  const clefBot=window.AH_clefBot||'bass';
+  ctx.fillStyle='#1e1e2e';ctx.textAlign='left';ctx.textBaseline='alphabetic';
 
-  // Time signature — after clef (use max of both clef widths to avoid overlap)
+  // Dessine n'importe laquelle des 4 clefs sur une portée donnée (yTop)
+  const drawClefAt=(clef, yTop)=>{
+    if(clef==='treble'){
+      ctx.font=`${trebleFS}px "Times New Roman",Georgia,serif`;
+      const tM=ctx.measureText('\uD834\uDD1E');
+      ctx.fillText('\uD834\uDD1E',AH_LM+3,(yTop+3*AH_LS)+((tM.actualBoundingBoxAscent||trebleFS*0.75)+(tM.actualBoundingBoxDescent||trebleFS*0.25))*0.38-(tM.actualBoundingBoxDescent||trebleFS*0.25));
+    } else if(clef==='bass'){
+      ctx.font=`${bassFS}px "Times New Roman",Georgia,serif`;
+      const bM=ctx.measureText('\uD834\uDD22');
+      ctx.fillText('\uD834\uDD22',AH_LM+4,(yTop+AH_LS)-((bM.actualBoundingBoxAscent||bassFS*0.8)+(bM.actualBoundingBoxDescent||bassFS*0.1))*0.15+(bM.actualBoundingBoxAscent||bassFS*0.8));
+    } else if(clef==='alto'){
+      AH_drawCClef(ctx, AH_LM+4, yTop, AH_LS, 2); // Ut3 (3e ligne)
+    } else { // tenor
+      AH_drawCClef(ctx, AH_LM+4, yTop, AH_LS, 1); // Ut4 (4e ligne du bas = lineIdx 1 depuis le haut)
+    }
+  };
+
+  drawClefAt(clefTop, AH_trebleTop); // Portée haute
+  drawClefAt(clefBot, AH_bassTop);   // Portée basse
+
+  // Time signature — after clef
   const ts=document.getElementById('ah_timeSigSel').value.split('/');
   ctx.font=`${trebleFS}px "Times New Roman",Georgia,serif`;
   const trebleClefWidth=ctx.measureText('\uD834\uDD1E').width;
@@ -4332,16 +4371,6 @@ function AH_renderScore(){
   else if(ksN<0){const c=-ksN;ctx.font=`${AH_LS*1.8}px "Times New Roman",Georgia,serif`;ctx.textBaseline='middle';for(let i=0;i<c&&i<7;i++){ctx.fillText('\u266D',ksX+i*9,AH_trebleTop+flatTP[i]*AH_LS);ctx.fillText('\u266D',ksX+i*9,AH_bassTop+flatBP[i]*AH_LS);}ksX+=c*9+4;}
   window._ksEndX=ksX;
 
-  // ── Clef d'ut (Alto = Ut3, Ténor = Ut4) si activé ──
-  if(window.AH_useAltoClef){
-    // Remplace la clef de sol sur la portée du haut → Ut 3e ligne
-    AH_drawCClef(ctx, AH_LM+4, AH_trebleTop, AH_LS, 2);
-  }
-  if(window.AH_useTenorClef){
-    // Remplace la clef de fa sur la portée du bas → Ut 4e ligne
-    AH_drawCClef(ctx, AH_LM+4, AH_bassTop, AH_LS, 3);
-  }
-
   if(!AH_chords.length) return;
 
   const csX=(window._ksEndX||AH_LM+50)+14,chW=Math.max(42,Math.min(90,(cw-csX-AH_RM-10)/AH_chords.length)),startX=csX;
@@ -4356,7 +4385,7 @@ function AH_renderScore(){
 
     // Compute Y positions for all 4 voices, then displace seconds/unisons
     const voiceData=['S','A','T','B'].map(v=>{
-      const midi=ch[v],{y,staff}=AH_midiToY(midi);
+      const midi=ch[v],{y,staff}=AH_midiToY(midi,AH_voiceStaff(v));
       return{v,midi,y,staff,color:AH_VCOLORS[v],xOff:0};
     });
     // Sort by Y to detect close notes
@@ -4377,8 +4406,8 @@ function AH_renderScore(){
       if(staff==='treble'){const mcY=AH_midiToY(60).y;if(midi<=60&&mcY>=bl+AH_LS*0.8){ctx.beginPath();ctx.moveTo(nx-noteSize-3,mcY);ctx.lineTo(nx+noteSize+3,mcY);ctx.stroke();}}
       AH_drawNotehead(ctx,nx,y,color,noteSize);
       // Nom de note entre les lignes (au centre de l'espace inter-ligne le plus proche)
-      const noteLabelY = y - AH_LS * 0.55; // légèrement au-dessus, entre deux lignes
-      ctx.font=`bold ${Math.max(9,AH_LS*0.75)}px "DM Sans",sans-serif`;ctx.fillStyle=color;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(AH_noteName(midi),nx,noteLabelY);
+      const noteLabelX = nx + noteSize + 5; // à droite de la note
+      ctx.font=`bold ${Math.max(9,AH_LS*0.75)}px "DM Sans",sans-serif`;ctx.fillStyle=color;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(AH_noteName(midi),noteLabelX,y);
     });
     if(ci<AH_chords.length-1){ctx.strokeStyle='#ccc';ctx.lineWidth=0.5;const bx=x+chW/2;ctx.beginPath();ctx.moveTo(bx,AH_trebleTop);ctx.lineTo(bx,AH_trebleTop+4*AH_LS);ctx.stroke();ctx.beginPath();ctx.moveTo(bx,AH_bassTop);ctx.lineTo(bx,AH_bassTop+4*AH_LS);ctx.stroke();}
     if(ci<AH_chords.length-1){const nx=startX+(ci+1)*chW+chW/2;if(AH_errors.filter(e=>e.chord===ci&&e.type==='error').length>0){ctx.strokeStyle='rgba(239,68,68,0.4)';ctx.lineWidth=2;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(x+8,AH_bassTop+4*AH_LS+8);ctx.lineTo(nx-8,AH_bassTop+4*AH_LS+8);ctx.stroke();ctx.setLineDash([]);}}
@@ -4450,27 +4479,35 @@ function AH_exportPDF(){
   ctx.fill(new Path2D("M20 498Q43 514 62 557Q81 600 82 646Q82 650 82 654Q82 658 81 662Q74 709 60 768Q46 826 44 869Q45 909 56 941Q67 972 72 980Q74 984 76 986Q77 988 77 990Q77 992 75 995Q73 997 71 997Q70 997 68 995Q66 994 63 990Q23 943 11 870Q0 798 2 737Q3 689 12 639Q22 589 22 548Q22 537 21 527Q20 516 18 506Q17 501 15 499Q14 498 11 498Q7 498 5 495Q2 493 2 490Q2 491 5 487Q7 484 11 483Q14 483 15 482Q17 480 18 476Q20 466 21 453Q22 440 22 431Q22 391 12 342Q3 293 2 244Q0 183 11 111Q23 39 63 -9Q66 -13 68 -14Q70 -16 71 -16Q73 -16 75 -14Q77 -11 77 -9Q77 -7 76 -5Q74 -3 72 1Q67 9 56 40Q45 72 44 112Q46 155 60 213Q74 272 81 319Q82 323 82 327Q82 331 82 335Q81 381 62 424Q43 467 20 483Q18 486 18 491Q18 496 20 498Z"));
   ctx.restore();}
 
-  // Clefs — soit Sol/Fa par défaut, soit Ut3/Ut4 si toggles activés
+  // Clefs — toutes les 4 (Sol/Fa/Alto Ut3/Ténor Ut4) selon sélecteurs
   ctx.fillStyle='#000';ctx.textAlign='left';ctx.textBaseline='alphabetic';
   const pTFS=pLS*5.6;
-  let clefWidth = 0;
-  if(window.AH_useAltoClef){
-    AH_drawCClef(ctx, pLM+10, pTT, pLS, 2, '#000');
-    clefWidth = pLS * 2.4;
-  } else {
-    ctx.font=pTFS+'px "Times New Roman",Georgia,serif';
-    const ptM=ctx.measureText('\uD834\uDD1E'),ptH=(ptM.actualBoundingBoxAscent||pTFS*0.75)+(ptM.actualBoundingBoxDescent||pTFS*0.25);
-    ctx.fillText('\uD834\uDD1E',pLM+8,(pTT+3*pLS)+ptH*0.38-(ptM.actualBoundingBoxDescent||pTFS*0.25));
-    clefWidth = ptM.width;
-  }
   const pBFS=pTFS*0.75;
-  if(window.AH_useTenorClef){
-    AH_drawCClef(ctx, pLM+10, pBT, pLS, 1, '#000');
-  } else {
-    ctx.font=pBFS+'px "Times New Roman",Georgia,serif';
-    const pbM=ctx.measureText('\uD834\uDD22'),pbH=(pbM.actualBoundingBoxAscent||pBFS*0.8)+(pbM.actualBoundingBoxDescent||pBFS*0.1);
-    ctx.fillText('\uD834\uDD22',pLM+10,(pBT+pLS)-pbH*0.15+(pbM.actualBoundingBoxAscent||pBFS*0.8));
-  }
+  const pClefTop=window.AH_clefTop||'treble';
+  const pClefBot=window.AH_clefBot||'bass';
+  let clefWidth = pLS*2.4;
+  const pDrawClef=(clef, yTop)=>{
+    if(clef==='treble'){
+      ctx.font=pTFS+'px "Times New Roman",Georgia,serif';
+      const m=ctx.measureText('\uD834\uDD1E'),h=(m.actualBoundingBoxAscent||pTFS*0.75)+(m.actualBoundingBoxDescent||pTFS*0.25);
+      ctx.fillText('\uD834\uDD1E',pLM+8,(yTop+3*pLS)+h*0.38-(m.actualBoundingBoxDescent||pTFS*0.25));
+      return m.width;
+    } else if(clef==='bass'){
+      ctx.font=pBFS+'px "Times New Roman",Georgia,serif';
+      const m=ctx.measureText('\uD834\uDD22'),h=(m.actualBoundingBoxAscent||pBFS*0.8)+(m.actualBoundingBoxDescent||pBFS*0.1);
+      ctx.fillText('\uD834\uDD22',pLM+10,(yTop+pLS)-h*0.15+(m.actualBoundingBoxAscent||pBFS*0.8));
+      return m.width;
+    } else if(clef==='alto'){
+      AH_drawCClef(ctx, pLM+10, yTop, pLS, 2, '#000'); // Ut3
+      return pLS*2.4;
+    } else { // tenor
+      AH_drawCClef(ctx, pLM+10, yTop, pLS, 1, '#000'); // Ut4 (4e ligne du bas)
+      return pLS*2.4;
+    }
+  };
+  const wTop=pDrawClef(pClefTop, pTT);
+  pDrawClef(pClefBot, pBT);
+  clefWidth=Math.max(wTop, pLS*2.4);
 
   // Time signature — after clef
   const tsP=tsVal.split('/');
@@ -4494,10 +4531,14 @@ function AH_exportPDF(){
   const chW=Math.max(140,Math.min(260,(W-noteStart-pRM-30)/AH_chords.length));
   const pNS=18;  // taille note augmentée (14 → 18)
 
-  function pMY(midi){
+  function pMY(midi, staffHint){
     const oct=Math.floor(midi/12)-1,pc=midi%12,dp=oct*7+AH_DIA[pc];
-    if(midi>=57)return{y:pTT+2*pLS-(dp-34)*(pLS/2),staff:'treble'};
-    return{y:pBT+2*pLS-(dp-22)*(pLS/2),staff:'bass'};
+    let useTop;
+    if(staffHint==='top') useTop=true;
+    else if(staffHint==='bot') useTop=false;
+    else useTop=(midi>=57);
+    if(useTop){const{diaRef}=AH_clefRef(pClefTop);return{y:pTT+2*pLS-(dp-diaRef)*(pLS/2),staff:'treble'};}
+    const{diaRef}=AH_clefRef(pClefBot);return{y:pBT+2*pLS-(dp-diaRef)*(pLS/2),staff:'bass'};
   }
 
   AH_chords.forEach((ch,ci)=>{
@@ -4505,7 +4546,7 @@ function AH_exportPDF(){
 
     // Calculer toutes les positions Y puis décaler les secondes/unissons
     const vd=['S','A','T','B'].map(v=>{
-      const midi=ch[v],{y,staff}=pMY(midi);
+      const midi=ch[v],{y,staff}=pMY(midi,AH_voiceStaff(v));
       return {v,midi,y,staff,xOff:0,color:AH_VCOLORS[v]};
     });
     const sortedV=[...vd].sort((a,b)=>a.y-b.y);
@@ -4524,11 +4565,11 @@ function AH_exportPDF(){
       if(staff==='treble'){const mcY=pMY(60).y;if(midi<=60&&mcY>=bl+pLS*0.8){ctx.beginPath();ctx.moveTo(nx-pNS-6,mcY);ctx.lineTo(nx+pNS+6,mcY);ctx.stroke();}}
       // Notehead — filled with voice color
       ctx.save();ctx.translate(nx,y);ctx.rotate(-0.18);ctx.beginPath();ctx.ellipse(0,0,pNS+3,pNS-4,0,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();ctx.restore();
-      // Nom de note ENTRE les lignes (au-dessus de la note, jamais sur une ligne)
-      const labelY = y - pLS * 0.55;
+      // Nom de note à droite de la note (évite le chevauchement)
+      const labelX = nx + pNS + 8;
       ctx.font=`bold ${Math.max(14,pLS*0.65)}px "DM Sans",sans-serif`;
-      ctx.fillStyle=color;ctx.textAlign='center';ctx.textBaseline='middle';
-      ctx.fillText(AH_noteName(midi), nx, labelY);
+      ctx.fillStyle=color;ctx.textAlign='left';ctx.textBaseline='middle';
+      ctx.fillText(AH_noteName(midi), labelX, y);
     });
 
     if(ci<AH_chords.length-1){ctx.strokeStyle='#000';ctx.lineWidth=2;const bx=x+chW/2;ctx.beginPath();ctx.moveTo(bx,pTT);ctx.lineTo(bx,pTT+4*pLS);ctx.stroke();ctx.beginPath();ctx.moveTo(bx,pBT);ctx.lineTo(bx,pBT+4*pLS);ctx.stroke();}

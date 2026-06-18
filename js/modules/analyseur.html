@@ -43,19 +43,25 @@
         <div class="card-title" style="flex-wrap:wrap;align-items:center;gap:6px">
           <span data-i18n="t_score">Partition</span>
           <span class="limit-badge" id="ah_chordCount">0 / 20 <span data-i18n="ah_ch">accords</span></span>
-          <!-- Boutons clef d'ut SATB (switch ON/OFF — bleu quand actif) -->
-          <button id="ah_altoClefBtn" class="btn" type="button"
-            onclick="AH_toggleAltoClef()"
-            title="Clef d'alto (Ut 3e) pour la voix Alto"
-            style="font-size:11px;padding:4px 10px;margin-left:auto">
-            <span style="font-family:'Times New Roman',serif;font-size:15px;line-height:1;margin-right:3px">𝄡</span><span data-i18n="str_clef_alto">Clef d'alto</span>
-          </button>
-          <button id="ah_tenorClefBtn" class="btn" type="button"
-            onclick="AH_toggleTenorClef()"
-            title="Clef de ténor (Ut 4e) pour la voix Ténor"
-            style="font-size:11px;padding:4px 10px">
-            <span style="font-family:'Times New Roman',serif;font-size:15px;line-height:1;margin-right:3px">𝄡</span><span data-i18n="str_clef_tenor">Clef de ténor</span>
-          </button>
+          <!-- Sélecteurs de clef par portée SATB -->
+          <label style="font-size:11px;color:var(--t2);display:flex;align-items:center;gap:4px;margin-left:auto">
+            <span data-i18n="ah_clef_top">Portée haute :</span>
+            <select id="ah_clefTopSel" class="note-sel" onchange="AH_onClefChange()" style="font-size:10px">
+              <option value="treble" data-i18n="ah_clef_sol">Clef de Sol</option>
+              <option value="alto" data-i18n="ah_clef_alto">Clef d'Alto (Ut3)</option>
+              <option value="tenor" data-i18n="ah_clef_tenor">Clef de Ténor (Ut4)</option>
+              <option value="bass" data-i18n="ah_clef_fa">Clef de Fa</option>
+            </select>
+          </label>
+          <label style="font-size:11px;color:var(--t2);display:flex;align-items:center;gap:4px">
+            <span data-i18n="ah_clef_bot">Portée basse :</span>
+            <select id="ah_clefBotSel" class="note-sel" onchange="AH_onClefChange()" style="font-size:10px">
+              <option value="bass" data-i18n="ah_clef_fa">Clef de Fa</option>
+              <option value="tenor" data-i18n="ah_clef_tenor">Clef de Ténor (Ut4)</option>
+              <option value="alto" data-i18n="ah_clef_alto">Clef d'Alto (Ut3)</option>
+              <option value="treble" data-i18n="ah_clef_sol">Clef de Sol</option>
+            </select>
+          </label>
         </div>
         <canvas id="ah_scoreCanvas" class="score-canvas"></canvas>
         <div class="chord-labels" id="ah_chordLabels"></div>
